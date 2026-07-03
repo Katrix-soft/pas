@@ -68,3 +68,4 @@ El archivo `backend/docker-compose.yml` sirve como blueprint para configurar tus
 2. Agrega un servicio **PostgreSQL** y un servicio **Redis** usando las plantillas de base de datos nativas de Easypanel.
 3. Configura el servicio de FastAPI importando tu repositorio Git y conectando las variables de entorno (`DATABASE_URL`, `REDIS_URL`).
 4. Para la aplicación web de Angular, utiliza el Dockerfile de SSR y expón el puerto 4000.
+# pas
