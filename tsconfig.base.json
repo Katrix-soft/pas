@@ -1,0 +1,40 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2022",
+    "module": "esnext",
+    "lib": ["es2022", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "paths": {
+      "@broker/core": ["libs/core/src/index.ts"],
+      "@broker/shared": ["libs/shared/src/index.ts"],
+      "@broker/ui": ["libs/ui/src/index.ts"],
+      "@broker/api": ["libs/api/src/index.ts"],
+      "@broker/auth": ["libs/auth/src/index.ts"],
+      "@broker/theme": ["libs/theme/src/index.ts"],
+      "@broker/crm": ["libs/crm/src/index.ts"],
+      "@broker/policies": ["libs/policies/src/index.ts"],
+      "@broker/quotations": ["libs/quotations/src/index.ts"],
+      "@broker/claims": ["libs/claims/src/index.ts"],
+      "@broker/dashboard": ["libs/dashboard/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

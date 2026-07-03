@@ -1,0 +1,7 @@
+{
+  "name": "policies",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/policies/src",
+  "targets": {}
+}
