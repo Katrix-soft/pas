@@ -7,68 +7,9 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="bg-background text-on-surface font-body-md min-h-screen flex">
-      <!-- NavigationDrawer (Mobile Hidden, Desktop Fixed) -->
-      <nav class="hidden md:flex flex-col h-screen overflow-y-auto bg-inverse-surface dark:bg-on-surface h-full w-72 fixed left-0 top-0 shadow-lg border-r border-outline-variant z-50">
-        <!-- Profile Header -->
-        <div class="p-lg flex flex-col items-start gap-sm">
-          <div class="w-12 h-12 rounded-full bg-surface-variant overflow-hidden">
-            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxV_Lny2jpCwVQBom8G8WALyyFWXRsd5XoQcy30SPjHS-L2jfpq1olCRjKTOjF-Na9AcDOha_U_-bVBMluwLTEcqBs-h4ZvSKzlF0pp2ahBkfX16mcEKfowEUeB-3XoUglBcDvaERaUXmvwlBTwNGOaVnQj2pyfkpk3ge-oVFlRfgwswC3BpLPTC2D45laAVqc4uY9wfgAOvEV4G_PZXKuNIuYp7TF2QAxUGtKSXwhioXES8uT9ZMl3bY5yIvjnZisQ83F3Bh2tCF1">
-          </div>
-          <div class="mt-sm">
-            <h3 class="font-headline-sm text-headline-sm font-bold text-surface-lowest">Agente Profesional</h3>
-            <p class="font-label-md text-label-md text-secondary-fixed">Seguros Globales</p>
-            <p class="font-body-sm text-body-sm text-surface-variant opacity-70">ID: 28491</p>
-          </div>
-        </div>
-        <div class="mt-md px-sm space-y-xs">
-          <!-- Nav Item: Dashboard -->
-          <a routerLink="/dashboard" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors rounded-lg cursor-pointer">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="font-label-md text-label-md">Dashboard</span>
-          </a>
-          <!-- Nav Item: Cobranzas -->
-          <a routerLink="/cobranzas" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors rounded-lg cursor-pointer">
-            <span class="material-symbols-outlined">payments</span>
-            <span class="font-label-md text-label-md">Cobranzas</span>
-          </a>
-          <!-- Nav Item: Clientes (Active) -->
-          <a routerLink="/clientes" class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg p-md m-sm scale-[0.98] duration-150 ease-in-out cursor-pointer">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
-            <span class="font-label-md text-label-md">Clientes</span>
-          </a>
-          <!-- Nav Item: Siniestros -->
-          <a routerLink="/siniestros" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors rounded-lg cursor-pointer">
-            <span class="material-symbols-outlined">report_problem</span>
-            <span class="font-label-md text-label-md">Siniestros</span>
-          </a>
-        </div>
-        <div class="p-lg mt-auto border-t border-white/10">
-          <div routerLink="/perfil" class="flex items-center gap-sm text-surface-variant hover:text-white cursor-pointer transition-colors">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="font-label-md text-label-md">Configuración</span>
-          </div>
-        </div>
-      </nav>
-
-      <!-- Main Content Canvas -->
-      <main class="flex-1 md:ml-72 flex flex-col min-h-screen pb-24">
-        <!-- TopAppBar (Sticky) -->
-        <header class="flex justify-between items-center px-md py-sm w-full bg-surface dark:bg-on-background docked full-width top-0 sticky z-40 border-b border-outline-variant">
-          <div class="flex items-center gap-md">
-            <h1 class="font-headline-sm-mobile md:font-headline-sm text-headline-sm-mobile md:text-headline-sm font-black text-primary">Clientes</h1>
-          </div>
-          <div class="flex items-center gap-md">
-            <button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-all cursor-pointer">
-              <span class="material-symbols-outlined text-on-surface-variant">search</span>
-            </button>
-            <div routerLink="/perfil" class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden cursor-pointer">
-              <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9wY4cWCYQc9iUwgLx6CH0fBfVtMldr_fBY7BUrJu227DhckASGIJ89DYM1iTBr-tctaSB2RVzhtl2GLQvEr_fk5zExTSK82VW-vLqrgwxLZhz9ualAk5n6jhFRMpEcQmpaK-bPf3BmoDam1obU-uftLpIrh1JF9bRSdcpkzVEd_zg16MMZ23kgFdVMuIhTxLkKbPKJRiqWSyvXquscQg_YJkfEz9xRhqC-O7E5x62BsiFpCNeCTMKcGKLsMQisYnoDc7q-oZae5Js">
-            </div>
-          </div>
-        </header>
-
-        <!-- Search and Filter Section -->
+    <div class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
+      <main class="flex-1 w-full">
+<!-- Search and Filter Section -->
         <section class="p-container-margin md:p-lg space-y-md">
           <div class="relative group" [class.ring-2]="isFocused" [class.ring-primary]="isFocused">
             <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
@@ -247,28 +188,7 @@ import { RouterLink } from '@angular/router';
       </main>
 
       <!-- BottomNavBar (Mobile Only) -->
-      <nav class="md:hidden flex justify-around items-center h-20 w-full px-container-margin fixed bottom-0 z-50 bg-surface-container-lowest border-t border-outline-variant shadow-[0_-4px_12px_rgba(0,0,0,0.05)] pb-safe">
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center flex-1 py-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="text-label-md font-label-md">Métricas</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center flex-1 py-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-          <span class="material-symbols-outlined">payments</span>
-          <span class="text-label-md font-label-md">Cobros</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center flex-1 py-sm bg-primary-container text-on-primary-container rounded-lg mx-xs cursor-pointer scale-105">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
-          <span class="text-label-md font-label-md">Clientes</span>
-        </a>
-        <a routerLink="/siniestros" class="flex flex-col items-center justify-center flex-1 py-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-          <span class="material-symbols-outlined">report_problem</span>
-          <span class="text-label-md font-label-md">Siniestros</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center flex-1 py-sm text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-          <span class="material-symbols-outlined">account_circle</span>
-          <span class="text-label-md font-label-md">Perfil</span>
-        </a>
-      </nav>
+      
     </div>
 `,
   styles: [`

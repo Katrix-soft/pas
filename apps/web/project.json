@@ -18,7 +18,12 @@
         "styles": [
           "apps/web/src/styles.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "optimization": {
+          "fonts": {
+            "inline": false
+          }
+        }
       },
       "configurations": {
         "production": {

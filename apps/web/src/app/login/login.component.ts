@@ -1,12 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { AuthService } from '@broker/dashboard';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, HttpClientModule],
   template: `
     <main class="w-full max-w-md mx-auto">
       <!-- Logo Section -->
@@ -20,12 +22,30 @@ import { RouterLink, Router } from '@angular/router';
       <!-- Form Card -->
       <div class="bg-surface-container-lowest login-card p-lg rounded-xl border border-outline-variant">
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-lg">
+          
+          <div *ngIf="errorMsg()" class="bg-error-container text-on-error-container p-sm rounded-lg text-sm text-center">
+            {{ errorMsg() }}
+          </div>
+
+          <div class="space-y-sm">
+            <label class="font-label-md text-on-surface">Correo Electrónico</label>
+            <input type="email" formControlName="email" class="w-full bg-surface-container-low border border-outline-variant rounded-lg p-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="admin@katrix.com" />
+          </div>
+
+          <div class="space-y-sm relative">
+            <label class="font-label-md text-on-surface">Contraseña</label>
+            <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" class="w-full bg-surface-container-low border border-outline-variant rounded-lg p-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="••••••••" />
+            <button type="button" (click)="togglePassword()" class="absolute right-3 top-8 material-symbols-outlined text-on-surface-variant hover:text-primary">
+              {{ showPassword() ? 'visibility_off' : 'visibility' }}
+            </button>
+          </div>
+
           <!-- Action Button -->
           <div class="pt-sm">
-            <button type="submit" 
+            <button type="submit" [disabled]="loginForm.invalid || isLoading()"
                     class="w-full py-md px-lg bg-primary text-on-primary font-headline-sm rounded-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all duration-150 flex justify-center items-center gap-sm disabled:opacity-50 disabled:cursor-not-allowed">
-              <span>Iniciar Sesión</span>
-              <span class="material-symbols-outlined">login</span>
+              <span>{{ isLoading() ? 'Iniciando...' : 'Iniciar Sesión' }}</span>
+              <span *ngIf="!isLoading()" class="material-symbols-outlined">login</span>
             </button>
           </div>
         </form>
@@ -65,8 +85,10 @@ import { RouterLink, Router } from '@angular/router';
 export class LoginComponent {
   loginForm: FormGroup;
   showPassword = signal(false);
+  isLoading = signal(false);
+  errorMsg = signal<string | null>(null);
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
@@ -78,7 +100,20 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    console.log('Bypassing login...');
-    this.router.navigate(['/dashboard']);
+    if (this.loginForm.invalid) return;
+    
+    this.isLoading.set(true);
+    this.errorMsg.set(null);
+    
+    this.authService.login(this.loginForm.value).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+      },
+      error: (err: any) => {
+        this.isLoading.set(false);
+        this.errorMsg.set('Credenciales incorrectas o error en el servidor');
+        console.error(err);
+      }
+    });
   }
 }
