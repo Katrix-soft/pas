@@ -1,6 +1,7 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'lib-dashboard',
@@ -10,20 +11,6 @@ import { RouterLink } from '@angular/router';
     @if (isLoading()) {
 
     <div class="text-on-surface font-body-md bg-background min-h-screen">
-      <!-- TopAppBar -->
-      <header class="w-full top-0 sticky z-50 bg-surface flex justify-between items-center px-container-margin py-sm transition-colors duration-200">
-        <div class="flex items-center gap-md">
-          <button class="p-xs hover:bg-surface-container-low transition-colors duration-200 rounded-full">
-            <span class="material-symbols-outlined text-primary">menu</span>
-          </button>
-          <h1 class="font-headline-sm text-headline-sm text-primary">Dashboard de Seguros</h1>
-        </div>
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container bg-surface-container">
-          </div>
-        </div>
-      </header>
-
       <!-- Main Content Area -->
       <main class="min-h-screen px-container-margin pb-24 md:pb-8 pt-lg">
         <!-- Dashboard Header / Welcome Skeleton -->
@@ -177,97 +164,13 @@ import { RouterLink } from '@angular/router';
           </div>
         </div>
       </main>
-
-      <!-- BottomNavBar -->
-      <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe bg-surface h-16 border-t border-outline-variant">
-        <button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-xl py-xs active:scale-90 duration-200">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
-          <span class="font-label-md text-label-md">Inicio</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant py-xs hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
-          <span class="material-symbols-outlined">pie_chart</span>
-          <span class="font-label-md text-label-md">Cartera</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant py-xs hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
-          <span class="material-symbols-outlined">category</span>
-          <span class="font-label-md text-label-md">Ramos</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant py-xs hover:bg-surface-container-high transition-colors active:scale-90 duration-200">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="font-label-md text-label-md">Alertas</span>
-        </button>
-      </nav>
     </div>
-
-    
     } @else if (isError()) {
 
     <div class="bg-background text-on-background min-h-screen flex flex-col md:flex-row overflow-x-hidden">
-      <!-- TopAppBar (Mobile & Web) -->
-      <header class="w-full top-0 sticky z-40 bg-surface flex justify-between items-center px-container-margin py-sm transition-colors duration-200 md:hidden">
-        <div class="flex items-center gap-md">
-          <span class="material-symbols-outlined text-primary cursor-pointer">menu</span>
-          <h1 class="font-headline-md text-headline-md font-bold text-primary">Dashboard de Seguros</h1>
-        </div>
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-high bg-surface-variant flex items-center justify-center">
-            <span class="material-symbols-outlined text-on-surface-variant">person</span>
-          </div>
-        </div>
-      </header>
-
-      <!-- Sidebar Navigation (Desktop Only) -->
-      <aside class="hidden md:flex flex-col h-screen w-72 sticky top-0 bg-inverse-surface p-md shadow-md z-50">
-        <div class="mb-xl px-sm">
-          <div class="flex items-center gap-md mb-md">
-            <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-variant">
-              <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXPa3PVhCO6DVj2yrfgOQwVf0Fd7Son__yMGERqaw29Lm7fZE6lcpQTuRqG1_3aog5pqFfuLUTZmz14AQQDL-xsLuJUZWxt-9zDw8sZHo8WRXXI-BueXLU55ogTTDM-VT0wEsyxUmp2kMBLLpsMP-Q5A4zQdUoCeTqEDcFzLGecJo2-5dJDskhIRlo0q5qk7zMKVJGOzov9tIaPBDfhgkZ172JP4H_1UGZzycDZGPiG2Z5Bc3Q2o3SDA"/>
-            </div>
-            <div>
-              <p class="font-headline-sm text-on-primary font-bold">Martín Seguros</p>
-              <p class="font-label-md text-on-surface-variant text-xs opacity-70">Productor Senior</p>
-            </div>
-          </div>
-          <p class="font-label-md text-on-surface-variant uppercase tracking-widest text-[10px] px-xs mb-sm">Menú Principal</p>
-        </div>
-
-        <nav class="flex flex-col gap-xs flex-1">
-          <a class="flex items-center gap-md p-md bg-primary-container text-on-primary-container rounded-lg font-bold transition-all scale-95 active:scale-100 cursor-pointer">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="font-body-md">Resumen</span>
-          </a>
-          <a class="flex items-center gap-md p-md text-surface-variant hover:text-on-primary-container hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer">
-            <span class="material-symbols-outlined">account_balance_wallet</span>
-            <span class="font-body-md">Cartera</span>
-          </a>
-          <a class="flex items-center gap-md p-md text-surface-variant hover:text-on-primary-container hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer">
-            <span class="material-symbols-outlined">business</span>
-            <span class="font-body-md">Compañías</span>
-          </a>
-          <a class="flex items-center gap-md p-md text-surface-variant hover:text-on-primary-container hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer">
-            <span class="material-symbols-outlined">event_repeat</span>
-            <span class="font-body-md">Renovaciones</span>
-          </a>
-        </nav>
-
-        <div class="mt-auto border-t border-outline-variant pt-md">
-          <a class="flex items-center gap-md p-md text-surface-variant hover:text-on-primary-container hover:bg-surface-container-highest rounded-lg transition-all cursor-pointer">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="font-body-md">Configuración</span>
-          </a>
-        </div>
-      </aside>
-
       <!-- Main Content Canvas -->
       <main class="flex-1 flex flex-col items-center justify-center p-md lg:p-xl mb-16 md:mb-0 bg-background relative w-full overflow-hidden">
-        
-        <!-- Desktop Header for Error State (since sidebar is side-by-side) -->
-        <header class="hidden md:flex absolute top-0 left-0 w-full z-40 bg-surface justify-between items-center px-lg py-md border-b border-outline-variant">
-          <h1 class="font-headline-md text-headline-md font-bold text-primary">Dashboard de Seguros</h1>
-          <button routerLink="/login" class="flex items-center gap-xs p-xs text-error hover:bg-error-container rounded-full transition-all cursor-pointer" title="Cerrar Sesión">
-            <span class="material-symbols-outlined">logout</span>
-          </button>
-        </header>
+
 
         <!-- Background Decoration (Subtle Gradients) -->
         <div class="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
@@ -315,79 +218,13 @@ import { RouterLink } from '@angular/router';
           </p>
         </div>
       </main>
-
-      <!-- BottomNavBar (Mobile Only) -->
-      <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe bg-surface h-16 border-t border-outline-variant shadow-lg">
-        <a class="flex flex-col items-center justify-center text-on-surface-variant py-xs hover:bg-surface-container-high transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">home</span>
-          <span class="font-label-md text-label-md">Inicio</span>
-        </a>
-        <a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-xl py-xs active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pie_chart</span>
-          <span class="font-label-md text-label-md">Cartera</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant py-xs hover:bg-surface-container-high transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">category</span>
-          <span class="font-label-md text-label-md">Ramos</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-on-surface-variant py-xs hover:bg-surface-container-high transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="font-label-md text-label-md">Alertas</span>
-        </a>
-      </nav>
     </div>
 
     } @else {
 
-    <div class="font-body-md text-on-background min-h-screen bg-background">
-      <!-- Navigation Drawer (Desktop/Tablet Only) -->
-      <aside class="hidden md:flex flex-col h-screen overflow-y-auto bg-inverse-surface dark:bg-on-surface w-72 fixed left-0 top-0 shadow-lg border-r border-outline-variant z-50">
-        <div class="p-lg flex items-center gap-md">
-          <div class="font-headline-sm text-headline-sm font-bold text-surface-lowest">Seguros Globales</div>
-        </div>
-        
-        <div class="px-md py-lg flex flex-col items-start text-left">
-          <div class="w-12 h-12 rounded-full overflow-hidden mb-sm border-2 border-secondary-fixed">
-            <img class="w-full h-full object-cover" alt="Agent profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzNU6AwjOUme4uTYL9zshWPM1P1JOdiffDFW7rLQ0z8I1mQHYlcGgvTesz1EyndQFrCG1oKAMcoqh8bEcB9h6fDDdc0Fmj8BSI2Xx3q64pxC0OxPNemeMctL3v2dpVzdnbeK6fX_5DS-NRn6zzQdwquXeVTe-IOvmGwWYpKQpxXFx5S6k9dBLitOoG_WCJWGD0uWeOPv1yF_HQjv1iIVnu-HOK7zGr1JFyJTLT6JTOfOa73ZAZoRnkcprY7-U1cwMUiEeP2q6k_BKh">
-          </div>
-          <h3 class="font-headline-sm text-headline-sm text-secondary-fixed">Agente Profesional</h3>
-          <p class="font-body-md text-body-md text-surface-variant/80">Seguros Globales</p>
-          <p class="font-label-md text-label-md text-outline-variant mt-xs">ID: 28491</p>
-        </div>
-        
-        <nav class="mt-md space-y-xs">
-          <a class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg p-md m-sm scale-[0.98] duration-150 ease-in-out cursor-pointer">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="font-label-md text-label-md">Dashboard</span>
-          </a>
-          <a routerLink="/cobranzas" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">payments</span>
-            <span class="font-label-md text-label-md">Cobranzas</span>
-          </a>
-          <a routerLink="/clientes" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">groups</span>
-            <span class="font-label-md text-label-md">Clientes</span>
-          </a>
-          <a routerLink="/siniestros" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">report_problem</span>
-            <span class="font-label-md text-label-md">Siniestros</span>
-          </a>
-          <div class="h-px bg-outline-variant/30 my-sm mx-md"></div>
-          <a routerLink="/ticketera/kanban" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">view_kanban</span>
-            <span class="font-label-md text-label-md flex-1">Mesa Operativa</span>
-            <span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-[10px] font-bold">4</span>
-          </a>
-          <a routerLink="/notificaciones" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">notifications_active</span>
-            <span class="font-label-md text-label-md flex-1">Alertas</span>
-            <span class="w-2 h-2 rounded-full bg-error"></span>
-          </a>
-        </nav>
-      </aside>
-
+    <div class="font-body-md text-on-background min-h-screen bg-background flex flex-col">
       <!-- Main Content Area -->
-      <main class="md:ml-72 min-h-screen flex flex-col pb-24 md:pb-lg">
+      <main class="flex-1 flex flex-col pb-6 md:pb-lg">
         <!-- TopAppBar -->
         <header class="docked full-width top-0 sticky z-40 bg-surface dark:bg-on-background border-b border-outline-variant flex justify-between items-center px-md py-sm w-full">
           <div class="flex items-center gap-md">
@@ -408,11 +245,56 @@ import { RouterLink } from '@angular/router';
           </div>
         </header>
 
-        <section class="p-container-margin md:p-lg space-y-lg">
+        @if (role() === 'admin') {
+          <!-- VISTA ADMINISTRADOR -->
+          <section class="p-container-margin md:p-lg space-y-lg">
+            <!-- Greeting Admin -->
+            <div class="flex justify-between items-start w-full mb-lg">
+              <div class="flex flex-col">
+                <h2 class="font-headline-md text-headline-md text-on-surface">Hola, {{ userName() || 'Admin' }}</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Resumen Global de la Plataforma (Vista Admin).</p>
+              </div>
+            </div>
+
+            <!-- Admin Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+              <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform">
+                <div>
+                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Productores Activos</p>
+                  <h2 class="font-metric-xl text-metric-xl text-primary">124</h2>
+                </div>
+                <div class="flex items-center gap-xs bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-bold text-xs self-start mt-sm">
+                  <span class="material-symbols-outlined text-sm">trending_up</span>
+                  <span>+12%</span>
+                </div>
+              </div>
+
+              <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-green shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform">
+                <div>
+                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Cartera Global Administrada</p>
+                  <h2 class="font-metric-xl text-metric-xl text-on-surface">$1.2B</h2>
+                </div>
+              </div>
+
+              <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-tertiary shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform">
+                <div>
+                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Tickets de Mesa Operativa</p>
+                  <h2 class="font-metric-xl text-metric-xl text-tertiary">42</h2>
+                </div>
+                <div class="flex items-center gap-xs mt-sm">
+                  <span class="material-symbols-outlined text-tertiary text-sm">view_kanban</span>
+                  <span class="text-tertiary font-bold text-xs uppercase">15 Pendientes</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        } @else {
+          <!-- VISTA PAS (Productor) -->
+          <section class="p-container-margin md:p-lg space-y-lg">
           <!-- Greeting -->
           <div class="flex justify-between items-start w-full mb-lg">
             <div class="flex flex-col">
-              <h2 class="font-headline-md text-headline-md text-on-surface">Hola, Carlos</h2>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Hola, {{ userName() || 'Agente' }}</h2>
               <p class="font-body-sm text-body-sm text-on-surface-variant">Aquí tienes el resumen de tu cartera hoy.</p>
             </div>
             <button routerLink="/asistente" class="flex items-center gap-sm bg-primary text-on-primary px-md py-sm rounded-lg font-bold text-sm hover:bg-primary-container transition-colors shadow-sm cursor-pointer">
@@ -595,28 +477,10 @@ import { RouterLink } from '@angular/router';
               </div>
             </div>
           </div>
+          </div>
         </section>
+        }
       </main>
-
-      <!-- Bottom Navigation (Mobile Only) -->
-      <nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl border-t border-outline-variant bg-surface shadow-[0_-4px_12px_rgba(0,0,0,0.05)] flex justify-around items-center h-16 px-container-margin">
-        <a class="flex flex-col items-center justify-center text-primary font-bold active:bg-primary-fixed/20 transition-all scale-[0.98] cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
-          <span class="font-label-md text-label-md">Métricas</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 active:bg-primary-fixed/20 transition-all cursor-pointer">
-          <span class="material-symbols-outlined">receipt_long</span>
-          <span class="font-label-md text-label-md">Cobros</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 active:bg-primary-fixed/20 transition-all cursor-pointer">
-          <span class="material-symbols-outlined">person_search</span>
-          <span class="font-label-md text-label-md">Clientes</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 active:bg-primary-fixed/20 transition-all cursor-pointer">
-          <span class="material-symbols-outlined">person</span>
-          <span class="font-label-md text-label-md">Perfil</span>
-        </a>
-      </nav>
     </div>
   
     }
@@ -658,6 +522,15 @@ export class DashboardComponent implements OnInit {
   isLoading = signal(true);
   isError = signal(false);
   isRetrying = signal(false);
+
+  private authService = inject(AuthService);
+  role = computed(() => this.authService.currentUser()?.role || 'pas');
+  userName = computed(() => {
+    const user = this.authService.currentUser();
+    if (!user || !user.name) return '';
+    // Optional: Just grab the first name
+    return user.name.split(' ')[0];
+  });
 
   ngOnInit() {
     this.initialLoadSequence();

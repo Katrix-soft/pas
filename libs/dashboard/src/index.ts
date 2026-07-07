@@ -15,3 +15,5 @@ export * from './lib/seguimiento-detalle.component';
 export * from './lib/ticket-seguimiento.component';
 export * from './lib/poliza-emitida.component';
 export * from './lib/ticketera-kanban.component';
+export * from './lib/layout.component';
+export * from './lib/services/auth.service';
