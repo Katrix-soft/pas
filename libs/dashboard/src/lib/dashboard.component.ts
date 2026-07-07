@@ -247,46 +247,177 @@ import { AuthService } from './services/auth.service';
 
         @if (role() === 'admin') {
           <!-- VISTA ADMINISTRADOR -->
-          <section class="p-container-margin md:p-lg space-y-lg">
-            <!-- Greeting Admin -->
-            <div class="flex justify-between items-start w-full mb-lg">
-              <div class="flex flex-col">
-                <h2 class="font-headline-md text-headline-md text-on-surface">Hola, {{ userName() || 'Admin' }}</h2>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">Resumen Global de la Plataforma (Vista Admin).</p>
+          <section class="p-container-margin md:p-lg space-y-lg pb-24">
+            <!-- Welcome Section -->
+            <div class="flex justify-between items-end mb-base">
+              <div>
+                <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Panel Administrativo</h2>
+                <p class="text-body-md text-on-surface-variant mt-1">Control centralizado de trámites y tickets operativos.</p>
+              </div>
+              <span class="text-label-md font-label-md text-primary bg-primary-fixed px-2 py-1 rounded-full">Junio 2026</span>
+            </div>
+
+            <!-- Gestión de Tickets (Counters) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl">
+              <div class="premium-card rounded-xl p-md left-accent-blue cursor-pointer">
+                <p class="text-label-md font-label-md text-on-surface-variant mb-1">Abiertos</p>
+                <div class="flex justify-between items-end">
+                  <h4 class="font-headline-md text-headline-md text-on-surface">124</h4>
+                  <span class="material-symbols-outlined text-primary">mail</span>
+                </div>
+              </div>
+              <div class="premium-card rounded-xl p-md left-accent-orange cursor-pointer">
+                <p class="text-label-md font-label-md text-on-surface-variant mb-1">En Proceso</p>
+                <div class="flex justify-between items-end">
+                  <h4 class="font-headline-md text-headline-md text-on-surface">56</h4>
+                  <span class="material-symbols-outlined text-tertiary">pending_actions</span>
+                </div>
+              </div>
+              <div class="premium-card rounded-xl p-md left-accent-red cursor-pointer">
+                <p class="text-label-md font-label-md text-on-surface-variant mb-1">Falta Doc.</p>
+                <div class="flex justify-between items-end">
+                  <h4 class="font-headline-md text-headline-md text-on-surface">18</h4>
+                  <span class="material-symbols-outlined text-error">description</span>
+                </div>
+              </div>
+              <div class="premium-card rounded-xl p-md left-accent-green cursor-pointer">
+                <p class="text-label-md font-label-md text-on-surface-variant mb-1">Cerrados (Hoy)</p>
+                <div class="flex justify-between items-end">
+                  <h4 class="font-headline-md text-headline-md text-on-surface">42</h4>
+                  <span class="material-symbols-outlined text-secondary">check_circle</span>
+                </div>
               </div>
             </div>
 
-            <!-- Admin Metrics Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
-              <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform">
-                <div>
-                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Productores Activos</p>
-                  <h2 class="font-metric-xl text-metric-xl text-primary">124</h2>
+            <!-- Dashboard Columns: Salud Operativa & Tickets Recientes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl mb-xl">
+              <!-- Salud Operativa (Administrative Focus) -->
+              <div>
+                <div class="flex items-center gap-sm mb-md">
+                  <span class="material-symbols-outlined text-error">notification_important</span>
+                  <h3 class="font-headline-sm text-headline-sm text-on-surface">Alertas Administrativas</h3>
                 </div>
-                <div class="flex items-center gap-xs bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-bold text-xs self-start mt-sm">
-                  <span class="material-symbols-outlined text-sm">trending_up</span>
-                  <span>+12%</span>
+                <div class="space-y-sm">
+                  <!-- Administrative Task 1 -->
+                  <div class="premium-card rounded-xl p-md bg-error-container/10 border-error/20 flex items-center gap-md cursor-pointer hover:bg-error-container/20">
+                    <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error">
+                      <span class="material-symbols-outlined">priority_high</span>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-body-md font-semibold text-on-surface">8 Endosos Críticos</p>
+                      <p class="text-body-sm text-on-surface-variant">Requieren firma digital inmediata para emisión.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-outline">chevron_right</span>
+                  </div>
+                  <!-- Administrative Task 2 -->
+                  <div class="premium-card rounded-xl p-md bg-secondary-container/10 border-secondary/20 flex items-center gap-md cursor-pointer hover:bg-secondary-container/20">
+                    <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                      <span class="material-symbols-outlined">task</span>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-body-md font-semibold text-on-surface">15 Altas Pendientes</p>
+                      <p class="text-body-sm text-on-surface-variant">En espera de validación de identidad técnica.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-outline">chevron_right</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-green shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform">
-                <div>
-                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Cartera Global Administrada</p>
-                  <h2 class="font-metric-xl text-metric-xl text-on-surface">$1.2B</h2>
+              <!-- Tickets Recientes/Urgentes -->
+              <div>
+                <div class="flex justify-between items-center mb-md">
+                  <h3 class="font-headline-sm text-headline-sm text-on-surface">Tickets Urgentes</h3>
+                  <button class="text-label-md font-bold text-primary hover:underline">Ver todos</button>
                 </div>
-              </div>
-
-              <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-tertiary shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform">
-                <div>
-                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Tickets de Mesa Operativa</p>
-                  <h2 class="font-metric-xl text-metric-xl text-tertiary">42</h2>
-                </div>
-                <div class="flex items-center gap-xs mt-sm">
-                  <span class="material-symbols-outlined text-tertiary text-sm">view_kanban</span>
-                  <span class="text-tertiary font-bold text-xs uppercase">15 Pendientes</span>
+                <div class="space-y-sm">
+                  <!-- Ticket Item 1 -->
+                  <div class="premium-card rounded-xl p-md flex flex-col gap-sm">
+                    <div class="flex justify-between items-start">
+                      <div class="flex items-center gap-2">
+                        <span class="text-label-md font-bold bg-surface-container px-2 py-0.5 rounded">#TK-8842</span>
+                        <span class="text-label-md font-medium text-tertiary">Siniestro</span>
+                      </div>
+                      <span class="text-[10px] text-error font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">schedule</span> 12m ago
+                      </span>
+                    </div>
+                    <p class="text-body-sm text-on-surface font-medium">Falta reporte policial para siniestro de flota.</p>
+                    <div class="flex items-center gap-2">
+                      <div class="w-6 h-6 rounded-full bg-primary-container text-[10px] flex items-center justify-center text-white">MG</div>
+                      <p class="text-[12px] text-on-surface-variant">Asignado a: Marta García</p>
+                    </div>
+                  </div>
+                  <!-- Ticket Item 2 -->
+                  <div class="premium-card rounded-xl p-md flex flex-col gap-sm">
+                    <div class="flex justify-between items-start">
+                      <div class="flex items-center gap-2">
+                        <span class="text-label-md font-bold bg-surface-container px-2 py-0.5 rounded">#TK-8839</span>
+                        <span class="text-label-md font-medium text-primary">Endoso</span>
+                      </div>
+                      <span class="text-[10px] text-outline font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">schedule</span> 45m ago
+                      </span>
+                    </div>
+                    <p class="text-body-sm text-on-surface font-medium">Cambio de titularidad y medio de pago.</p>
+                    <div class="flex items-center gap-2">
+                      <div class="w-6 h-6 rounded-full bg-secondary-container text-[10px] flex items-center justify-center text-on-secondary-container">CP</div>
+                      <p class="text-[12px] text-on-surface-variant">Asignado a: Carlos Pires</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <!-- Top Productores (Gestión Focus) -->
+            <div class="mb-xl overflow-hidden">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface mb-md">Productores con Mayor Gestión</h3>
+              <div class="flex gap-md overflow-x-auto hide-scrollbar pb-2">
+                <!-- Producer Card 1 -->
+                <div class="min-w-[240px] premium-card rounded-xl p-md">
+                  <div class="flex items-center gap-md mb-md">
+                    <img alt="Marta García" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLXKTm9fdfuxX1umSqlgzvi6Cmh8jk6QYMgn4ymVmzLpzXhUIfLkZFS0QB3Kz1m5w40BHo-IGwB4Pm5jyAtc7rXXmq9m0sD8qvtsMENBYgQjfVhkUW6SNZKZneDXEI21C7F_l2m7JvDKrPNhYbQwyx9Y1LIOyBYiVCjNKAnGbOvEjVWfiRDNnu26AOFcFvb_6ewGdmWEmZuktDlEvMbefU3fDuHFmeLAbvVCNd_blC79a0iR0YRGQN5w"/>
+                    <div>
+                      <p class="text-body-md font-bold">Marta García</p>
+                      <p class="text-label-md text-on-surface-variant">Región Norte</p>
+                    </div>
+                  </div>
+                  <div class="space-y-sm">
+                    <div class="flex justify-between text-body-sm">
+                      <span class="text-on-surface-variant">Tickets Resueltos</span>
+                      <span class="font-bold">142</span>
+                    </div>
+                    <div class="w-full bg-surface-container rounded-full h-1.5">
+                      <div class="bg-primary h-1.5 rounded-full" style="width: 92%"></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Producer Card 2 -->
+                <div class="min-w-[240px] premium-card rounded-xl p-md">
+                  <div class="flex items-center gap-md mb-md">
+                    <img alt="Carlos Pires" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnvFVytqaWCZv-TNI6ISNP3Hueq3mmKgV4P-RNPxma-vQWimrZAuOeDNQ9PVcp3lraLjCAHY3u8S3E5VQstYIH_LyCRSMDnHWQmsnFsofN_0f3tsitCG1akXwqeanWdP-MZughxm9NG0B7AewhPBSnThluUmU461TNAmT9ByPCj6X5ntIK235O1siHhHM7R0xxZkY1YkZfoeEGKFhT2VAfV1Q96vVkShYc3RyZ5n9jQPZYRWMeVIpAbQ"/>
+                    <div>
+                      <p class="text-body-md font-bold">Carlos Pires</p>
+                      <p class="text-label-md text-on-surface-variant">Región Sur</p>
+                    </div>
+                  </div>
+                  <div class="space-y-sm">
+                    <div class="flex justify-between text-body-sm">
+                      <span class="text-on-surface-variant">Tickets Resueltos</span>
+                      <span class="font-bold">118</span>
+                    </div>
+                    <div class="w-full bg-surface-container rounded-full h-1.5">
+                      <div class="bg-primary h-1.5 rounded-full" style="width: 78%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Info -->
+            <footer class="py-md text-center border-t border-outline-variant mt-xl">
+              <p class="text-label-md text-outline">© 2026 JC Organizadores - Operación Centralizada</p>
+              <p class="text-[10px] text-outline mt-1 uppercase tracking-widest">Nexus Platform v4.2.1</p>
+            </footer>
           </section>
         } @else {
           <!-- VISTA PAS (Productor) -->
@@ -515,6 +646,24 @@ import { AuthService } from './services/auth.service';
     .metric-card-accent-green { border-left: 4px solid #006c49; }
     .metric-card-accent-red { border-left: 4px solid #ba1a1a; }
     .metric-card-accent-tertiary { border-left: 4px solid #4648d4; }
+
+    /* Estilos nuevos Admin Dashboard */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .premium-card {
+        background: #ffffff;
+        border: 1px solid #E2E8F0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .premium-card:active {
+        transform: scale(0.98);
+    }
+    .left-accent-blue { border-left: 4px solid #0058be; }
+    .left-accent-green { border-left: 4px solid #006c49; }
+    .left-accent-red { border-left: 4px solid #ba1a1a; }
+    .left-accent-purple { border-left: 4px solid #4648d4; }
+    .left-accent-orange { border-left: 4px solid #f59e0b; }
   
 `]
 })
