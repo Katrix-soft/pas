@@ -475,8 +475,8 @@ import { AuthService } from './services/auth.service';
                   Ver Calendario Completo
                 </button>
               </div>
+              </div>
             </div>
-          </div>
           </div>
         </section>
         }
