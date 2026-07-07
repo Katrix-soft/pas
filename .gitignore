@@ -1,2 +1,4 @@
 node_modules
 .angular
+.nx/workspace-data/
+**/__pycache__/
