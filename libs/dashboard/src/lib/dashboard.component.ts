@@ -606,7 +606,6 @@ import { AuthService } from './services/auth.service';
                   Ver Calendario Completo
                 </button>
               </div>
-              </div>
             </div>
           </div>
         </section>
@@ -673,7 +672,7 @@ export class DashboardComponent implements OnInit {
   isRetrying = signal(false);
 
   private authService = inject(AuthService);
-  role = computed(() => this.authService.currentUser()?.role || 'pas');
+  role = computed(() => this.authService.currentUser()?.role || 'admin');
   userName = computed(() => {
     const user = this.authService.currentUser();
     if (!user || !user.name) return '';
