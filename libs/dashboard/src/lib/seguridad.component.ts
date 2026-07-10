@@ -120,29 +120,7 @@ import { RouterLink } from '@angular/router';
         </button>
       </div>
 
-      <!-- BottomNavBar -->
-      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-outline-variant flex justify-around items-center h-16 px-container-margin pb-safe">
-        <button routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg p-2 cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Métricas</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg p-2 cursor-pointer">
-          <span class="material-symbols-outlined">payments</span>
-          <span class="font-label-md text-label-md">Cobros</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg p-2 cursor-pointer">
-          <span class="material-symbols-outlined">group</span>
-          <span class="font-label-md text-label-md">Clientes</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-all rounded-lg p-2 cursor-pointer">
-          <span class="material-symbols-outlined">report_problem</span>
-          <span class="font-label-md text-label-md">Siniestros</span>
-        </button>
-        <button routerLink="/perfil" class="flex flex-col items-center justify-center text-primary transition-all rounded-lg p-2 cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
-          <span class="font-label-md text-label-md">Perfil</span>
-        </button>
-      </nav>
+
     </div>
 `,
   styles: [`

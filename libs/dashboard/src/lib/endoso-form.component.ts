@@ -144,29 +144,7 @@ import { RouterLink, Router } from '@angular/router';
         </div>
       </main>
 
-      <!-- BottomNavBar (Hidden on desktop, visible on mobile) -->
-      <nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container shadow-sm flex justify-around items-center pt-sm pb-safe px-base">
-        <div routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-base active:scale-90 transition-transform cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Dashboard</span>
-        </div>
-        <div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-base active:scale-90 transition-transform cursor-pointer">
-          <span class="material-symbols-outlined">group</span>
-          <span class="font-label-md text-label-md">Clientes</span>
-        </div>
-        <div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform cursor-pointer">
-          <span class="material-symbols-outlined">description</span>
-          <span class="font-label-md text-label-md">Trámites</span>
-        </div>
-        <div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-base active:scale-90 transition-transform cursor-pointer">
-          <span class="material-symbols-outlined">warning</span>
-          <span class="font-label-md text-label-md">Siniestros</span>
-        </div>
-        <div class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors p-base active:scale-90 transition-transform cursor-pointer">
-          <span class="material-symbols-outlined">account_circle</span>
-          <span class="font-label-md text-label-md">Perfil</span>
-        </div>
-      </nav>
+
     </div>
 `,
   styles: [`

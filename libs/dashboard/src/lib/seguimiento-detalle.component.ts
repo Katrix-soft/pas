@@ -228,29 +228,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </main>
 
-      <!-- BottomNavBar (Mobile Only) -->
-      <nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant shadow-sm flex justify-around items-center h-16 px-xs pb-safe">
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container transition-colors active:scale-90 duration-200">
-          <span class="material-symbols-outlined">view_kanban</span>
-          <span class="font-label-md text-label-md">Board</span>
-        </button>
-        <button routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Metrics</span>
-        </button>
-        <button routerLink="/clientes" class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-200 cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
-          <span class="font-label-md text-label-md">Clients</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container transition-colors active:scale-90 duration-200">
-          <span class="material-symbols-outlined">admin_panel_settings</span>
-          <span class="font-label-md text-label-md">Team</span>
-        </button>
-        <button routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">person</span>
-          <span class="font-label-md text-label-md">Profile</span>
-        </button>
-      </nav>
+
     </div>
   `
 })

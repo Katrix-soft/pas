@@ -149,29 +149,7 @@ import { RouterLink } from '@angular/router';
         <span class="material-symbols-outlined text-[32px]" data-icon="add">add</span>
       </button>
 
-      <!-- BottomNavBar -->
-      <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-container-margin py-xs bg-surface shadow-md z-50 rounded-t-lg">
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant px-sm py-xs scale-95 transition-transform duration-150 hover:bg-surface-container-highest cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-          <span class="font-label-md text-label-md">Métricas</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center text-on-surface-variant px-sm py-xs scale-95 transition-transform duration-150 hover:bg-surface-container-highest cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="payments">payments</span>
-          <span class="font-label-md text-label-md">Cobros</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center text-on-surface-variant px-sm py-xs scale-95 transition-transform duration-150 hover:bg-surface-container-highest cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="groups">groups</span>
-          <span class="font-label-md text-label-md">Clientes</span>
-        </a>
-        <a class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-xl px-sm py-xs scale-95 transition-transform duration-150 cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="report_problem" style="font-variation-settings: 'FILL' 1;">report_problem</span>
-          <span class="font-label-md text-label-md">Siniestros</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant px-sm py-xs scale-95 transition-transform duration-150 hover:bg-surface-container-highest cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="person">person</span>
-          <span class="font-label-md text-label-md">Perfil</span>
-        </a>
-      </nav>
+
     </div>
 `,
   styles: [`

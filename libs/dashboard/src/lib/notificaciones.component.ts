@@ -144,29 +144,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </main>
 
-      <!-- BottomNavBar -->
-      <nav class="md:hidden fixed bottom-0 w-full z-50 pb-safe bg-white border-t border-outline-variant shadow-sm flex justify-around items-center h-20 px-2">
-        <button routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant px-2 py-1 hover:text-primary transition-colors active:scale-95 cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-          <span class="font-label-md text-label-md">Métricas</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-2 py-1 hover:text-primary transition-colors active:scale-95 cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="payments">payments</span>
-          <span class="font-label-md text-label-md">Cobros</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-2 py-1 hover:text-primary transition-colors active:scale-95 cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="groups">groups</span>
-          <span class="font-label-md text-label-md">Clientes</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-2 py-1 hover:text-primary transition-colors active:scale-95 cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="report_problem">report_problem</span>
-          <span class="font-label-md text-label-md">Siniestros</span>
-        </button>
-        <button routerLink="/perfil" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 active:scale-95 cursor-pointer">
-          <span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
-          <span class="font-label-md text-label-md">Perfil</span>
-        </button>
-      </nav>
+
     </div>
 `,
   styles: [`

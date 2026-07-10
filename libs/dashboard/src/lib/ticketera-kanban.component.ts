@@ -252,25 +252,7 @@ interface KanbanTicket {
         </section>
       </main>
 
-      <!-- BottomNavBar -->
-      <nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline shadow-sm flex justify-around items-center h-16 px-xs pb-safe">
-        <a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-full px-4 py-1 active:scale-90 transition-transform duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">view_kanban</span>
-          <span class="font-label-md text-label-md">Board</span>
-        </a>
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Metrics</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">groups</span>
-          <span class="font-label-md text-label-md">Clients</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors active:scale-90 duration-200 cursor-pointer">
-          <span class="material-symbols-outlined">person</span>
-          <span class="font-label-md text-label-md">Profile</span>
-        </a>
-      </nav>
+
     </div>
   `,
   styles: [`

@@ -685,19 +685,13 @@ export class DashboardComponent implements OnInit {
   }
 
   initialLoadSequence() {
-    this.isLoading.set(true);
-    this.isError.set(false);
+    this.isLoading.set(false);
     
-    // Mostramos skeleton 2 segs y simulamos carga
-    setTimeout(() => {
-      this.isLoading.set(false);
-      // Solo mostramos error si no hay internet
-      if (!navigator.onLine) {
-        this.isError.set(true);
-      } else {
-        this.isError.set(false);
-      }
-    }, 2000);
+    if (!navigator.onLine) {
+      this.isError.set(true);
+    } else {
+      this.isError.set(false);
+    }
   }
 
   simulateReload() {

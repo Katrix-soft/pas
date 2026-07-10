@@ -2,11 +2,12 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, HttpClientModule],
   template: `
     <main class="flex-grow flex items-center justify-center w-full">
       <div class="w-full max-w-[440px] flex flex-col items-center relative">
@@ -29,6 +30,9 @@ import { RouterLink } from '@angular/router';
 
           <!-- Recovery Form -->
           <form [formGroup]="recoveryForm" (ngSubmit)="onSubmit()" class="space-y-lg">
+            <div *ngIf="errorMsg()" class="bg-error-container text-on-error-container p-sm rounded-lg text-sm text-center">
+              {{ errorMsg() }}
+            </div>
             <div class="space-y-xs">
               <label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="email">
                 Email
@@ -113,8 +117,9 @@ export class ForgotPasswordComponent {
   recoveryForm: FormGroup;
   isLoading = signal(false);
   showSuccess = signal(false);
+  errorMsg = signal<string | null>(null);
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private http: HttpClient) {
     this.recoveryForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
@@ -123,12 +128,20 @@ export class ForgotPasswordComponent {
   onSubmit(): void {
     if (this.recoveryForm.valid) {
       this.isLoading.set(true);
+      this.errorMsg.set(null);
       
-      // Simulate network delay
-      setTimeout(() => {
-        this.isLoading.set(false);
-        this.showSuccess.set(true);
-      }, 1200);
+      this.http.post('http://localhost:8000/api/v1/auth/forgot-password', this.recoveryForm.value)
+        .subscribe({
+          next: () => {
+            this.isLoading.set(false);
+            this.showSuccess.set(true);
+          },
+          error: (err) => {
+            this.isLoading.set(false);
+            this.errorMsg.set('No se pudo enviar el correo. Por favor intente más tarde.');
+            console.error('Error enviando correo:', err);
+          }
+        });
     }
   }
 }

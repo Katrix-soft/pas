@@ -7,42 +7,8 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="bg-background text-on-background min-h-screen pb-24 md:pb-0 md:pl-72">
-      <!-- Navigation Drawer (Desktop) -->
-      <aside class="hidden md:flex flex-col h-screen py-lg h-full w-72 fixed left-0 top-0 bg-inverse-surface dark:bg-surface-container-lowest shadow-md z-50">
-        <div class="px-lg mb-xl">
-          <h1 class="font-headline-sm text-headline-sm text-primary-fixed">Assurance Nexus</h1>
-        </div>
-        <div class="px-md flex items-center gap-md mb-xl">
-          <div class="w-12 h-12 rounded-full bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed font-bold">AP</div>
-          <div>
-            <p class="font-label-md text-label-md text-primary-fixed">Agente Profesional</p>
-            <p class="text-xs text-surface-variant">ID: 4492</p>
-          </div>
-        </div>
-        <nav class="flex-1 space-y-sm px-sm">
-          <a routerLink="/dashboard" class="flex items-center gap-md px-md py-md text-surface-variant hover:text-white hover:bg-surface-variant/10 rounded-r-full transition-all duration-200 cursor-pointer">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="font-label-md text-label-md">Dashboard</span>
-          </a>
-          <a routerLink="/clientes" class="flex items-center gap-md px-md py-md bg-primary-container text-on-primary-container rounded-r-full font-bold transition-all duration-200 cursor-pointer">
-            <span class="material-symbols-outlined">group</span>
-            <span class="font-label-md text-label-md">Clientes</span>
-          </a>
-          <a routerLink="/cobranzas" class="flex items-center gap-md px-md py-md text-surface-variant hover:text-white hover:bg-surface-variant/10 rounded-r-full transition-all duration-200 cursor-pointer">
-            <span class="material-symbols-outlined">payments</span>
-            <span class="font-label-md text-label-md">Cobranzas</span>
-          </a>
-          <a routerLink="/siniestros" class="flex items-center gap-md px-md py-md text-surface-variant hover:text-white hover:bg-surface-variant/10 rounded-r-full transition-all duration-200 cursor-pointer">
-            <span class="material-symbols-outlined">report_problem</span>
-            <span class="font-label-md text-label-md">Siniestros</span>
-          </a>
-          <a routerLink="/perfil" class="flex items-center gap-md px-md py-md text-surface-variant hover:text-white hover:bg-surface-variant/10 rounded-r-full transition-all duration-200 cursor-pointer">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="font-label-md text-label-md">Ajustes</span>
-          </a>
-        </nav>
-      </aside>
+    <div class="bg-background text-on-background min-h-screen pb-24 md:pb-0">
+
 
       <!-- Top App Bar -->
       <header class="w-full top-0 sticky z-40 bg-surface-container-lowest dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex justify-between items-center px-container-margin h-16">
@@ -186,29 +152,7 @@ import { RouterLink } from '@angular/router';
         </section>
       </main>
 
-      <!-- Bottom Navigation Bar (Mobile) -->
-      <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container-lowest dark:bg-surface-dim border-t border-outline-variant flex justify-around items-center px-4 pt-2 pb-safe shadow-lg z-50">
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant py-1 cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-[10px]">Métricas</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center text-on-surface-variant py-1 cursor-pointer">
-          <span class="material-symbols-outlined">payments</span>
-          <span class="font-label-md text-[10px]">Cobros</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
-          <span class="font-label-md text-[10px]">Clientes</span>
-        </a>
-        <a routerLink="/siniestros" class="flex flex-col items-center justify-center text-on-surface-variant py-1 cursor-pointer">
-          <span class="material-symbols-outlined">report_problem</span>
-          <span class="font-label-md text-[10px]">Siniestros</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant py-1 cursor-pointer">
-          <span class="material-symbols-outlined">person</span>
-          <span class="font-label-md text-[10px]">Perfil</span>
-        </a>
-      </nav>
+
     </div>
   `
 })

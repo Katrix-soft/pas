@@ -88,25 +88,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </main>
 
-      <!-- Bottom Navigation Bar (Mobile) -->
-      <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 pb-safe bg-surface border-t border-outline-variant shadow-md">
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary py-1 cursor-pointer transition-colors">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="text-label-md font-label-md">Dashboard</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary py-1 cursor-pointer transition-colors">
-          <span class="material-symbols-outlined">group</span>
-          <span class="text-label-md font-label-md">Clientes</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary py-1 cursor-pointer transition-colors">
-          <span class="material-symbols-outlined">receipt_long</span>
-          <span class="text-label-md font-label-md">Cobranzas</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary py-1 cursor-pointer transition-colors">
-          <span class="material-symbols-outlined">person</span>
-          <span class="text-label-md font-label-md">Perfil</span>
-        </a>
-      </nav>
+
     </div>
   `,
   styles: [`

@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'lib-perfil',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="bg-surface text-on-surface font-body-md min-h-screen pb-20 md:pb-0 md:pl-72">
+    <div class="bg-surface text-on-surface font-body-md min-h-screen pb-20 md:pb-0">
       <!-- TopAppBar -->
       <header class="docked full-width top-0 sticky z-40 bg-surface border-b border-outline-variant flex justify-between items-center px-md py-sm w-full">
         <div class="flex items-center gap-md">
@@ -19,39 +20,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </header>
       
-      <!-- Navigation Drawer (Desktop) -->
-      <aside class="hidden md:flex h-full w-72 fixed left-0 top-0 bg-inverse-surface border-r border-outline-variant shadow-lg flex-col overflow-y-auto z-50">
-        <div class="p-lg flex flex-col items-start gap-sm">
-          <div class="font-headline-sm text-headline-sm font-bold text-surface-lowest">Assurance Nexus</div>
-          <div class="mt-xl flex items-center gap-md">
-            <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-highest">
-              <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA72tUbNTws76KplKuCieL4SiaYlF8XI7xF2vVDG8HrrZUrgYe5e0MzaGsmX6fkbxwLkYOXgEpO5nYxP494m4G8LE3wC_LrLjxg3eb1ykl_CC93fYKiEBWqoWcB9idz5U8IZUr9OrBplqS423Xhh0TaQ_uPiQD5ewDiJ06w7C4k6dUfUlM4_xQVIL56Z5Pdpf9xCxroncacLctGmPG8Am-5Z4t05DPl7APZMfgHmg2rEzlGCL6dqjJNfXJu1o6_WehP3sHEr_MC85FP">
-            </div>
-            <div>
-              <p class="font-headline-md text-headline-md text-secondary-fixed">Carlos López</p>
-              <p class="font-body-md text-body-md text-surface-variant opacity-80">ID: 28491</p>
-            </div>
-          </div>
-        </div>
-        <nav class="mt-md flex-1">
-          <a routerLink="/dashboard" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">dashboard</span>
-            <span class="font-label-md text-label-md">Dashboard</span>
-          </a>
-          <a routerLink="/cobranzas" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">payments</span>
-            <span class="font-label-md text-label-md">Cobranzas</span>
-          </a>
-          <a routerLink="/clientes" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors cursor-pointer">
-            <span class="material-symbols-outlined">groups</span>
-            <span class="font-label-md text-label-md">Clientes</span>
-          </a>
-          <a class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg p-md m-sm cursor-pointer">
-            <span class="material-symbols-outlined">person</span>
-            <span class="font-label-md text-label-md">Perfil</span>
-          </a>
-        </nav>
-      </aside>
+
 
       <main class="max-w-4xl mx-auto p-md space-y-lg">
         <!-- Profile Hero Section -->
@@ -116,6 +85,20 @@ import { RouterLink } from '@angular/router';
               </div>
               <span class="material-symbols-outlined text-outline">call</span>
             </div>
+            <!-- Subir Logo Row -->
+            <div *ngIf="authService.currentUser()?.role === 'pas'" class="p-md flex justify-between items-center hover:bg-surface-container-lowest/50 transition-colors">
+              <div>
+                <p class="font-label-md text-label-md text-outline mb-xs">LOGO DE EMPRESA</p>
+                <input type="file" accept="image/*" class="hidden" #logoInput (change)="onLogoSelected($event)">
+                <button (click)="logoInput.click()" class="font-body-md text-primary font-semibold hover:underline cursor-pointer">
+                  Agregar imagen del logo
+                </button>
+              </div>
+              <div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center overflow-hidden border border-outline-variant">
+                <img *ngIf="authService.tenantLogo()" [src]="authService.tenantLogo()" class="w-full h-full object-contain">
+                <span *ngIf="!authService.tenantLogo()" class="material-symbols-outlined text-outline">image</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -157,29 +140,7 @@ import { RouterLink } from '@angular/router';
         </section>
       </main>
 
-      <!-- BottomNavBar (Mobile Only) -->
-      <footer class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl border-t border-outline-variant bg-surface shadow-[0_-4px_12px_rgba(0,0,0,0.05)] flex justify-around items-center h-16 px-container-margin">
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 cursor-pointer hover:text-primary transition-colors">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Métricas</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 cursor-pointer hover:text-primary transition-colors">
-          <span class="material-symbols-outlined">payments</span>
-          <span class="font-label-md text-label-md">Cobros</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 cursor-pointer hover:text-primary transition-colors">
-          <span class="material-symbols-outlined">groups</span>
-          <span class="font-label-md text-label-md">Clientes</span>
-        </a>
-        <a routerLink="/siniestros" class="flex flex-col items-center justify-center text-on-surface-variant opacity-70 cursor-pointer hover:text-primary transition-colors">
-          <span class="material-symbols-outlined">report_problem</span>
-          <span class="font-label-md text-label-md">Siniestros</span>
-        </a>
-        <a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 font-bold cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
-          <span class="font-label-md text-label-md">Perfil</span>
-        </a>
-      </footer>
+
     </div>
 `,
   styles: [`
@@ -192,4 +153,19 @@ import { RouterLink } from '@angular/router';
     }
 `]
 })
-export class PerfilComponent {}
+export class PerfilComponent {
+  authService = inject(AuthService);
+
+  onLogoSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const base64 = e.target.result;
+        this.authService.tenantLogo.set(base64);
+        localStorage.setItem('tenantLogo', base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+}

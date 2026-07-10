@@ -21,48 +21,8 @@ import { RouterLink } from '@angular/router';
       </header>
 
       <div class="flex min-h-screen">
-        <!-- Desktop Sidebar (NavigationDrawer) -->
-        <aside class="hidden md:flex h-full w-72 fixed left-0 top-0 bg-inverse-surface border-r border-outline-variant shadow-lg flex-col z-50">
-          <div class="p-lg">
-            <span class="font-headline-sm text-headline-sm font-bold text-surface-lowest">Seguros Globales</span>
-            <div class="mt-xl flex items-center gap-md">
-              <div class="w-12 h-12 rounded-xl overflow-hidden bg-surface-container">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaFDCE1pLS4YtCbDFueqdc6h9ZXngDR7-kxl3hvrkhGhnmBt6d9FqbwJAnHUwF7uwh7khpGkM1U2ZeF18E3wA8pbUD_TaLt6uc3trz9Vt9FJH7uC5UGtZIsBw84hXinTTmQqo1OZa9Aq3WXcjaQFJ8WaQUZaDUTR2GAx0x5ZFkvwXetzbsyzJq760LGv7_FE9zMJIKKyRJ7xEuHoU--qpsc-r8ZlV5b998U1ETlkO-TPs-o1GBo791i5-UxmqILnt7CmIBkFKAyJTZ">
-              </div>
-              <div>
-                <h2 class="font-headline-sm text-headline-sm text-surface-lowest">Carlos López</h2>
-                <p class="font-label-md text-label-md text-secondary-fixed">ID: 28491</p>
-              </div>
-            </div>
-          </div>
-          <nav class="flex-1 mt-md px-sm">
-            <a routerLink="/dashboard" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors rounded-lg cursor-pointer">
-              <span class="material-symbols-outlined">dashboard</span>
-              <span class="font-label-md text-label-md">Dashboard</span>
-            </a>
-            <a routerLink="/cobranzas" class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg p-md m-sm scale-[0.98] duration-150 ease-in-out cursor-pointer">
-              <span class="material-symbols-outlined">payments</span>
-              <span class="font-label-md text-label-md">Cobranzas</span>
-            </a>
-            <a routerLink="/clientes" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors rounded-lg cursor-pointer">
-              <span class="material-symbols-outlined">groups</span>
-              <span class="font-label-md text-label-md">Clientes</span>
-            </a>
-            <a routerLink="/siniestros" class="flex items-center gap-md text-surface-variant hover:text-on-primary-fixed-variant p-md m-sm hover:bg-surface-variant/10 transition-colors rounded-lg cursor-pointer">
-              <span class="material-symbols-outlined">report_problem</span>
-              <span class="font-label-md text-label-md">Siniestros</span>
-            </a>
-          </nav>
-          <div class="p-lg mt-auto border-t border-white/10">
-            <div routerLink="/perfil" class="flex items-center gap-sm text-surface-variant hover:text-white cursor-pointer transition-colors">
-              <span class="material-symbols-outlined">settings</span>
-              <span class="font-label-md text-label-md">Configuración</span>
-            </div>
-          </div>
-        </aside>
-
         <!-- Main Content Area -->
-        <main class="flex-1 md:ml-72 p-container-margin md:p-xl">
+        <main class="flex-1 p-container-margin md:p-xl">
           <!-- Breadcrumbs & Header -->
           <div class="mb-lg">
             <nav class="flex items-center gap-xs text-on-surface-variant mb-xs">
@@ -221,29 +181,7 @@ import { RouterLink } from '@angular/router';
         </main>
       </div>
 
-      <!-- Bottom Navigation Bar (Mobile Only) -->
-      <nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant flex justify-around items-center h-20 pb-safe px-container-margin shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <a routerLink="/dashboard" class="flex flex-col items-center justify-center gap-1 flex-1 h-full text-on-surface-variant cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="text-[10px] font-label-md">Métricas</span>
-        </a>
-        <a routerLink="/cobranzas" class="flex flex-col items-center justify-center gap-1 flex-1 h-full bg-primary-container text-on-primary-container rounded-xl my-2 mx-1 cursor-pointer scale-105">
-          <span class="material-symbols-outlined">receipt_long</span>
-          <span class="text-[10px] font-label-md">Cobros</span>
-        </a>
-        <a routerLink="/clientes" class="flex flex-col items-center justify-center gap-1 flex-1 h-full text-on-surface-variant cursor-pointer">
-          <span class="material-symbols-outlined">groups</span>
-          <span class="text-[10px] font-label-md">Clientes</span>
-        </a>
-        <a routerLink="/siniestros" class="flex flex-col items-center justify-center gap-1 flex-1 h-full text-on-surface-variant cursor-pointer">
-          <span class="material-symbols-outlined">report_problem</span>
-          <span class="text-[10px] font-label-md">Siniestros</span>
-        </a>
-        <a routerLink="/perfil" class="flex flex-col items-center justify-center gap-1 flex-1 h-full text-on-surface-variant cursor-pointer">
-          <span class="material-symbols-outlined">person</span>
-          <span class="text-[10px] font-label-md">Perfil</span>
-        </a>
-      </nav>
+
 
       <!-- Floating Action Button for specific contexts -->
       <button class="fixed bottom-24 right-6 md:bottom-10 md:right-10 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-40 cursor-pointer">
