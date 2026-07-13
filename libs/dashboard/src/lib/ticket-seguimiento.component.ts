@@ -211,29 +211,6 @@ import { RouterLink } from '@angular/router';
         </div>
       </main>
 
-      <!-- Bottom Navigation Mobile -->
-      <div class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-surface border-t border-outline-variant flex justify-around items-center px-4 py-2 pb-safe shadow-lg">
-        <div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform scale-95 active:scale-90 cursor-pointer">
-          <span class="material-symbols-outlined">chat</span>
-          <span class="font-label-md text-label-md">Chat</span>
-        </div>
-        <div routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform scale-95 active:scale-90 cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Dashboard</span>
-        </div>
-        <div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 transition-transform scale-95 active:scale-90 cursor-pointer">
-          <span class="material-symbols-outlined">receipt_long</span>
-          <span class="font-label-md text-label-md">Tickets</span>
-        </div>
-        <div routerLink="/clientes" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform scale-95 active:scale-90 cursor-pointer">
-          <span class="material-symbols-outlined">groups</span>
-          <span class="font-label-md text-label-md">Clients</span>
-        </div>
-        <div routerLink="/perfil" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform scale-95 active:scale-90 cursor-pointer">
-          <span class="material-symbols-outlined">person</span>
-          <span class="font-label-md text-label-md">Profile</span>
-        </div>
-      </div>
     </div>
   `
 })

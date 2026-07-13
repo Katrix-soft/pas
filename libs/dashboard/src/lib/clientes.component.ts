@@ -186,9 +186,6 @@ import { RouterLink } from '@angular/router';
           <span class="material-symbols-outlined text-[28px]">person_add</span>
         </button>
       </main>
-
-      <!-- BottomNavBar (Mobile Only) -->
-      
     </div>
 `,
   styles: [`

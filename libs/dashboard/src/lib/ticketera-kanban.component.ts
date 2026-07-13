@@ -24,11 +24,9 @@ interface KanbanTicket {
       <header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex justify-between items-center px-md py-sm">
         <div class="flex items-center gap-md">
           <button routerLink="/dashboard" class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high transition-colors p-sm rounded-full active:scale-95 duration-150 md:hidden">arrow_back</button>
-          <button class="hidden md:block material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high transition-colors p-sm rounded-full active:scale-95 duration-150">menu</button>
           <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">JC Organizadores</h1>
         </div>
         <div class="flex items-center gap-sm">
-          <button class="material-symbols-outlined text-on-surface-variant dark:text-surface-variant p-sm rounded-full hover:bg-surface-container-high transition-colors">search</button>
           <div routerLink="/perfil" class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant shadow-sm active:scale-95 transition-transform duration-150 cursor-pointer">
             <img class="w-full h-full object-cover" alt="Admin portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXboOsLOO24VSDorYonADgwWmcCUdjVD-xXDcGIQnBFXQxMWQSWVwnH02WwIJ7W_Q6dmgTCoMhjziGFoPxoyFETqc-ZKm1hrJZJqKux8-1XDpYtTMgNBumNvq0lglGu5MwP-VxsMRaeAH4Xn1KVxoe3cWRRyD9-YuPR-ccHDs1bgj_TJu6nFCdcWobn1aAzzlX2SxbQQPK5tOfk2s2bPlM9iwMNxz4fLDUgHIltb4ie0wwBvk0tYurhg"/>
           </div>

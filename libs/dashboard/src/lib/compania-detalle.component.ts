@@ -225,28 +225,6 @@ import { RouterLink } from '@angular/router';
           </div>
         </section>
       </main>
-
-      <!-- BottomNavBar -->
-      <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface border-t border-outline-variant px-container-margin pb-safe h-16 shadow-lg md:hidden">
-        <button routerLink="/dashboard" class="flex flex-col items-center justify-center text-on-surface-variant px-md py-xs hover:text-primary transition-colors duration-150 cursor-pointer">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="font-label-md text-label-md">Dashboard</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-md py-xs hover:text-primary transition-colors duration-150 cursor-pointer">
-          <span class="material-symbols-outlined">group</span>
-          <span class="font-label-md text-label-md">Clients</span>
-        </button>
-        <!-- ACTIVE TAB: Company (Métricas context within company) -->
-        <button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-md py-xs scale-100 transition-transform duration-150 cursor-pointer">
-          <span class="material-symbols-outlined">business</span>
-          <span class="font-label-md text-label-md">Company</span>
-        </button>
-        <button class="flex flex-col items-center justify-center text-on-surface-variant px-md py-xs hover:text-primary transition-colors duration-150 cursor-pointer">
-          <span class="material-symbols-outlined">description</span>
-          <span class="font-label-md text-label-md">Policies</span>
-        </button>
-      </nav>
-    </div>
 `,
   styles: [`
     .scrollbar-hide::-webkit-scrollbar {
