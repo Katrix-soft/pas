@@ -1,4 +1,5 @@
 import os
+<<<<<<< Updated upstream
 import smtplib
 import ssl
 import asyncio
@@ -6,8 +7,29 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pydantic import BaseModel
 from dotenv import load_dotenv
+=======
+import json
+import urllib.request
+import urllib.error
+>>>>>>> Stashed changes
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+# Carga manual del archivo .env para evitar dependencias externas en el entorno de desarrollo
+def load_env():
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, val = line.split("=", 1)
+                    # Quitar comillas si existen
+                    val = val.strip().strip("'").strip('"')
+                    os.environ[key.strip()] = val
+
+load_env()
 
 app = FastAPI(
     title="jcorg Broker Platform API",
@@ -27,10 +49,13 @@ app.add_middleware(
 @app.get("/health", tags=["System"])
 async def health_check():
     """Endpoint para monitoreo y healthcheck de Easypanel"""
+    client_id = os.getenv("SANCOR_GSS_API_CLIENT_ID", "")
+    masked_client_id = f"{client_id[:4]}...{client_id[-4:]}" if len(client_id) > 8 else "None"
     return {
         "status": "healthy",
         "version": "1.0.0",
-        "environment": os.getenv("ENV", "development")
+        "environment": os.getenv("ENV", "development"),
+        "sancor_client_id_loaded": masked_client_id
     }
 
 @app.get("/api/v1/pas/me", tags=["PAS"])
@@ -40,7 +65,7 @@ async def get_current_pas_profile(
     """Ejemplo de endpoint simulando aislamiento por pas_id (RLS)"""
     if not x_pas_id:
         raise HTTPException(status_code=401, detail="Header X-PAS-ID es obligatorio")
-    
+
     return {
         "pas_id": x_pas_id,
         "name": "Productor Asesor de Seguros - Demo",
@@ -52,6 +77,7 @@ async def get_current_pas_profile(
         }
     }
 
+<<<<<<< Updated upstream
 load_dotenv()
 
 class ForgotPasswordRequest(BaseModel):
@@ -116,3 +142,80 @@ async def forgot_password(req: ForgotPasswordRequest):
         print(f"Error sending email: {e}")
         raise HTTPException(status_code=500, detail="No se pudo enviar el correo")
 
+=======
+@app.post("/api/v1/quotations/vehicle/automotive", tags=["Quotations"])
+async def proxy_sancor_quotation(
+    request_body: dict,
+    authorization: str | None = Header(None),
+    x_dynatrace: str | None = Header(None, alias="X-dynaTrace")
+):
+    """
+    Proxy que actúa como intermediario para evitar problemas de CORS.
+    Reenvía las solicitudes de cotización a la API externa de Sancor Seguros.
+    """
+    base_url = os.getenv("SANCOR_API_BASE_URL")
+    client_id = os.getenv("SANCOR_GSS_API_CLIENT_ID")
+
+    if not base_url:
+        raise HTTPException(
+            status_code=500,
+            detail="La variable de entorno SANCOR_API_BASE_URL no está configurada."
+        )
+
+    target_url = f"{base_url}/vehicle/automotive"
+
+    # Preparar headers
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "gss_apiclient_id": client_id or ""
+    }
+
+    if authorization:
+        headers["Authorization"] = authorization
+    if x_dynatrace:
+        headers["X-dynaTrace"] = x_dynatrace
+
+    print(f"Proxy POST: {target_url}")
+    print(f"Authorization: {authorization[:30] if authorization else 'None'}...")
+
+    try:
+        data = json.dumps(request_body).encode("utf-8")
+        req = urllib.request.Request(target_url, data=data, headers=headers, method="POST")
+
+        # Realizar la llamada HTTP sincrónica a la API de Sancor
+        with urllib.request.urlopen(req, timeout=30) as response:
+            resp_body = response.read().decode("utf-8")
+            return json.loads(resp_body)
+
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="ignore")
+        status_code = e.code
+        print(f"Sancor API Error {status_code}: {error_body}")
+        try:
+            parsed_error = json.loads(error_body)
+            return JSONResponse(status_code=status_code, content=parsed_error)
+        except Exception:
+            return JSONResponse(
+                status_code=status_code,
+                content={
+                    "messages": [{
+                        "code": "GSS-ERR-PROXY",
+                        "text": f"Error de respuesta del servidor Sancor: {e.reason}",
+                        "help": error_body
+                    }]
+                }
+            )
+    except Exception as e:
+        print(f"Proxy Connection Error: {str(e)}")
+        return JSONResponse(
+            status_code=502,
+            content={
+                "messages": [{
+                    "code": "GSS-ERR-GATEWAY",
+                    "text": "No se pudo establecer comunicación con el Gateway de Sancor Seguros.",
+                    "help": str(e)
+                }]
+            }
+        )
+>>>>>>> Stashed changes

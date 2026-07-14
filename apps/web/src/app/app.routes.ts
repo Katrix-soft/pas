@@ -90,6 +90,10 @@ export const routes: Routes = [
       {
         path: 'ticketera/kanban',
         loadComponent: () => import('@broker/dashboard').then(m => m.TicketeraKanbanComponent)
+      },
+      {
+        path: 'sancor-demo',
+        loadComponent: () => import('../../../../libs/quotations/src/index').then(m => m.VehicleQuotationDemoComponent)
       }
     ]
   }
