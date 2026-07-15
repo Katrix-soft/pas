@@ -1,107 +1,193 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-request-access',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   template: `
-    <!-- Top Navigation Bar -->
-    <nav class="sticky top-0 z-40 bg-transparent px-md py-sm flex items-center justify-start border-none absolute w-full">
-      <button routerLink="/login" class="p-base hover:bg-surface-container-high rounded-full transition-all flex items-center justify-center cursor-pointer relative z-50">
-        <span class="material-symbols-outlined text-primary">arrow_back</span>
-      </button>
-    </nav>
+    <div class="min-h-screen flex flex-col md:flex-row bg-surface font-body-md w-full">
+      
+      <!-- Branding / Visual (Header on mobile, Left Side on desktop) -->
+      <div class="flex w-full md:w-1/2 lg:w-3/5 relative overflow-hidden items-center justify-center bg-[#0a0f24] min-h-[35vh] md:min-h-screen pb-12 md:pb-0">
+        <!-- Background Image with Overlay -->
+        <img src="https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50 md:opacity-40">
+        
+        <!-- Abstract Gradients -->
+        <div class="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-br from-primary/70 via-[#1e1b4b]/80 to-[#0a0f24]/90 mix-blend-multiply"></div>
 
-    <!-- Main Content Canvas -->
-    <main class="flex-grow flex flex-col items-center justify-center px-container-margin relative w-full overflow-hidden">
-      <!-- Abstract Background Decorative Elements -->
-      <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-primary-fixed/20 rounded-full blur-3xl -z-10"></div>
-      <div class="absolute bottom-[-5%] left-[-5%] w-48 h-48 bg-secondary-fixed-dim/20 rounded-full blur-3xl -z-10"></div>
-
-      <!-- Focused Transactional Card -->
-      <div class="w-full max-w-md glass-card rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex flex-col items-center text-center animate-fade-in-up">
-        <!-- Branding Header -->
-        <div class="mb-xl">
-          <img alt="JCOrg Seguros Logo" class="w-32 h-32 object-contain mx-auto mb-md transform transition-transform hover:scale-105 duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALdX90bEnzYj8tXab6SB6Q_bO066RoA_MOoubYfuUviybyeUuIWTEV9CJnHqyOik-L0lW2X456rwB1hMq5CC5igU7XQ_p8_VuTnT2jlPBMSoQfJ4oshj8dRtLL8D0XSvdZfejWqTzZ4VObXxH3ZKRr-bm3aPRPccuwkhyt8Ex7CEbZi40a9Zh6MlBaeQ0KeEgPTMUNWmMusqmFdZgkd0Lc16M_-liNnBxK7fd9uzJyk-Yfi9NDtT5wMSyERHBqzMpbeMmAQcLy4Gfn">
-          <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background tracking-tight">Solicitar Acceso</h1>
-        </div>
-
-        <!-- Informational Message -->
-        <div class="space-y-md mb-xl">
-          <div class="flex items-center justify-center w-12 h-12 bg-surface-container-low rounded-full mx-auto">
-            <span class="material-symbols-outlined text-primary text-[28px]">lock_person</span>
-          </div>
-          <p class="text-on-surface-variant leading-relaxed">
-            Para obtener acceso al portal de seguros, por favor contacte a nuestro equipo de administración.
+        <div class="relative z-10 p-6 md:p-12 text-white max-w-xl text-center flex flex-col items-center">
+          <img alt="JC Organizadores Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWmWtBTOG94ebZcQp0UsJ6-0V6LVgCiuVka12SaJiSnycaDjT4UAneUW1KkNSHjdKY2UH4QqvtgyuuGMuYWv782qq8YKsON7lzY-Lfa7EUdlDMvxPzbhmId2Jk_qwzaWf6u7UtMH6nMUSSRt0utH_nlQ2XxJONaq1dz10BEbyvSu7otZUp4ZkK1A2fZ-VFkBy-HdbRQ1wWPZTOohnN6HzD64k8QIG5wNIu8a0gnSX_oa2UfXKNAIyfNRca4wtw_RPX8T81IoCGA7Eo" class="h-16 md:h-28 lg:h-36 mb-4 md:mb-10 object-contain drop-shadow-xl brightness-0 invert">
+          <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold mb-2 md:mb-6 tracking-tight leading-tight">Acceso Exclusivo <br class="hidden md:block"/>para Productores</h1>
+          <p class="hidden md:block text-lg lg:text-xl text-white/80 font-light leading-relaxed">
+            Únete a la red de productores más innovadora y gestiona todas tus pólizas desde una única plataforma inteligente.
           </p>
-          <div class="inline-flex items-center gap-sm px-md py-sm bg-surface-container rounded-lg border border-outline-variant/30">
-            <span class="material-symbols-outlined text-primary text-sm">mail</span>
-            <span class="font-label-md text-label-md text-primary select-all">soporte&#64;jcorg.com.ar</span>
-          </div>
-        </div>
-
-        <!-- Action Cluster -->
-        <div class="w-full flex flex-col gap-md">
-          <a href="mailto:soporte@jcorg.com.ar" class="w-full bg-primary text-on-primary font-headline-sm text-headline-sm py-md rounded-lg flex items-center justify-center gap-sm hover:bg-on-primary-fixed-variant active:scale-[0.98] transition-all duration-200">
-            <span class="material-symbols-outlined">send</span>
-            Enviar Email
-          </a>
-          <button routerLink="/login" class="w-full bg-transparent border border-primary text-primary font-headline-sm text-headline-sm py-md rounded-lg flex items-center justify-center gap-sm hover:bg-primary-fixed/20 active:scale-[0.98] transition-all duration-200 cursor-pointer">
-            <span class="material-symbols-outlined">home</span>
-            Volver al Inicio
-          </button>
-        </div>
-
-        <!-- Secondary Guidance -->
-        <div class="mt-lg pt-lg border-t border-outline-variant w-full">
-          <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Asistencia Directa</p>
-          <div class="flex justify-center gap-lg">
-            <button class="flex flex-col items-center gap-xs group cursor-pointer">
-              <div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:border-primary group-hover:text-primary transition-colors">
-                <span class="material-symbols-outlined">help</span>
-              </div>
-              <span class="text-[10px] font-bold text-outline uppercase">Ayuda</span>
-            </button>
-            <button class="flex flex-col items-center gap-xs group cursor-pointer">
-              <div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:border-primary group-hover:text-primary transition-colors">
-                <span class="material-symbols-outlined">call</span>
-              </div>
-              <span class="text-[10px] font-bold text-outline uppercase">Llamar</span>
-            </button>
-          </div>
         </div>
       </div>
 
-      <!-- Footer Policy / Trust -->
-      <footer class="mt-xl text-center relative z-10 pb-xl">
-        <p class="font-label-md text-label-md text-outline opacity-70">
-          © 2026 Powered by Katrix. Todos los derechos reservados.
-        </p>
-      </footer>
-    </main>
+      <!-- Request Access Form (Bottom sheet on mobile, Right Side on desktop) -->
+      <div class="w-full md:w-1/2 lg:w-2/5 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-24 bg-white relative z-20 rounded-t-[32px] md:rounded-none -mt-8 md:mt-0 flex-1 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:shadow-none">
+        
+        <div class="w-full max-w-sm pt-4 md:pt-0">
+          <!-- Mobile Logo (Only visible on mobile) -->
+          <img alt="Logo" class="md:hidden h-20 mb-10 mx-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWmWtBTOG94ebZcQp0UsJ6-0V6LVgCiuVka12SaJiSnycaDjT4UAneUW1KkNSHjdKY2UH4QqvtgyuuGMuYWv782qq8YKsON7lzY-Lfa7EUdlDMvxPzbhmId2Jk_qwzaWf6u7UtMH6nMUSSRt0utH_nlQ2XxJONaq1dz10BEbyvSu7otZUp4ZkK1A2fZ-VFkBy-HdbRQ1wWPZTOohnN6HzD64k8QIG5wNIu8a0gnSX_oa2UfXKNAIyfNRca4wtw_RPX8T81IoCGA7Eo">
+
+          <!-- Back Button -->
+          <button routerLink="/login" class="mb-8 flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer group w-fit">
+            <span class="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+            <span class="text-sm font-bold">Volver al login</span>
+          </button>
+
+          <div class="mb-8 text-center md:text-left">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-xl mb-4">
+              <span class="material-symbols-outlined text-2xl">lock_person</span>
+            </div>
+            <h2 class="text-3xl font-bold text-on-surface mb-2 tracking-tight">Solicitar Acceso</h2>
+            <p class="text-on-surface-variant font-body-md text-sm leading-relaxed">
+              {{ showForm() ? 'Complete sus datos para enviar la solicitud de acceso.' : 'Para obtener acceso al portal de seguros, contáctese con nuestro equipo de administración.' }}
+            </p>
+          </div>
+
+          <!-- Initial State (No Form) -->
+          <div *ngIf="!showForm()" class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <!-- Email Box -->
+            <div class="flex items-center gap-4 p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl hover:border-primary/50 transition-colors">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                <span class="material-symbols-outlined text-lg">mail</span>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Correo de Soporte</p>
+                <p class="text-on-surface font-semibold select-all">supit&#64;katrix.com.ar</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-3 pt-2">
+              <button (click)="toggleForm()" class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,118,255,0.23)] hover:-translate-y-0.5 hover:bg-primary/90 active:scale-[0.98] active:translate-y-0 transition-all duration-200 flex justify-center items-center gap-2 cursor-pointer">
+                <span>Enviar Email</span>
+                <span class="material-symbols-outlined text-xl">send</span>
+              </button>
+              
+              <button routerLink="/login" class="w-full py-4 bg-transparent border-2 border-outline-variant/50 text-on-surface-variant font-bold rounded-xl hover:border-outline-variant hover:bg-surface-container-lowest hover:text-on-surface active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2 cursor-pointer">
+                <span>Volver al Inicio</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form State -->
+          <form *ngIf="showForm()" [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+            
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-on-surface-variant ml-1">Nombre Completo</label>
+              <input type="text" formControlName="fullName" class="w-full bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:bg-white outline-none transition-all shadow-sm" placeholder="Ej. Juan Pérez" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-on-surface-variant ml-1">Correo Electrónico</label>
+              <input type="email" formControlName="email" class="w-full bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:bg-white outline-none transition-all shadow-sm" placeholder="juan@ejemplo.com" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-on-surface-variant ml-1">Teléfono</label>
+              <input type="tel" formControlName="phone" class="w-full bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:bg-white outline-none transition-all shadow-sm" placeholder="+54 9 11 1234-5678" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-on-surface-variant ml-1">Mensaje (Opcional)</label>
+              <textarea formControlName="message" rows="2" class="w-full bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl px-4 py-3 text-sm text-on-surface focus:border-primary focus:bg-white outline-none transition-all shadow-sm resize-none" placeholder="Escriba aquí el motivo de su solicitud..."></textarea>
+            </div>
+
+            <div class="flex flex-col gap-3 pt-2">
+              <button type="submit" [disabled]="requestForm.invalid" class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(0,118,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,118,255,0.23)] hover:-translate-y-0.5 hover:bg-primary/90 active:scale-[0.98] active:translate-y-0 transition-all duration-200 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none">
+                <span>Enviar por Correo</span>
+                <span class="material-symbols-outlined text-xl">send</span>
+              </button>
+              <button type="button" (click)="toggleForm()" class="w-full py-3 bg-transparent text-on-surface-variant font-bold hover:text-primary transition-colors flex justify-center items-center gap-2 cursor-pointer">
+                <span>Cancelar</span>
+              </button>
+            </div>
+          </form>
+          
+          <!-- Secondary Guidance -->
+          <div class="mt-8 pt-8 border-t border-outline-variant/50" *ngIf="!showForm()">
+              <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider text-center mb-6">Asistencia Directa</p>
+              <div class="flex justify-center gap-8">
+                <button class="flex flex-col items-center gap-2 group cursor-pointer">
+                  <div class="w-12 h-12 rounded-full border-2 border-outline-variant/50 flex items-center justify-center group-hover:border-primary group-hover:text-primary transition-all group-hover:shadow-md bg-surface-container-lowest">
+                    <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">help</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-on-surface-variant uppercase group-hover:text-primary transition-colors">Ayuda</span>
+                </button>
+                <button class="flex flex-col items-center gap-2 group cursor-pointer">
+                  <div class="w-12 h-12 rounded-full border-2 border-outline-variant/50 flex items-center justify-center group-hover:border-primary group-hover:text-primary transition-all group-hover:shadow-md bg-surface-container-lowest">
+                    <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">call</span>
+                  </div>
+                  <span class="text-[10px] font-bold text-on-surface-variant uppercase group-hover:text-primary transition-colors">Llamar</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <footer class="mt-16 text-center opacity-60">
+            <p class="font-label-md text-xs text-on-surface-variant">
+              © 2026 Powered by Katrix.
+            </p>
+          </footer>
+        </div>
+      </div>
   `,
   styles: [`
     :host {
-      display: flex;
-      flex-direction: column;
+      display: block;
       width: 100%;
       min-height: 100vh;
-      background-color: #F8FAFC;
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    .animate-fade-in-up {
-      animation: fadeInUp 0.6s ease-out forwards;
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
-export class RequestAccessComponent {}
+export class RequestAccessComponent {
+  showForm = signal(false);
+  requestForm: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.requestForm = this.fb.group({
+      fullName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', Validators.required],
+      message: ['']
+    });
+  }
+
+  toggleForm(): void {
+    this.showForm.update(v => !v);
+  }
+
+  onSubmit(): void {
+    if (this.requestForm.invalid) return;
+
+    const { fullName, email, phone, message } = this.requestForm.value;
+    
+    const subject = encodeURIComponent(`Solicitud de Acceso - ${fullName}`);
+    const body = encodeURIComponent(`Hola equipo de soporte Katrix,
+
+Deseo solicitar acceso a la plataforma para gestionar pólizas. Mis datos de contacto son:
+
+Nombre: ${fullName}
+Email: ${email}
+Teléfono: ${phone}
+
+Mensaje adicional:
+${message || 'Sin mensaje adicional.'}
+
+Quedo a la espera de su respuesta. Gracias.`);
+
+    // Abre el cliente de correo por defecto (Outlook, Gmail, Apple Mail, etc)
+    window.location.href = `mailto:supit@katrix.com.ar?subject=${subject}&body=${body}`;
+    
+    // Opcional: limpiar y volver atrás tras solicitar
+    this.showForm.set(false);
+    this.requestForm.reset();
+  }
+}

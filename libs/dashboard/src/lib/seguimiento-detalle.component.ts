@@ -35,37 +35,82 @@ import { RouterLink } from '@angular/router';
           </div>
 
           <!-- Stepper -->
-          <div class="w-full glass-card p-md rounded-xl shadow-sm overflow-x-auto bg-white/80 backdrop-blur border border-slate-200">
-            <div class="flex items-center justify-between min-w-[600px] relative px-4">
-              <div class="absolute top-1/2 left-0 right-0 h-1 bg-surface-variant -translate-y-1/2 z-0 mx-8"></div>
-              <div class="absolute top-1/2 left-0 w-2/3 h-1 bg-secondary -translate-y-1/2 z-0 mx-8"></div>
+          <nav aria-label="Progress" class="mb-lg">
+            <ol role="list" class="divide-y divide-outline-variant rounded-xl border border-outline-variant md:flex md:divide-y-0 bg-white shadow-sm overflow-hidden">
               
-              <div class="z-10 flex flex-col items-center gap-2 group">
-                <div class="stepper-circle w-10 h-10 rounded-full flex items-center justify-center bg-secondary text-white shadow-md">
-                  <span class="material-symbols-outlined">check</span>
+              <!-- Step 1 (Completed) -->
+              <li class="relative md:flex md:flex-1">
+                <div class="flex items-center px-6 py-4 text-sm font-medium w-full group hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                  <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm">
+                    <span class="material-symbols-outlined text-[20px]">check</span>
+                  </span>
+                  <span class="ml-4 text-sm font-medium text-on-surface flex flex-col">
+                    <span class="text-label-lg font-bold">Lead</span>
+                    <span class="text-body-sm text-on-surface-variant font-normal">Contacto inicial</span>
+                  </span>
                 </div>
-                <span class="font-label-md text-label-md text-secondary">Lead</span>
-              </div>
-              <div class="z-10 flex flex-col items-center gap-2">
-                <div class="stepper-circle w-10 h-10 rounded-full flex items-center justify-center bg-secondary text-white shadow-md">
-                  <span class="material-symbols-outlined">check</span>
+                <!-- Arrow separator for desktop -->
+                <div class="absolute top-0 right-0 hidden h-full w-5 md:block pointer-events-none" aria-hidden="true">
+                  <svg class="h-full w-full text-outline-variant" viewBox="0 0 22 80" fill="none" preserveAspectRatio="none">
+                    <path d="M0 -2L20 40L0 82" vector-effect="non-scaling-stroke" stroke="currentcolor" stroke-linejoin="round" />
+                  </svg>
                 </div>
-                <span class="font-label-md text-label-md text-secondary">Cotizado</span>
-              </div>
-              <div class="z-10 flex flex-col items-center gap-2">
-                <div class="stepper-circle w-10 h-10 rounded-full flex items-center justify-center bg-primary text-white shadow-lg ring-4 ring-primary-fixed">
-                  <span class="material-symbols-outlined">description</span>
+              </li>
+
+              <!-- Step 2 (Completed) -->
+              <li class="relative md:flex md:flex-1">
+                <div class="flex items-center px-6 py-4 text-sm font-medium w-full group hover:bg-surface-container-lowest transition-colors cursor-pointer md:pl-8">
+                  <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm">
+                    <span class="material-symbols-outlined text-[20px]">check</span>
+                  </span>
+                  <span class="ml-4 text-sm font-medium text-on-surface flex flex-col">
+                    <span class="text-label-lg font-bold">Cotizado</span>
+                    <span class="text-body-sm text-on-surface-variant font-normal">Presupuesto</span>
+                  </span>
                 </div>
-                <span class="font-label-md text-label-md text-primary font-bold">Pend. Docs</span>
-              </div>
-              <div class="z-10 flex flex-col items-center gap-2">
-                <div class="stepper-circle w-10 h-10 rounded-full flex items-center justify-center bg-surface-variant text-on-surface-variant">
-                  <span class="material-symbols-outlined">task_alt</span>
+                <!-- Arrow separator for desktop -->
+                <div class="absolute top-0 right-0 hidden h-full w-5 md:block pointer-events-none" aria-hidden="true">
+                  <svg class="h-full w-full text-outline-variant" viewBox="0 0 22 80" fill="none" preserveAspectRatio="none">
+                    <path d="M0 -2L20 40L0 82" vector-effect="non-scaling-stroke" stroke="currentcolor" stroke-linejoin="round" />
+                  </svg>
                 </div>
-                <span class="font-label-md text-label-md text-on-surface-variant">Emitido</span>
-              </div>
-            </div>
-          </div>
+              </li>
+
+              <!-- Step 3 (Current) -->
+              <li class="relative md:flex md:flex-1">
+                <!-- Active border bottom -->
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-primary"></div>
+                <div class="flex items-center px-6 py-4 text-sm font-medium w-full md:pl-8">
+                  <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-primary text-primary bg-primary-fixed-dim/20">
+                    <span class="text-label-lg font-bold">03</span>
+                  </span>
+                  <span class="ml-4 text-sm font-medium text-primary flex flex-col">
+                    <span class="text-label-lg font-bold">Pend. Docs</span>
+                    <span class="text-body-sm text-primary/80 font-normal">Firma requerida</span>
+                  </span>
+                </div>
+                <!-- Arrow separator for desktop -->
+                <div class="absolute top-0 right-0 hidden h-full w-5 md:block pointer-events-none" aria-hidden="true">
+                  <svg class="h-full w-full text-outline-variant" viewBox="0 0 22 80" fill="none" preserveAspectRatio="none">
+                    <path d="M0 -2L20 40L0 82" vector-effect="non-scaling-stroke" stroke="currentcolor" stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </li>
+
+              <!-- Step 4 (Upcoming) -->
+              <li class="relative md:flex md:flex-1">
+                <div class="flex items-center px-6 py-4 text-sm font-medium w-full md:pl-8 opacity-60">
+                  <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-outline-variant text-outline-variant">
+                    <span class="text-label-lg font-bold">04</span>
+                  </span>
+                  <span class="ml-4 text-sm font-medium text-outline-variant flex flex-col">
+                    <span class="text-label-lg font-bold">Emitido</span>
+                    <span class="text-body-sm font-normal">Finalizado</span>
+                  </span>
+                </div>
+              </li>
+            </ol>
+          </nav>
         </section>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
