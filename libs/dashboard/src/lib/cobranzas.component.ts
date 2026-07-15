@@ -23,13 +23,8 @@ import { RouterLink } from '@angular/router';
       <div class="flex min-h-screen">
         <!-- Main Content Area -->
         <main class="flex-1 p-container-margin md:p-xl">
-          <!-- Breadcrumbs & Header -->
+          <!-- Header -->
           <div class="mb-lg">
-            <nav class="flex items-center gap-xs text-on-surface-variant mb-xs">
-              <span class="font-label-md text-label-md">Cobranzas</span>
-              <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-              <span class="font-label-md text-label-md font-bold text-primary">Falta de Pago</span>
-            </nav>
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-md">
               <div>
                 <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Gestión de Cobranzas</h2>

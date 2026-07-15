@@ -2,13 +2,14 @@ import { Component, signal, effect, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
+import { BreadcrumbsComponent } from './breadcrumbs.component';
 
 export type Role = 'admin' | 'pas' | string;
 
 @Component({
   selector: 'lib-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbsComponent],
   template: `
     <div class="flex h-screen w-full bg-background overflow-hidden">
       
@@ -128,6 +129,10 @@ export type Role = 'admin' | 'pas' | string;
 
       <!-- Main Content Container -->
       <div class="flex-1 h-full overflow-y-auto relative bg-background pb-20 md:pb-0 custom-scrollbar">
+        <!-- Global Breadcrumbs Wrapper -->
+        <div class="w-full px-container-margin md:px-xl pt-sm pb-0 -mb-sm relative z-10">
+          <lib-breadcrumbs></lib-breadcrumbs>
+        </div>
         <router-outlet></router-outlet>
       </div>
 
