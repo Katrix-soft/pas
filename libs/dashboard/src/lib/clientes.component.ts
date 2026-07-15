@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
     <div class="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
       <main class="flex-1 w-full">
 <!-- Search and Filter Section -->
-        <section class="p-container-margin md:p-lg space-y-md">
+        <section class="px-container-margin md:px-lg pb-lg pt-sm space-y-md">
           <div class="relative group" [class.ring-2]="isFocused" [class.ring-primary]="isFocused">
             <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
             <input (focus)="isFocused = true" (blur)="isFocused = false" class="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-0 focus:outline-none transition-all font-body-md text-on-surface" placeholder="Buscar por nombre, DNI o póliza..." type="text">

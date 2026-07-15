@@ -410,11 +410,6 @@ import { AuthService } from './services/auth.service';
               </div>
             </div>
 
-            <!-- Footer Info -->
-            <footer class="py-md text-center border-t border-outline-variant mt-xl">
-              <p class="text-label-md text-outline">© 2026 JC Organizadores - Operación Centralizada</p>
-              <p class="text-[10px] text-outline mt-1 uppercase tracking-widest">Nexus Platform v4.2.1</p>
-            </footer>
           </section>
         } @else {
           <!-- VISTA PAS (Productor) -->
@@ -607,6 +602,12 @@ import { AuthService } from './services/auth.service';
           </div>
         </section>
         }
+
+        <!-- Global Footer Info (Admin & PAS) -->
+        <footer class="py-md text-center border-t border-outline-variant mt-auto mx-container-margin md:mx-lg">
+          <p class="text-label-md text-outline">© 2026 JC Organizadores - Operación Centralizada</p>
+          <p class="text-[10px] text-outline mt-1 uppercase tracking-widest font-bold text-primary">Powered by Katrix.</p>
+        </footer>
       </main>
     </div>
   

@@ -22,7 +22,7 @@ import { RouterLink } from '@angular/router';
 
       <div class="flex min-h-screen">
         <!-- Main Content Area -->
-        <main class="flex-1 p-container-margin md:p-xl">
+        <main class="flex-1 px-container-margin md:px-xl pb-xl">
           <!-- Header -->
           <div class="mb-lg">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-md">

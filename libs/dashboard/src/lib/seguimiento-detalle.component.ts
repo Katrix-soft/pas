@@ -8,22 +8,7 @@ import { RouterLink } from '@angular/router';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="font-body-md text-on-background min-h-screen bg-background pb-24 md:pb-0">
-      <!-- TopAppBar -->
-      <header class="w-full top-0 sticky z-50 bg-surface border-b border-outline-variant flex justify-between items-center px-md py-sm">
-        <div class="flex items-center gap-md">
-          <button routerLink="/dashboard" class="hover:bg-surface-container-high p-2 rounded-full transition-colors active:scale-95 duration-150 cursor-pointer">
-            <span class="material-symbols-outlined text-primary">arrow_back</span>
-          </button>
-          <h1 class="font-headline-sm text-headline-sm text-primary font-bold">JC Organizadores</h1>
-        </div>
-        <div class="flex items-center gap-sm">
-          <div routerLink="/perfil" class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container cursor-pointer">
-            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa-BE3PftFjp7iNmt70jCCevdc-Pm2Uiihq_T-RCP4bUf8HFJHm2nY8XoxepXq3_LBDHcr7CMPzXh9UF0J46EU3UoWecOyPl5DTfmgrhwWagx4-tFg0RzLYXc0VQNimXVL1ly3jaLUZV4LuM6AmurrtwdL-3Yb_uLffryf73WjFI_dABlD4-FCnz0IcQqI9mDyUFo6dPkG93oUO6QI5UI5RYOHOK2bpBn2dzOysHip6uz4A7YPl2uY9g"/>
-          </div>
-        </div>
-      </header>
-
-      <main class="max-w-7xl mx-auto p-container-margin mb-24">
+      <main class="max-w-7xl mx-auto px-container-margin pb-24 pt-sm">
         <!-- Header Section -->
         <section class="mb-lg">
           <div class="flex flex-wrap justify-between items-start gap-md mb-md">

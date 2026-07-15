@@ -8,19 +8,6 @@ import { RouterLink } from '@angular/router';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="bg-surface font-body-md text-on-surface min-h-screen pb-24 overflow-x-hidden">
-      <!-- TopAppBar -->
-      <header class="w-full top-0 sticky z-40 bg-surface flex justify-between items-center px-md py-sm transition-colors duration-200">
-        <div class="flex items-center gap-md">
-          <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
-            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5SGCNiQ98fmk8EL1U_KgMsYreUGyhu0v1CblOmzI0ktdiZ_4RmF6yJt1NM_6MKOKGtslpCFnK9pWA7Bp-VpWs2j3Yz4IyyPza7YPKJ50-yi99FLK-F_VkU4iyBc0Q9eCn8aPw4BlWpNimzi9kPzcT5qUg7iJ8vvORi6k6RQ3cW8SdrcZKJICDrOPdaXyzSVeTuudXNfUVbBWxiLqFjKTEKdUatB3XHXeF1fbgjH9h3T-vKeErLf345sWNoDxCUpEssXHMRg6m29_B">
-          </div>
-          <h1 class="font-headline-md text-headline-md font-bold text-primary">Siniestros</h1>
-        </div>
-        <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors cursor-pointer">
-          <span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
-        </button>
-      </header>
-
       <main class="px-container-margin pt-sm space-y-lg">
         <!-- Search Bar -->
         <section class="relative">

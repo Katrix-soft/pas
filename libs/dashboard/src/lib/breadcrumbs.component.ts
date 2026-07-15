@@ -9,18 +9,19 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <nav *ngIf="breadcrumbs.length > 0" class="flex items-center gap-xs text-on-surface-variant mb-xs">
+    <nav *ngIf="breadcrumbs.length > 0" class="flex items-center gap-1 text-on-surface-variant mb-xs" aria-label="Breadcrumb">
       <ng-container *ngFor="let crumb of breadcrumbs; let last = last; let first = first">
         <!-- Render arrow if not first -->
-        <span *ngIf="!first" class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span *ngIf="!first" class="text-outline-variant font-bold select-none text-sm">/</span>
         
-        <!-- Render link or text -->
-        <a *ngIf="!last" [routerLink]="crumb.url" class="font-label-md text-label-md hover:text-primary transition-colors cursor-pointer">
+        <!-- Render link -->
+        <a [routerLink]="crumb.url" 
+           class="font-label-md text-label-md px-3 py-1.5 rounded-md hover:bg-surface-container-high transition-colors cursor-pointer uppercase tracking-wider flex items-center justify-center"
+           [class.font-bold]="last"
+           [class.text-primary]="last"
+           [class.hover:text-primary]="!last">
           {{ crumb.label }}
         </a>
-        <span *ngIf="last" class="font-label-md text-label-md font-bold text-primary">
-          {{ crumb.label }}
-        </span>
       </ng-container>
     </nav>
   `
@@ -40,6 +41,14 @@ export class BreadcrumbsComponent {
     'asistente': 'Asistente IA',
     'poliza': 'Póliza',
     'emitida': 'Emitida'
+  };
+
+  // Mapeo de URLs intermedias (que no tienen ruta real) a vistas válidas
+  private routeUrlOverride: Record<string, string> = {
+    '/seguimiento': '/siniestros',
+    '/ticket': '/ticketera/kanban',
+    '/ticketera': '/dashboard',
+    '/poliza': '/dashboard'
   };
 
   constructor() {
@@ -71,9 +80,12 @@ export class BreadcrumbsComponent {
       const mappedName = this.routeNameMap[part.toLowerCase()];
       const label = mappedName ? mappedName : this.capitalize(part.replace(/-/g, ' '));
       
+      // Aplicar override de URL si existe (para evitar links rotos en segmentos intermedios)
+      const finalUrl = this.routeUrlOverride[currentUrl] || currentUrl;
+      
       return {
         label: label,
-        url: currentUrl
+        url: finalUrl
       };
     });
   }
