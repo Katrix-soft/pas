@@ -1,17 +1,14 @@
 import os
-<<<<<<< Updated upstream
 import smtplib
 import ssl
 import asyncio
+import json
+import urllib.request
+import urllib.error
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pydantic import BaseModel
 from dotenv import load_dotenv
-=======
-import json
-import urllib.request
-import urllib.error
->>>>>>> Stashed changes
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -77,7 +74,6 @@ async def get_current_pas_profile(
         }
     }
 
-<<<<<<< Updated upstream
 load_dotenv()
 
 class ForgotPasswordRequest(BaseModel):
@@ -142,7 +138,7 @@ async def forgot_password(req: ForgotPasswordRequest):
         print(f"Error sending email: {e}")
         raise HTTPException(status_code=500, detail="No se pudo enviar el correo")
 
-=======
+
 @app.post("/api/v1/quotations/vehicle/automotive", tags=["Quotations"])
 async def proxy_sancor_quotation(
     request_body: dict,
@@ -218,4 +214,3 @@ async def proxy_sancor_quotation(
                 }]
             }
         )
->>>>>>> Stashed changes
