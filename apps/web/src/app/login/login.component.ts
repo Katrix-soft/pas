@@ -21,7 +21,7 @@ import { AuthService } from '@broker/dashboard';
         <div class="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-br from-primary/70 via-[#1e1b4b]/80 to-[#0a0f24]/90 mix-blend-multiply"></div>
 
         <div class="relative z-10 p-6 md:p-12 text-white max-w-xl text-center flex flex-col items-center">
-          <img alt="JC Organizadores Logo" src="assets/logo.png" class="h-10 sm:h-14 md:h-20 max-w-[180px] md:max-w-[260px] mb-3 md:mb-8 object-contain drop-shadow-lg rounded-2xl bg-white/95 p-2 md:p-3">
+          <img alt="JC Organizadores Logo" src="assets/logo1.png" class="h-10 sm:h-14 md:h-20 max-w-[180px] md:max-w-[260px] mb-3 md:mb-8 object-contain drop-shadow-lg rounded-2xl bg-white/95 p-2 md:p-3">
           <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold mb-2 md:mb-6 tracking-tight leading-tight">El futuro de la <br class="hidden md:block"/>gestión de seguros</h1>
           <p class="hidden md:block text-lg lg:text-xl text-white/80 font-light leading-relaxed">
             Plataforma inteligente para la administración, cotización y emisión de pólizas. Diseñada para potenciar tu productividad y la de tu equipo.
