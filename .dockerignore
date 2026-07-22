@@ -1,0 +1,10 @@
+.git
+.gitignore
+.nx
+.angular
+node_modules
+dist
+venv
+backend/venv
+apps/**/node_modules
+*.log
