@@ -49,14 +49,26 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    # 1. Crear tablas automáticamente en PostgreSQL
     async with engine.begin() as conn:
+        # Verificar si existe una tabla 'users' antigua sin la columna 'password_hash'
+        try:
+            res = await conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name='password_hash';"))
+            has_col = res.scalar()
+            if has_col is None:
+                res_table = await conn.execute(text("SELECT table_name FROM information_schema.tables WHERE table_name='users';"))
+                if res_table.scalar():
+                    await conn.execute(text("DROP TABLE users CASCADE;"))
+                    print("🧹 Tabla 'users' preexistente eliminada para actualizar a la nueva estructura con password_hash.")
+        except Exception as e:
+            print(f"Aviso al verificar esquema previo: {e}")
+
+        # Crear todas las tablas en PostgreSQL
         await conn.run_sync(Base.metadata.create_all)
     
-    # 2. Inicializar usuarios de prueba si la tabla de usuarios está vacía
+    # Inicializar usuarios semilla
     async with AsyncSessionLocal() as session:
         try:
-            result = await session.execute(select(User).limit(1))
+            result = await session.execute(select(User).filter(User.email == "admin@katrix.com.ar"))
             existing_user = result.scalars().first()
             if not existing_user:
                 admin_user = User(
