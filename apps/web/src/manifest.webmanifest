@@ -1,8 +1,8 @@
 {
   "name": "JC Organizadores - PAS Platform",
   "short_name": "JC PAS",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#0a0f24",
+  "background_color": "#0a0f24",
   "display": "standalone",
   "orientation": "any",
   "scope": "/",
