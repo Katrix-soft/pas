@@ -1,7 +1,9 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MercantilQuotationService } from '../../../quotations/src/lib/services/mercantil-quotation.service';
+import { MercantilVehiculo, MercantilCotizacionResponse } from '../../../quotations/src/lib/models/mercantil-quotation.model';
 
 @Component({
   selector: 'lib-asistente-ia',
@@ -109,9 +111,9 @@ import { FormsModule } from '@angular/forms';
               
               <div class="flex flex-col gap-1 w-full">
                 <div class="relative">
-                  <select [(ngModel)]="selectedVersion" (change)="errors[4] = false" class="w-full appearance-none bg-transparent border text-on-surface rounded-xl px-4 py-3 pr-10 focus:outline-none focus:ring-1" [ngClass]="errors[4] ? 'border-error focus:ring-error' : 'border-outline-variant focus:border-primary focus:ring-primary'">
-                    <option value="" disabled selected>Versión del auto</option>
-                    <option *ngFor="let version of versions" [value]="version">{{version}}</option>
+                  <select [(ngModel)]="selectedVersionObj" (change)="errors[4] = false" class="w-full appearance-none bg-transparent border text-on-surface rounded-xl px-4 py-3 pr-10 focus:outline-none focus:ring-1" [ngClass]="errors[4] ? 'border-error focus:ring-error' : 'border-outline-variant focus:border-primary focus:ring-primary'">
+                    <option [ngValue]="null" disabled selected>Versión del auto</option>
+                    <option *ngFor="let version of versions" [ngValue]="version">{{version.desc}}</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" [ngClass]="errors[4] ? 'text-error' : 'text-on-surface-variant'">
                     <span class="material-symbols-outlined">expand_more</span>
@@ -211,6 +213,40 @@ import { FormsModule } from '@angular/forms';
             </div>
             <span class="text-[10px] text-on-surface-variant font-label-md px-xs">11:18 AM</span>
           </div>
+          <!-- Step 8: Resultados de Cotización -->
+          <div *ngIf="loadingQuotation || quotationResult || quotationError" class="flex flex-col items-start gap-xs chat-msg">
+            <div class="bg-surface text-on-surface p-md rounded-xl shadow-sm max-w-[90%] border border-outline-variant w-full">
+              <h3 class="font-body-lg text-on-surface mb-md">Cotización de Mercantil Andina</h3>
+              
+              <div *ngIf="loadingQuotation" class="flex items-center gap-3">
+                <div class="spinner"></div>
+                <span>Procesando cotización...</span>
+              </div>
+
+              <div *ngIf="quotationError" class="text-error bg-error-container p-3 rounded-lg text-sm">
+                {{ quotationError }}
+              </div>
+
+              <div *ngIf="quotationResult && !loadingQuotation" class="flex flex-col gap-4">
+                <div class="bg-primary-container text-on-primary-container p-4 rounded-xl">
+                  <div class="text-xs uppercase tracking-wider mb-1 font-semibold">Total Premio</div>
+                  <div class="text-2xl font-bold">$ {{ quotationResult.totalPrima | number:'1.2-2' }}</div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <div class="text-sm font-semibold uppercase tracking-wider text-on-surface-variant">Coberturas Incluidas</div>
+                  <div *ngFor="let cob of quotationResult.coberturas" class="text-sm py-1 border-b border-outline-variant last:border-0 flex justify-between">
+                    <span>{{ cob.descripcion }}</span>
+                  </div>
+                </div>
+
+                <button class="mt-4 bg-primary hover:bg-primary-dark text-on-primary py-2 px-8 rounded-full font-label-lg transition-colors cursor-pointer w-full text-center">
+                  Emitir Póliza
+                </button>
+              </div>
+            </div>
+            <span class="text-[10px] text-on-surface-variant font-label-md px-xs">11:19 AM</span>
+          </div>
         </div>
       </main>
 
@@ -240,39 +276,144 @@ import { FormsModule } from '@angular/forms';
     }
 `]
 })
-export class AsistenteIaComponent implements AfterViewInit {
-  years: string[] = ['2026 0km', ...Array.from({length: 27}, (_, i) => (2025 - i).toString())];
-  brands: string[] = ['Toyota', 'Volkswagen', 'Ford', 'Chevrolet', 'Peugeot', 'Renault', 'Fiat', 'Honda', 'Nissan', 'Jeep', 'Citroën', 'Hyundai'];
-  models: string[] = ['Corolla', 'Yaris', 'Hilux', 'Golf', 'Polo', 'Amarok', '208', 'Cronos', 'Ranger', 'Tracker'];
-  versions: string[] = ['1.8 XLI Manual', '2.0 XEI CVT', '2.0 SEG CVT', '1.6 Trendline', '1.4 TSI Highline', 'V6 Extreme', '1.2 Active', '1.3 Drive GSE', '3.2 XLT', '1.2 Turbo Premier'];
+export class AsistenteIaComponent implements OnInit, AfterViewInit {
+  private quotationService = inject(MercantilQuotationService);
+
+  years: number[] = [2026, ...Array.from({length: 27}, (_, i) => (2025 - i))];
+  brands: string[] = [];
+  models: string[] = [];
+  versions: MercantilVehiculo[] = [];
   
   hasTracker = true;
   trackers: string[] = ['Seguimiento Global S.R.L', 'LoJack', 'Ituran', 'Strix'];
-  localidades: string[] = ['5539 - LAS HERAS', '1425 - CABA', '2000 - ROSARIO', '5000 - CÓRDOBA'];
+  localidades: any[] = [
+    { cp: 5539, ciudad: 1, desc: '5539 - LAS HERAS' },
+    { cp: 1425, ciudad: 1, desc: '1425 - CABA' },
+    { cp: 2000, ciudad: 320, desc: '2000 - ROSARIO' },
+    { cp: 5000, ciudad: 1, desc: '5000 - CÓRDOBA' }
+  ];
   
   currentStep = 1;
   errors: Record<number, boolean> = {};
 
-  selectedYear = '';
+  selectedYear: number | null = null;
   selectedBrand = '';
   selectedModel = '';
-  selectedVersion = '';
+  selectedVersionObj: MercantilVehiculo | null = null;
   selectedTracker = '';
   selectedAge: number | null = 18;
-  selectedLoc = '';
+  selectedLoc: any = null;
+
+  // Estados de carga
+  loadingBrands = false;
+  loadingModels = false;
+  loadingVersions = false;
+  loadingQuotation = false;
+
+  // Resultado de cotización
+  quotationResult: any = null;
+  quotationError: string = '';
+
+  ngOnInit() {
+    this.loadingBrands = true;
+    this.quotationService.getMarcas().subscribe({
+      next: (marcas: string[]) => {
+        this.brands = marcas;
+        this.loadingBrands = false;
+      },
+      error: (err: any) => {
+        console.error('Error cargando marcas', err);
+        this.loadingBrands = false;
+      }
+    });
+  }
 
   nextStep(step: number) {
     if (step === 1 && !this.selectedYear) { this.errors[1] = true; return; }
     if (step === 2 && !this.selectedBrand) { this.errors[2] = true; return; }
     if (step === 3 && !this.selectedModel) { this.errors[3] = true; return; }
-    if (step === 4 && !this.selectedVersion) { this.errors[4] = true; return; }
+    if (step === 4 && !this.selectedVersionObj) { this.errors[4] = true; return; }
     if (step === 5 && this.hasTracker && !this.selectedTracker) { this.errors[5] = true; return; }
     if (step === 6 && !this.selectedAge) { this.errors[6] = true; return; }
     if (step === 7 && !this.selectedLoc) { this.errors[7] = true; return; }
 
     this.errors[step] = false;
     this.currentStep++;
+
+    // Lógicas al avanzar de paso
+    if (step === 2 && this.selectedBrand && this.selectedYear) {
+      this.loadModels(this.selectedBrand, this.selectedYear);
+    } else if (step === 3 && this.selectedModel && this.selectedYear) {
+      this.loadVersions(this.selectedModel, this.selectedYear);
+    } else if (step === 7) {
+      this.executeQuotation();
+    }
+
     this.scrollToBottom();
+  }
+
+  private loadModels(marca: string, anio: number) {
+    this.loadingModels = true;
+    this.models = [];
+    this.selectedModel = '';
+    this.quotationService.getModelos(marca, anio).subscribe({
+      next: (modelos: string[]) => {
+        this.models = modelos;
+        this.loadingModels = false;
+      },
+      error: (err: any) => {
+        console.error('Error cargando modelos', err);
+        this.loadingModels = false;
+      }
+    });
+  }
+
+  private loadVersions(query: string, anio: number) {
+    this.loadingVersions = true;
+    this.versions = [];
+    this.selectedVersionObj = null;
+    this.quotationService.getVersiones(query, anio).subscribe({
+      next: (versiones: MercantilVehiculo[]) => {
+        this.versions = versiones;
+        this.loadingVersions = false;
+      },
+      error: (err: any) => {
+        console.error('Error cargando versiones', err);
+        this.loadingVersions = false;
+      }
+    });
+  }
+
+  private executeQuotation() {
+    this.loadingQuotation = true;
+    this.quotationError = '';
+    this.quotationResult = null;
+    
+    if (!this.selectedVersionObj) return;
+
+    const payload = {
+      anio: this.selectedYear!,
+      codigoVehiculo: this.selectedVersionObj.codigo,
+      tieneGNC: false, // Podríamos agregarlo al state
+      tieneRastreador: this.hasTracker,
+      prestadorRastreador: this.hasTracker ? this.selectedTracker : undefined,
+      codigoPostal: this.selectedLoc.cp,
+      codigoCiudad: this.selectedLoc.ciudad,
+      edadAsegurado: this.selectedAge!
+    };
+
+    this.quotationService.cotizarAuto(payload).subscribe({
+      next: (res: MercantilCotizacionResponse) => {
+        this.quotationResult = res;
+        this.loadingQuotation = false;
+        this.scrollToBottom();
+      },
+      error: (err: any) => {
+        this.quotationError = err.message || 'Error al cotizar';
+        this.loadingQuotation = false;
+        this.scrollToBottom();
+      }
+    });
   }
 
   scrollToBottom() {
