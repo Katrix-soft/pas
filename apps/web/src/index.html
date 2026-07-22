@@ -140,6 +140,18 @@
   </script>
 </head>
 <body class="min-h-screen">
-  <app-root></app-root>
+  <app-root>
+    <div style="position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8f9ff; z-index: 9999; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+      <div style="position: relative; margin-bottom: 24px; animation: splashPulse 2s ease-in-out infinite;">
+        <img src="assets/logo.png" alt="JC Organizadores" style="height: 56px; max-width: 220px; width: auto; object-fit: contain;">
+      </div>
+      <div style="width: 32px; height: 32px; border: 3px solid #d3e4fe; border-top-color: #0058be; border-radius: 50%; animation: splashSpin 0.8s linear infinite; margin-bottom: 16px;"></div>
+      <p style="color: #0b1c30; font-size: 14px; font-weight: 600; letter-spacing: 0.03em;">Cargando JC PAS...</p>
+      <style>
+        @keyframes splashSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes splashPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.04); opacity: 0.85; } }
+      </style>
+    </div>
+  </app-root>
 </body>
 </html>

@@ -19,7 +19,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
         <div class="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-br from-primary/70 via-[#1e1b4b]/80 to-[#0a0f24]/90 mix-blend-multiply"></div>
 
         <div class="relative z-10 p-6 md:p-12 text-white max-w-xl text-center flex flex-col items-center">
-          <img alt="JC Organizadores Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWmWtBTOG94ebZcQp0UsJ6-0V6LVgCiuVka12SaJiSnycaDjT4UAneUW1KkNSHjdKY2UH4QqvtgyuuGMuYWv782qq8YKsON7lzY-Lfa7EUdlDMvxPzbhmId2Jk_qwzaWf6u7UtMH6nMUSSRt0utH_nlQ2XxJONaq1dz10BEbyvSu7otZUp4ZkK1A2fZ-VFkBy-HdbRQ1wWPZTOohnN6HzD64k8QIG5wNIu8a0gnSX_oa2UfXKNAIyfNRca4wtw_RPX8T81IoCGA7Eo" class="h-16 md:h-28 lg:h-36 mb-4 md:mb-10 object-contain drop-shadow-xl brightness-0 invert">
+          <img alt="JC Organizadores Logo" src="assets/logo.png" class="h-10 sm:h-14 md:h-20 max-w-[180px] md:max-w-[260px] mb-3 md:mb-8 object-contain drop-shadow-lg rounded-2xl bg-white/95 p-2 md:p-3">
           <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold mb-2 md:mb-6 tracking-tight leading-tight">Acceso Exclusivo <br class="hidden md:block"/>para Productores</h1>
           <p class="hidden md:block text-lg lg:text-xl text-white/80 font-light leading-relaxed">
             Únete a la red de productores más innovadora y gestiona todas tus pólizas desde una única plataforma inteligente.
@@ -32,7 +32,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
         
         <div class="w-full max-w-sm pt-4 md:pt-0">
           <!-- Mobile Logo (Only visible on mobile) -->
-          <img alt="Logo" class="md:hidden h-20 mb-10 mx-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWmWtBTOG94ebZcQp0UsJ6-0V6LVgCiuVka12SaJiSnycaDjT4UAneUW1KkNSHjdKY2UH4QqvtgyuuGMuYWv782qq8YKsON7lzY-Lfa7EUdlDMvxPzbhmId2Jk_qwzaWf6u7UtMH6nMUSSRt0utH_nlQ2XxJONaq1dz10BEbyvSu7otZUp4ZkK1A2fZ-VFkBy-HdbRQ1wWPZTOohnN6HzD64k8QIG5wNIu8a0gnSX_oa2UfXKNAIyfNRca4wtw_RPX8T81IoCGA7Eo">
+          <img alt="Logo" class="md:hidden h-12 mb-6 mx-auto object-contain bg-white/95 p-2 rounded-xl drop-shadow" src="assets/logo.png">
 
           <!-- Back Button -->
           <button routerLink="/login" class="mb-8 flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer group w-fit">

@@ -13,8 +13,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
       <div class="w-full max-w-[440px] flex flex-col items-center relative">
         <!-- Brand Logo Header -->
         <div class="mb-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <img alt="JC Organizadores Logo" class="h-24 w-auto object-contain" 
-               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsQ8yQtRi4ntI09YZoOXO-5aPc3CkPiYjLj-8XBKbS9Iq9nXR9GqRv74FkVwgYeAR5uw7QYOADx-vPSgsbSOVCEEi3gh8aE5wGVQATKi_7me2TIRl7oHqI3KCpEZby-7N4HD9wjaJulhIX97ao9GDYz9wdSdM5j5zXmsNRTgj4v6cLyiqFofAJqqM37_OwRBM9c3tH2x7rntlDWwYmoJE3tA9j9aOSTcNkh1YBHQXOFDkI-7k4yKysiujUJnNB4qEYY3aQgWJkgKKO">
+          <img alt="JC Organizadores Logo" class="h-12 md:h-16 w-auto object-contain bg-white/95 p-2 rounded-xl drop-shadow mx-auto" 
+               src="assets/logo.png">
         </div>
 
         <!-- Content Card -->
