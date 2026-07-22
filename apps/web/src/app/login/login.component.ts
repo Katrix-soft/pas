@@ -71,7 +71,7 @@ import { AuthService } from '@broker/dashboard';
             <!-- Options -->
             <div class="flex items-center justify-between pt-2">
               <label class="flex items-center gap-2 cursor-pointer group">
-                <input type="checkbox" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary focus:ring-offset-0 transition-all cursor-pointer">
+                <input type="checkbox" formControlName="rememberMe" class="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary focus:ring-offset-0 transition-all cursor-pointer">
                 <span class="text-sm font-medium text-on-surface-variant group-hover:text-on-surface transition-colors select-none">Recordarme</span>
               </label>
               <a routerLink="/forgot-password" class="text-sm font-bold text-primary hover:text-primary-container transition-colors">
@@ -126,9 +126,14 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router
   ) {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+    }
+
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
+      rememberMe: [false]
     });
   }
 

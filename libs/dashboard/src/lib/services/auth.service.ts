@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap, delay, throwError, switchMap } from 'rxjs';
+import { Observable, of, delay, throwError, switchMap } from 'rxjs';
 
 export interface User {
   role: 'admin' | 'pas';
@@ -11,33 +11,52 @@ export interface User {
   providedIn: 'root'
 })
 export class AuthService {
-  private savedUser = localStorage.getItem('currentUser');
-  currentUser = signal<User | null>(this.savedUser ? JSON.parse(this.savedUser) : null);
+  private getInitialUser(): User | null {
+    try {
+      const local = localStorage.getItem('currentUser');
+      if (local) return JSON.parse(local);
+      const session = sessionStorage.getItem('currentUser');
+      if (session) return JSON.parse(session);
+    } catch (e) {
+      console.error('Error parsing stored user session:', e);
+    }
+    return null;
+  }
+
+  currentUser = signal<User | null>(this.getInitialUser());
   tenantLogo = signal<string | null>(localStorage.getItem('tenantLogo'));
 
   constructor(private http: HttpClient) {}
 
+  isLoggedIn(): boolean {
+    return this.currentUser() !== null;
+  }
+
   login(credentials: any): Observable<any> {
-    // Simulate network delay
     return of(null).pipe(
-      delay(1000),
+      delay(800),
       switchMap(() => {
-        const { email, password } = credentials;
+        const { email, password, rememberMe } = credentials;
         
-        // Mock validation logic
+        let user: User | null = null;
         if (email?.includes('admin') && password === 'admin123') {
-           const user: User = { role: 'admin', name: 'Administrador' };
-           this.currentUser.set(user);
-           localStorage.setItem('currentUser', JSON.stringify(user));
-           return of({ success: true });
+           user = { role: 'admin', name: 'Administrador' };
         } 
-        else if (!email?.includes('admin') && password === 'pas123') {
-           const user: User = { role: 'pas', name: 'Productor PAS' };
-           this.currentUser.set(user);
-           localStorage.setItem('currentUser', JSON.stringify(user));
-           return of({ success: true });
+        else if (password === 'pas123' || !email?.includes('admin')) {
+           user = { role: 'pas', name: 'Productor PAS' };
         } 
-        else {
+
+        if (user) {
+          this.currentUser.set(user);
+          if (rememberMe) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            sessionStorage.removeItem('currentUser');
+          } else {
+            sessionStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.removeItem('currentUser');
+          }
+          return of({ success: true, user });
+        } else {
            return throwError(() => new Error('Credenciales incorrectas'));
         }
       })
@@ -47,5 +66,6 @@ export class AuthService {
   logout(): void {
     this.currentUser.set(null);
     localStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUser');
   }
 }
