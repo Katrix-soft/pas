@@ -17,6 +17,10 @@ from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_db, engine, Base
+
 # ============================================================
 # Carga de variables de entorno
 # Una sola carga, con path explícito al .env del proyecto
@@ -37,6 +41,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
 # ============================================================
@@ -70,6 +80,17 @@ async def health_check():
         "environment": os.getenv("ENV", "development"),
         "sancor_client_id_loaded": masked_client_id
     }
+
+
+@app.get("/health/db", tags=["System"])
+async def health_db(db: AsyncSession = Depends(get_db)):
+    """Verifica la conexión asíncrona a la base de datos PostgreSQL"""
+    try:
+        res = await db.execute(text("SELECT current_database();"))
+        db_name = res.scalar()
+        return {"status": "connected", "database": db_name}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
 
 
 # ============================================================

@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - ENV=development
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/jcorg_db
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/pas
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - postgres
@@ -20,7 +20,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=jcorg_db
+      - POSTGRES_DB=pas
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     volumes:
