@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MercantilQuotationService } from '../../../quotations/src/lib/services/mercantil-quotation.service';
-import { MercantilVehiculo, MercantilCotizacionResponse } from '../../../quotations/src/lib/models/mercantil-quotation.model';
+import { MercantilVehiculo, MercantilCotizacionResponse, MercantilMarca } from '../../../quotations/src/lib/models/mercantil-quotation.model';
 
 @Component({
   selector: 'lib-asistente-ia',
@@ -62,8 +62,8 @@ import { MercantilVehiculo, MercantilCotizacionResponse } from '../../../quotati
               <div class="flex flex-col gap-1 w-full">
                 <div class="relative">
                   <select [(ngModel)]="selectedBrand" (change)="errors[2] = false" class="w-full appearance-none bg-transparent border text-on-surface rounded-xl px-4 py-3 pr-10 focus:outline-none focus:ring-1" [ngClass]="errors[2] ? 'border-error focus:ring-error' : 'border-outline-variant focus:border-primary focus:ring-primary'">
-                    <option value="" disabled selected>Marca del auto</option>
-                    <option *ngFor="let brand of brands" [value]="brand">{{brand}}</option>
+                    <option [ngValue]="null" disabled selected>Marca del auto</option>
+                    <option *ngFor="let brand of brands" [ngValue]="brand">{{brand.desc}}</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3" [ngClass]="errors[2] ? 'text-error' : 'text-on-surface-variant'">
                     <span class="material-symbols-outlined">expand_more</span>
@@ -280,7 +280,7 @@ export class AsistenteIaComponent implements OnInit, AfterViewInit {
   private quotationService = inject(MercantilQuotationService);
 
   years: number[] = [2026, ...Array.from({length: 27}, (_, i) => (2025 - i))];
-  brands: string[] = [];
+  brands: MercantilMarca[] = [];
   models: string[] = [];
   versions: MercantilVehiculo[] = [];
   
@@ -297,7 +297,7 @@ export class AsistenteIaComponent implements OnInit, AfterViewInit {
   errors: Record<number, boolean> = {};
 
   selectedYear: number | null = null;
-  selectedBrand = '';
+  selectedBrand: MercantilMarca | null = null;
   selectedModel = '';
   selectedVersionObj: MercantilVehiculo | null = null;
   selectedTracker = '';
@@ -317,7 +317,7 @@ export class AsistenteIaComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.loadingBrands = true;
     this.quotationService.getMarcas().subscribe({
-      next: (marcas: string[]) => {
+      next: (marcas: MercantilMarca[]) => {
         this.brands = marcas;
         this.loadingBrands = false;
       },
@@ -342,9 +342,9 @@ export class AsistenteIaComponent implements OnInit, AfterViewInit {
 
     // Lógicas al avanzar de paso
     if (step === 2 && this.selectedBrand && this.selectedYear) {
-      this.loadModels(this.selectedBrand, this.selectedYear);
-    } else if (step === 3 && this.selectedModel && this.selectedYear) {
-      this.loadVersions(this.selectedModel, this.selectedYear);
+      this.loadModels(this.selectedBrand.codigo, this.selectedYear);
+    } else if (step === 3 && this.selectedModel && this.selectedYear && this.selectedBrand) {
+      this.loadVersions(this.selectedBrand.codigo, this.selectedYear, this.selectedModel);
     } else if (step === 7) {
       this.executeQuotation();
     }
@@ -352,11 +352,11 @@ export class AsistenteIaComponent implements OnInit, AfterViewInit {
     this.scrollToBottom();
   }
 
-  private loadModels(marca: string, anio: number) {
+  private loadModels(marcaCodigo: number, anio: number) {
     this.loadingModels = true;
     this.models = [];
     this.selectedModel = '';
-    this.quotationService.getModelos(marca, anio).subscribe({
+    this.quotationService.getModelos(marcaCodigo, anio).subscribe({
       next: (modelos: string[]) => {
         this.models = modelos;
         this.loadingModels = false;
@@ -368,11 +368,11 @@ export class AsistenteIaComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private loadVersions(query: string, anio: number) {
+  private loadVersions(marcaCodigo: number, anio: number, modelo: string) {
     this.loadingVersions = true;
     this.versions = [];
     this.selectedVersionObj = null;
-    this.quotationService.getVersiones(query, anio).subscribe({
+    this.quotationService.getVersiones(marcaCodigo, anio, modelo).subscribe({
       next: (versiones: MercantilVehiculo[]) => {
         this.versions = versiones;
         this.loadingVersions = false;

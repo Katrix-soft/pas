@@ -33,7 +33,7 @@ export type Role = 'admin' | 'pas' | string;
 
             <!-- Admin Role: JC Organizadores Logo -->
             <ng-container *ngIf="role() === 'admin'">
-               <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWmWtBTOG94ebZcQp0UsJ6-0V6LVgCiuVka12SaJiSnycaDjT4UAneUW1KkNSHjdKY2UH4QqvtgyuuGMuYWv782qq8YKsON7lzY-Lfa7EUdlDMvxPzbhmId2Jk_qwzaWf6u7UtMH6nMUSSRt0utH_nlQ2XxJONaq1dz10BEbyvSu7otZUp4ZkK1A2fZ-VFkBy-HdbRQ1wWPZTOohnN6HzD64k8QIG5wNIu8a0gnSX_oa2UfXKNAIyfNRca4wtw_RPX8T81IoCGA7Eo" alt="JC Organizadores" class="h-20 w-auto max-w-[80%] object-contain mx-auto rounded">
+               <img src="assets/logo1.png" alt="JC Organizadores" class="h-20 w-auto max-w-[80%] object-contain mx-auto drop-shadow-md">
             </ng-container>
           </div>
           <button (click)="toggleSidebar()" class="p-2 rounded-full hover:bg-white/10 transition-colors flex-shrink-0 flex items-center justify-center text-white/70 hover:text-white z-10" 
@@ -102,13 +102,23 @@ export type Role = 'admin' | 'pas' | string;
             <span *ngIf="!isExpanded()" class="absolute top-2 right-2 w-3 h-3 bg-[#2563eb] rounded-full border-2 border-[#1c2e43]"></span>
           </a>
           
+          <a routerLink="/ticket/seguimiento" routerLinkActive="bg-[#2563eb] text-white" 
+             class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
+             [title]="!isExpanded() ? 'Tickets' : ''"
+             [class.justify-center]="!isExpanded()">
+            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">confirmation_number</span>
+            <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
+              Tickets
+            </span>
+          </a>
+          
           <a routerLink="/notificaciones" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
-             [title]="!isExpanded() ? 'Alertas' : ''"
+             [title]="!isExpanded() ? 'Configuraciones' : ''"
              [class.justify-center]="!isExpanded()">
-            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">notifications</span>
+            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">settings</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex justify-between items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
-              Alertas
+              Configuraciones
               <span class="w-2 h-2 rounded-full bg-error mr-2"></span>
             </span>
             <!-- Badge when collapsed -->

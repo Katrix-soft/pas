@@ -385,17 +385,18 @@ async def mercantil_obtener_marcas():
         client = get_mercantil_client()
         marcas = await client.obtener_marcas()
 
-        result = {
-            "datos": sorted(
-                list({
-                    m["desc"].strip()
-                    for m in marcas
-                    if m.get("codigo", 0) > 0
-                    and m.get("desc")
-                    and m["desc"] != "---------------"
-                })
-            )
-        }
+        valid_marcas = []
+        seen = set()
+        for m in marcas:
+            desc = m.get("desc", "").strip()
+            codigo = m.get("codigo", 0)
+            if codigo > 0 and desc and desc != "---------------" and desc not in seen:
+                seen.add(desc)
+                valid_marcas.append({"codigo": codigo, "desc": desc})
+        
+        valid_marcas.sort(key=lambda x: x["desc"])
+        result = {"datos": valid_marcas}
+        
         # Guardar en Redis por 24 horas (86400 segundos)
         await set_cache(cache_key, result, ttl_seconds=86400)
         return result
@@ -405,17 +406,35 @@ async def mercantil_obtener_marcas():
 
 
 @app.get("/api/v1/quotations/mercantil/modelos", tags=["Quotations - Mercantil"])
-async def mercantil_obtener_modelos(marca: str):
-    cache_key = f"mercantil:modelos:{marca.lower()}"
+async def mercantil_obtener_modelos(marca_codigo: int, anio: int):
+    cache_key = f"mercantil:modelos:{marca_codigo}:{anio}"
     cached = await get_cache(cache_key)
     if cached:
         return cached
 
     try:
         client = get_mercantil_client()
-        res = await client.obtener_modelos_por_marca(marca)
-        await set_cache(cache_key, res, ttl_seconds=43200)
-        return res
+        res = await client.obtener_modelos(marca_codigo, anio)
+        result = {"datos": res}
+        await set_cache(cache_key, result, ttl_seconds=43200)
+        return result
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.get("/api/v1/quotations/mercantil/vehiculos", tags=["Quotations - Mercantil"])
+async def mercantil_obtener_versiones(marca_codigo: int, anio: int, modelo: str):
+    cache_key = f"mercantil:versiones:{marca_codigo}:{anio}:{modelo.replace(' ', '_').lower()}"
+    cached = await get_cache(cache_key)
+    if cached:
+        return cached
+
+    try:
+        client = get_mercantil_client()
+        res = await client.obtener_versiones(marca_codigo, anio, modelo)
+        result = {"datos": res}
+        await set_cache(cache_key, result, ttl_seconds=43200)
+        return result
     except MercantilAndinaError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 

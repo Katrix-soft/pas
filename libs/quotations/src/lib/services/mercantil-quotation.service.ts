@@ -5,6 +5,8 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../shared/src/lib/environments/environment';
 import {
   MercantilMarcasResponse,
+  MercantilMarca,
+  MercantilModelosResponse,
   MercantilVehiculo,
   MercantilVehiculosResponse,
   MercantilCotizarAutoPayload,
@@ -25,7 +27,7 @@ export class MercantilQuotationService {
   // --------------------------------------------------------
 
   /** Obtiene la lista de marcas disponibles (strings ordenados) */
-  getMarcas(): Observable<string[]> {
+  getMarcas(): Observable<MercantilMarca[]> {
     return this.http
       .get<MercantilMarcasResponse>(`${this.baseUrl}/marcas`)
       .pipe(
@@ -42,26 +44,15 @@ export class MercantilQuotationService {
    * Obtiene los modelos disponibles para una marca y año.
    * Devuelve una lista de descripciones únicas de modelos.
    */
-  getModelos(marca: string, anio: number): Observable<string[]> {
+  getModelos(marcaCodigo: number, anio: number): Observable<string[]> {
     const params = new HttpParams()
-      .set('marca', marca)
+      .set('marca_codigo', marcaCodigo.toString())
       .set('anio', anio.toString());
 
     return this.http
-      .get<MercantilVehiculo[]>(`${this.baseUrl}/modelos`, { params })
+      .get<MercantilModelosResponse>(`${this.baseUrl}/modelos`, { params })
       .pipe(
-        map((vehiculos) => {
-          // Extraemos modelos únicos del campo desc
-          const modelos = new Set<string>();
-          vehiculos.forEach(v => {
-            const parts = v.desc?.split(' ');
-            if (parts && parts.length > 0) {
-              // Tomamos las primeras 2-3 palabras como modelo
-              modelos.add(parts.slice(0, 3).join(' ').trim());
-            }
-          });
-          return Array.from(modelos).sort();
-        }),
+        map(res => res.datos),
         catchError(this.handleError)
       );
   }
@@ -74,12 +65,11 @@ export class MercantilQuotationService {
    * Obtiene los vehículos (versiones) completos para búsqueda de texto + año.
    * Útil para popular el selector de "Versión".
    */
-  getVersiones(query: string, anio: number): Observable<MercantilVehiculo[]> {
+  getVersiones(marcaCodigo: number, anio: number, modelo: string): Observable<MercantilVehiculo[]> {
     const params = new HttpParams()
-      .set('q', query)
+      .set('marca_codigo', marcaCodigo.toString())
       .set('anio', anio.toString())
-      .set('tipo', 'AUTO')
-      .set('limit', '50');
+      .set('modelo', modelo);
 
     return this.http
       .get<MercantilVehiculosResponse>(`${this.baseUrl}/vehiculos`, { params })

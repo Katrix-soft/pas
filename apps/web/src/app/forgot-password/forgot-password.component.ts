@@ -13,8 +13,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
       <div class="w-full max-w-[440px] flex flex-col items-center relative">
         <!-- Brand Logo Header -->
         <div class="mb-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <img alt="JC Organizadores Logo" class="h-12 md:h-16 w-auto object-contain bg-white/95 p-2 rounded-xl drop-shadow mx-auto" 
-               src="assets/logo.png">
+          <img alt="JC Organizadores Logo" class="h-12 md:h-16 w-auto object-contain drop-shadow mx-auto" 
+               src="assets/logo1.png">
         </div>
 
         <!-- Content Card -->

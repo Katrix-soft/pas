@@ -11,7 +11,12 @@ export interface MercantilMarca {
 
 /** Respuesta del endpoint /marcas */
 export interface MercantilMarcasResponse {
-  datos: string[]; // Backend devuelve lista de nombres ordenados
+  datos: MercantilMarca[];
+}
+
+/** Respuesta del endpoint /modelos */
+export interface MercantilModelosResponse {
+  datos: string[];
 }
 
 /** Representa un vehículo (versión) devuelto por /vehiculos o /modelos */

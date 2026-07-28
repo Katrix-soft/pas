@@ -130,25 +130,18 @@ class MercantilAndinaClient:
         )
 
 
-    async def obtener_modelos_por_marca(
-        self,
-        marca,
-        anio=2020,
-        tipo="AUTO",
-        offset=1,
-        limit=100
-    ):
+    async def obtener_modelos(self, marca_codigo: int, anio: int):
 
         return await self._request(
             "GET",
-            "/vehiculos/v1",
-            params={
-                "q": marca.lower(),
-                "anio": anio,
-                "tipo": tipo,
-                "offset": offset,
-                "limit": limit,
-            },
+            f"/vehiculos/v1/marcas/{marca_codigo}/{anio}"
+        )
+
+    async def obtener_versiones(self, marca_codigo: int, anio: int, modelo: str):
+
+        return await self._request(
+            "GET",
+            f"/vehiculos/v1/marcas/{marca_codigo}/{anio}/{modelo}"
         )
     # ---------------------------------------------------
     # COTIZACION
