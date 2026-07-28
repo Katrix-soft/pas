@@ -5,6 +5,9 @@ import { Observable, of, delay, throwError, switchMap } from 'rxjs';
 export interface User {
   role: 'admin' | 'pas';
   name: string;
+  matricula?: string;
+  organizador?: string;
+  email?: string;
 }
 
 @Injectable({
@@ -14,13 +17,40 @@ export class AuthService {
   private getInitialUser(): User | null {
     try {
       const local = localStorage.getItem('currentUser');
-      if (local) return JSON.parse(local);
+      if (local) {
+        const u = JSON.parse(local);
+        if (!u.name || u.name === 'Productor PAS') {
+          u.name = 'Gonzalo Javier Paso';
+          u.matricula = '86992';
+          u.organizador = 'JCORG Broker de Seguros';
+          u.email = 'gpaso@jcorg.com.ar';
+          localStorage.setItem('currentUser', JSON.stringify(u));
+        }
+        return u;
+      }
       const session = sessionStorage.getItem('currentUser');
-      if (session) return JSON.parse(session);
+      if (session) {
+        const u = JSON.parse(session);
+        if (!u.name || u.name === 'Productor PAS') {
+          u.name = 'Gonzalo Javier Paso';
+          u.matricula = '86992';
+          u.organizador = 'JCORG Broker de Seguros';
+          u.email = 'gpaso@jcorg.com.ar';
+          sessionStorage.setItem('currentUser', JSON.stringify(u));
+        }
+        return u;
+      }
     } catch (e) {
       console.error('Error parsing stored user session:', e);
     }
-    return null;
+    // Default logged in producer
+    return {
+      role: 'pas',
+      name: 'Gonzalo Javier Paso',
+      matricula: '86992',
+      organizador: 'JCORG Broker de Seguros',
+      email: 'gpaso@jcorg.com.ar'
+    };
   }
 
   currentUser = signal<User | null>(this.getInitialUser());
@@ -40,10 +70,16 @@ export class AuthService {
         
         let user: User | null = null;
         if (email?.includes('admin') && password === 'admin123') {
-           user = { role: 'admin', name: 'Administrador' };
+           user = { role: 'admin', name: 'Administrador Operativo', organizador: 'JCORG Central' };
         } 
-        else if (password === 'pas123' || !email?.includes('admin')) {
-           user = { role: 'pas', name: 'Productor PAS' };
+        else {
+           user = {
+             role: 'pas',
+             name: 'Gonzalo Javier Paso',
+             matricula: '86992',
+             organizador: 'JCORG Broker de Seguros',
+             email: email || 'gpaso@jcorg.com.ar'
+           };
         } 
 
         if (user) {

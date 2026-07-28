@@ -4,4 +4,8 @@ node_modules
 **/__pycache__/
 dist
 scratch/
+.env
+*.env
+backend/.env
+
 

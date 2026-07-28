@@ -35,10 +35,10 @@ import { AuthService } from './services/auth.service';
             </div>
           </div>
           <div class="pt-14 pb-lg px-lg">
-            <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Carlos López</h2>
+            <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Gonzalo Javier Paso</h2>
             <p class="text-primary font-semibold flex items-center gap-xs">
               <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
-              Productor Asesor Senior
+              Productor Asesor de Seguros (Matrícula #86992)
             </p>
           </div>
         </section>
@@ -48,12 +48,12 @@ import { AuthService } from './services/auth.service';
           <h3 class="font-label-md text-label-md text-outline uppercase mb-md tracking-wider">Resumen de Rendimiento</h3>
           <div class="grid grid-cols-2 gap-md">
             <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
-              <p class="font-label-md text-label-md text-on-surface-variant">Años de Trayectoria</p>
-              <p class="font-metric-xl text-metric-xl text-primary mt-xs">12</p>
+              <p class="font-label-md text-label-md text-on-surface-variant">Premio Mensual Administrado</p>
+              <p class="font-metric-xl text-metric-xl text-primary mt-xs">$48.2M</p>
             </div>
             <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant border-l-4 border-l-secondary shadow-sm hover:shadow-md transition-shadow">
-              <p class="font-label-md text-label-md text-on-surface-variant">Pólizas Totales</p>
-              <p class="font-metric-xl text-metric-xl text-secondary mt-xs">450</p>
+              <p class="font-label-md text-label-md text-on-surface-variant">Pólizas en Cartera</p>
+              <p class="font-metric-xl text-metric-xl text-secondary mt-xs">198</p>
             </div>
           </div>
         </section>
@@ -61,27 +61,34 @@ import { AuthService } from './services/auth.service';
         <!-- Personal Data -->
         <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
           <div class="p-md border-b border-outline-variant bg-surface-container-low">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface">Datos Personales</h3>
+            <h3 class="font-headline-sm text-headline-sm text-on-surface">Datos Profesionales del PAS</h3>
           </div>
           <div class="divide-y divide-outline-variant">
             <div class="p-md flex justify-between items-center hover:bg-surface-container-lowest/50 transition-colors">
               <div>
-                <p class="font-label-md text-label-md text-outline">ID DE AGENTE</p>
-                <p class="font-body-md text-body-md font-semibold text-on-surface">28491</p>
+                <p class="font-label-md text-label-md text-outline">MATRÍCULA SSN / REGISTRO</p>
+                <p class="font-body-md text-body-md font-semibold text-on-surface">PAS #86992 (Mercantil Andina)</p>
               </div>
               <span class="material-symbols-outlined text-outline">badge</span>
             </div>
             <div class="p-md flex justify-between items-center hover:bg-surface-container-lowest/50 transition-colors">
               <div>
+                <p class="font-label-md text-label-md text-outline">ORGANIZADOR / BROKER</p>
+                <p class="font-body-md text-body-md font-semibold text-on-surface">JCORG Broker de Seguros / Los Cerros Directo</p>
+              </div>
+              <span class="material-symbols-outlined text-outline">domain</span>
+            </div>
+            <div class="p-md flex justify-between items-center hover:bg-surface-container-lowest/50 transition-colors">
+              <div>
                 <p class="font-label-md text-label-md text-outline">EMAIL</p>
-                <p class="font-body-md text-body-md font-semibold text-on-surface">carlos.lopez&#64;jcorg.com.ar</p>
+                <p class="font-body-md text-body-md font-semibold text-on-surface">gpaso&#64;jcorg.com.ar</p>
               </div>
               <span class="material-symbols-outlined text-outline">mail</span>
             </div>
             <div class="p-md flex justify-between items-center hover:bg-surface-container-lowest/50 transition-colors">
               <div>
-                <p class="font-label-md text-label-md text-outline">TELÉFONO</p>
-                <p class="font-body-md text-body-md font-semibold text-on-surface">+54 11 4567-8901</p>
+                <p class="font-label-md text-label-md text-outline">TELÉFONO ORGANIZACIÓN</p>
+                <p class="font-body-md text-body-md font-semibold text-on-surface">0261 423-8800</p>
               </div>
               <span class="material-symbols-outlined text-outline">call</span>
             </div>

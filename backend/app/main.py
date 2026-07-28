@@ -4,6 +4,7 @@ import ssl
 import asyncio
 import json
 import time
+import re
 import urllib.request
 import urllib.error
 from email.mime.text import MIMEText
@@ -415,7 +416,16 @@ async def mercantil_obtener_modelos(marca_codigo: int, anio: int):
     try:
         client = get_mercantil_client()
         res = await client.obtener_modelos(marca_codigo, anio)
-        result = {"datos": res}
+        
+        clean_models = []
+        if isinstance(res, list):
+            for item in res:
+                if isinstance(item, str):
+                    cleaned = re.sub(r'\s+', ' ', item).strip()
+                    if cleaned and cleaned not in clean_models:
+                        clean_models.append(cleaned)
+
+        result = {"datos": clean_models}
         await set_cache(cache_key, result, ttl_seconds=43200)
         return result
     except MercantilAndinaError as e:
@@ -439,6 +449,16 @@ async def mercantil_obtener_versiones(marca_codigo: int, anio: int, modelo: str)
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
+@app.post("/api/v1/quotations/mercantil/login", tags=["Quotations - Mercantil"])
+async def mercantil_login():
+    """Autentica contra la API de Mercantil Andina (/credenciales/v2) y retorna el token"""
+    try:
+        client = get_mercantil_client()
+        return await client.login()
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
 @app.post("/api/v1/quotations/mercantil/cotizar-auto", tags=["Quotations - Mercantil"])
 async def mercantil_cotizar_auto(payload: dict):
     try:
@@ -453,5 +473,87 @@ async def mercantil_cotizar_moto(payload: dict):
     try:
         client = get_mercantil_client()
         return await client.cotizar_moto(payload)
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.post("/api/v1/quotations/mercantil/cotizar", tags=["Quotations - Mercantil"])
+async def mercantil_cotizar_general(payload: dict):
+    """Endpoint unificado de cotización (Auto v2 o Ramas Varias según payload)"""
+    try:
+        client = get_mercantil_client()
+        if "items" in payload:
+            return await client.cotizar_ramas_varias(payload)
+        return await client.cotizar_auto(payload)
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.get("/api/v1/quotations/mercantil/localidades", tags=["Quotations - Mercantil"])
+async def mercantil_obtener_localidades():
+    """Obtiene la lista de localidades habilitadas para cotizar en Mercantil Andina"""
+    return {
+        "datos": [
+            {"cp": 5522, "ciudad": 91002, "desc": "5522 - COQUIMBITO / GUAYMALLÉN (MENDOZA)"},
+            {"cp": 5539, "ciudad": 91001, "desc": "5539 - LAS HERAS (MENDOZA)"},
+            {"cp": 5500, "ciudad": 91000, "desc": "5500 - MENDOZA CAPITAL"},
+            {"cp": 1425, "ciudad": 1001, "desc": "1425 - PALERMO (CABA)"},
+            {"cp": 1000, "ciudad": 1000, "desc": "1000 - CABA CENTRO"},
+            {"cp": 1862, "ciudad": 20206, "desc": "1862 - GUERNICA (BUENOS AIRES)"},
+            {"cp": 7600, "ciudad": 14703, "desc": "7600 - MAR DEL PLATA (BUENOS AIRES)"},
+            {"cp": 2000, "ciudad": 3200, "desc": "2000 - ROSARIO (SANTA FE)"},
+            {"cp": 5000, "ciudad": 4000, "desc": "5000 - CÓRDOBA CAPITAL"},
+            {"cp": 8370, "ciudad": 220903, "desc": "8370 - SAN MARTÍN DE LOS ANDES (NEUQUÉN)"},
+            {"cp": 5603, "ciudad": 91425, "desc": "5603 - RAMA CAÍDA / SAN RAFAEL (MENDOZA)"}
+        ]
+    }
+
+
+@app.get("/api/v1/quotations/mercantil/productor", tags=["Quotations - Mercantil"])
+async def mercantil_perfil_productor():
+    """Retorna el perfil oficial y cartera del Productor Gonzalo Javier Paso (Matrícula #86992)"""
+    try:
+        client = get_mercantil_client()
+        return await client.obtener_perfil_productor()
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.get("/api/v1/quotations/mercantil/clientes", tags=["Quotations - Mercantil"])
+async def mercantil_buscar_clientes(q: Optional[str] = None):
+    """Búsqueda de clientes por DNI/CUIL en Mercantil Andina"""
+    try:
+        client = get_mercantil_client()
+        return await client.buscar_cliente(q or "")
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.post("/api/v1/quotations/mercantil/clientes", tags=["Quotations - Mercantil"])
+async def mercantil_crear_cliente(payload: dict):
+    """Alta de cliente en la API de Mercantil Andina"""
+    try:
+        client = get_mercantil_client()
+        return await client.crear_cliente(payload)
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.get("/api/v1/quotations/mercantil/suscripciones/{suscripcion_id}", tags=["Quotations - Mercantil"])
+async def mercantil_obtener_suscripcion(suscripcion_id: int):
+    """Consulta de suscripción / propuesta de póliza por ID"""
+    try:
+        client = get_mercantil_client()
+        return await client.obtener_suscripcion(suscripcion_id)
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.post("/api/v1/quotations/mercantil/suscripciones", tags=["Quotations - Mercantil"])
+async def mercantil_crear_suscripcion(payload: dict):
+    """Emisión / Creación de suscripción de póliza de auto"""
+    try:
+        client = get_mercantil_client()
+        return await client.crear_suscripcion(payload)
     except MercantilAndinaError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)

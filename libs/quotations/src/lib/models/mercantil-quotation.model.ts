@@ -38,7 +38,7 @@ export interface MercantilVehiculosResponse {
 /** Payload para cotizar un auto en Mercantil Andina */
 export interface MercantilCotizarAutoPayload {
   anio: number;
-  codigoVehiculo: string;   // código InfoAuto
+  codigoVehiculo: string | number;   // código InfoAuto
   tieneGNC: boolean;
   tieneRastreador: boolean;
   prestadorRastreador?: string;

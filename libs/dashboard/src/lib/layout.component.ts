@@ -44,16 +44,18 @@ export type Role = 'admin' | 'pas' | string;
         </div>
 
         <!-- Profile Area -->
-        <div class="px-6 pb-6 pt-2 flex flex-col items-start overflow-hidden transition-all duration-300" [class.items-center]="!isExpanded()">
+        <div class="px-6 pb-4 pt-2 flex flex-col items-start overflow-hidden transition-all duration-300" [class.items-center]="!isExpanded()">
           <div class="flex flex-col whitespace-nowrap transition-all duration-200" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
-            <span class="text-xl font-semibold text-[#10b981]">{{ role() === 'admin' ? 'Agente Profesional' : 'Agente Profesional' }}</span>
-            <span class="text-base text-white/80 mt-1">Seguros Globales</span>
-            <span class="text-sm text-white/50 mt-1 font-medium">ID: 28491</span>
+            <span class="text-base font-bold text-[#10b981]">{{ userFullName() }}</span>
+            <span class="text-xs text-white/90 mt-0.5 font-medium flex items-center gap-1">
+              <span class="bg-indigo-500/30 text-indigo-200 px-2 py-0.5 rounded text-[10px] uppercase font-bold border border-indigo-400/30">PAS #{{ userMatricula() }}</span>
+            </span>
+            <span class="text-xs text-white/60 mt-1 font-medium">{{ userOrganizador() }}</span>
           </div>
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex flex-col gap-2 px-3 mt-2 flex-1">
+        <nav class="flex flex-col gap-2 px-3 mt-2 flex-1 overflow-y-auto">
           
           <a routerLink="/dashboard" routerLinkActive="bg-[#2563eb] text-white" [routerLinkActiveOptions]="{exact: true}" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
@@ -61,6 +63,17 @@ export type Role = 'admin' | 'pas' | string;
              [class.justify-center]="!isExpanded()">
             <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">grid_view</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">Dashboard</span>
+          </a>
+
+          <a routerLink="/asistente" routerLinkActive="bg-[#2563eb] text-white" 
+             class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium text-emerald-400"
+             [title]="!isExpanded() ? 'Multicotizador IA' : ''"
+             [class.justify-center]="!isExpanded()">
+            <span class="material-symbols-outlined text-[24px] flex-shrink-0 text-indigo-400" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+            <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex justify-between items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
+              Multicotizador IA
+              <span class="bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase">Mercantil</span>
+            </span>
           </a>
           
           <a routerLink="/cobranzas" routerLinkActive="bg-[#2563eb] text-white" 
@@ -87,13 +100,13 @@ export type Role = 'admin' | 'pas' | string;
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">Siniestros</span>
           </a>
           
-          <div class="w-full h-[1px] bg-white/10 my-4"></div>
+          <div class="w-full h-[1px] bg-white/10 my-2"></div>
           
-          <a *ngIf="role() === 'admin'" routerLink="/ticketera/kanban" routerLinkActive="bg-[#2563eb] text-white" 
+          <a routerLink="/ticket/seguimiento" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
-             [title]="!isExpanded() ? 'Mesa Operativa' : ''"
+             [title]="!isExpanded() ? 'Mesa Operativa & Tickets' : ''"
              [class.justify-center]="!isExpanded()">
-            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">view_kanban</span>
+            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">confirmation_number</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex justify-between items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
                Mesa Operativa
                <span class="bg-[#2563eb] text-white text-[12px] font-bold w-6 h-6 rounded-full flex items-center justify-center">4</span>
@@ -102,16 +115,16 @@ export type Role = 'admin' | 'pas' | string;
             <span *ngIf="!isExpanded()" class="absolute top-2 right-2 w-3 h-3 bg-[#2563eb] rounded-full border-2 border-[#1c2e43]"></span>
           </a>
           
-          <a routerLink="/ticket/seguimiento" routerLinkActive="bg-[#2563eb] text-white" 
+          <a routerLink="/perfil" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
-             [title]="!isExpanded() ? 'Tickets' : ''"
+             [title]="!isExpanded() ? 'Mi Perfil' : ''"
              [class.justify-center]="!isExpanded()">
-            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">confirmation_number</span>
+            <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">person</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
-              Tickets
+              Mi Perfil
             </span>
           </a>
-          
+
           <a routerLink="/notificaciones" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
              [title]="!isExpanded() ? 'Configuraciones' : ''"
@@ -177,7 +190,13 @@ export class LayoutComponent {
   router = inject(Router);
 
   role = computed<Role>(() => this.authService.currentUser()?.role || 'admin');
-  userName = computed<string>(() => this.authService.currentUser()?.name || '');
+  userFullName = computed(() => {
+    const user = this.authService.currentUser();
+    return (!user?.name || user.name === 'Productor PAS') ? 'Gonzalo Javier Paso' : user.name;
+  });
+  userMatricula = computed(() => this.authService.currentUser()?.matricula || '86992');
+  userOrganizador = computed(() => this.authService.currentUser()?.organizador || 'JCORG Broker de Seguros');
+  userName = computed<string>(() => this.userFullName().split(' ')[0]);
   
   constructor() {
   }

@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'lib-seguimiento-detalle',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="font-body-md text-on-background min-h-screen bg-background pb-24 md:pb-0">
       <main class="max-w-7xl mx-auto px-container-margin pb-24 pt-sm">

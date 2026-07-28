@@ -34,19 +34,19 @@ import { RouterLink } from '@angular/router';
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant card-accent-blue shadow-sm">
             <span class="text-label-md font-label-md text-outline uppercase mb-1 block">Nro. de Póliza</span>
-            <p class="font-headline-sm text-headline-sm text-primary mb-4">#AZ-998234-2024</p>
+            <p class="font-headline-sm text-headline-sm text-primary mb-4">#594387129</p>
             <span class="text-label-md font-label-md text-outline uppercase mb-1 block">Compañía</span>
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-secondary">verified</span>
-              <p class="font-body-lg text-body-lg font-bold">Allianz</p>
+              <p class="font-body-lg text-body-lg font-bold">Mercantil Andina</p>
             </div>
           </div>
           <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant card-accent-green shadow-sm">
             <span class="text-label-md font-label-md text-outline uppercase mb-1 block">Cliente</span>
-            <p class="font-body-lg text-body-lg font-bold text-on-surface mb-4">Roberto Gomez Sanchez</p>
-            <span class="text-label-md font-label-md text-outline uppercase mb-1 block">Ramo</span>
-            <div class="inline-flex items-center px-3 py-1 bg-surface-container rounded-full text-on-surface-variant font-label-md text-label-md">
-              Seguro de Hogar Premium
+            <p class="font-body-lg text-body-lg font-bold text-on-surface mb-4">Schaffer Augusto Pablo</p>
+            <span class="text-label-md font-label-md text-outline uppercase mb-1 block">Ramo & Vehículo</span>
+            <div class="inline-flex items-center px-3 py-1 bg-surface-container rounded-full text-on-surface-variant font-label-md text-label-md font-bold">
+              Automotor • CHEVROLET SPIN 1.8 LT
             </div>
           </div>
         </div>
@@ -56,18 +56,18 @@ import { RouterLink } from '@angular/router';
           <button (click)="descargarPoliza()" [disabled]="isDownloading()" class="w-full bg-primary text-on-primary py-4 rounded-lg font-headline-sm flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-all hover:brightness-110 cursor-pointer disabled:opacity-70 disabled:cursor-wait">
             @if(isDownloading()) {
               <span class="material-symbols-outlined animate-spin">sync</span>
-              Preparando Archivo...
+              Preparando Póliza Oficial Mercantil...
             } @else if(isDownloaded()) {
               <span class="material-symbols-outlined">check</span>
-              ¡Descarga Lista!
+              ¡Póliza Descargada!
             } @else {
               <span class="material-symbols-outlined">download</span>
-              Descargar Póliza (PDF)
+              Descargar Póliza Digital (PDF)
             }
           </button>
-          <button class="w-full bg-[#25D366] text-white py-4 rounded-lg font-headline-sm flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-all hover:brightness-110 cursor-pointer">
+          <button (click)="compartirWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-4 rounded-lg font-headline-sm flex items-center justify-center gap-2 shadow-md active:scale-[0.98] transition-all hover:brightness-110 cursor-pointer">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">share</span>
-            Compartir por WhatsApp
+            Enviar Póliza y Link de Pago por WhatsApp
           </button>
         </section>
 
@@ -84,7 +84,7 @@ import { RouterLink } from '@angular/router';
         <!-- Micro-interaction Visual Feedback -->
         <div class="mt-12 p-4 bg-surface-container rounded-lg border border-outline-variant flex items-start gap-3">
           <span class="material-symbols-outlined text-primary">info</span>
-          <p class="text-body-sm text-on-surface-variant">La copia digital se ha enviado automáticamente al correo registrado del cliente: <span class="font-bold">roberto.gomez&#64;email.com</span></p>
+          <p class="text-body-sm text-on-surface-variant">La copia digital se ha enviado automáticamente al correo registrado del cliente y se encuentra registrada a nombre del Productor <span class="font-bold">Gonzalo Javier Paso (#86992)</span>.</p>
         </div>
       </main>
 
@@ -110,15 +110,20 @@ export class PolizaEmitidaComponent {
   descargarPoliza() {
     this.isDownloading.set(true);
     
-    // Simulamos el tiempo de preparacion del archivo
     setTimeout(() => {
       this.isDownloading.set(false);
       this.isDownloaded.set(true);
       
-      // Reseteamos el boton despues de unos segundos
       setTimeout(() => {
         this.isDownloaded.set(false);
       }, 2000);
     }, 1500);
+  }
+
+  compartirWhatsApp() {
+    const linkPago = `https://pagos.mercantilandina.com.ar/cupon?poliza=594387129&cuota=1`;
+    const msg = `Hola Schaffer Augusto Pablo! 👋 Te saluda Gonzalo Javier Paso (PAS #86992 de Mercantil Andina / JCORG Broker).\n\n¡Tu póliza N° 594387129 (CHEVROLET SPIN 1.8 LT) ha sido emitida con éxito! 🎉\n\nPodés abonar la primera cuota ingresando directamente en el link oficial de Mercantil Andina:\n${linkPago}\n\n¡Gracias por confiar en nosotros!`;
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   }
 }

@@ -12,9 +12,10 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
     <main class="flex-grow flex items-center justify-center w-full">
       <div class="w-full max-w-[440px] flex flex-col items-center relative">
         <!-- Brand Logo Header -->
-        <div class="mb-xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <img alt="JC Organizadores Logo" class="h-12 md:h-16 w-auto object-contain drop-shadow mx-auto" 
-               src="assets/logo1.png">
+        <div class="mb-xl animate-in fade-in slide-in-from-bottom-4 duration-700 text-center">
+          <div class="inline-block bg-[#0a0f24] px-5 py-3 rounded-2xl shadow-lg border border-white/10">
+            <img alt="JC Organizadores Logo" class="h-10 md:h-14 w-auto object-contain mx-auto" src="assets/logo.png">
+          </div>
         </div>
 
         <!-- Content Card -->

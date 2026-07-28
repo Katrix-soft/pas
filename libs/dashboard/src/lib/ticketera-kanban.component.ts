@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 
 interface KanbanTicket {
   id: string;
@@ -17,7 +16,7 @@ interface KanbanTicket {
 @Component({
   selector: 'lib-ticketera-kanban',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <div class="bg-background text-on-background font-body-md min-h-screen pb-24">
       <!-- Main Content Canvas -->

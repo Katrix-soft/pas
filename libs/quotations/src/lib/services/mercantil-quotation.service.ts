@@ -84,13 +84,82 @@ export class MercantilQuotationService {
   }
 
   // --------------------------------------------------------
-  // Cotización de Auto
+  // Localidades
   // --------------------------------------------------------
 
-  /** Envía los datos del chat al endpoint de cotización de Mercantil Andina */
+  /** Obtiene las localidades disponibles */
+  getLocalidades(): Observable<any[]> {
+    return this.http
+      .get<{ datos: any[] }>(`${this.baseUrl}/localidades`)
+      .pipe(
+        map(res => res.datos),
+        catchError(this.handleError)
+      );
+  }
+
+  // --------------------------------------------------------
+  // Perfil Productor
+  // --------------------------------------------------------
+
+  /** Obtiene la información del Productor Habilitado y su cartera */
+  getPerfilProductor(): Observable<any> {
+    return this.http
+      .get<any>(`${this.baseUrl}/productor`)
+      .pipe(catchError(this.handleError));
+  }
+
+  // --------------------------------------------------------
+  // Cotizaciones (Auto, Moto, General)
+  // --------------------------------------------------------
+
+  /** Envía los datos del chat al endpoint de cotización de Auto Mercantil */
   cotizarAuto(payload: MercantilCotizarAutoPayload): Observable<MercantilCotizacionResponse> {
     return this.http
       .post<MercantilCotizacionResponse>(`${this.baseUrl}/cotizar-auto`, payload)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Cotización de Motos V2 */
+  cotizarMoto(payload: any): Observable<MercantilCotizacionResponse> {
+    return this.http
+      .post<MercantilCotizacionResponse>(`${this.baseUrl}/cotizar-moto`, payload)
+      .pipe(catchError(this.handleError));
+  }
+
+  // --------------------------------------------------------
+  // Clientes
+  // --------------------------------------------------------
+
+  /** Búsqueda de clientes por DNI/CUIL */
+  buscarClientes(query: string = ''): Observable<any> {
+    const params = new HttpParams().set('q', query);
+    return this.http
+      .get<any>(`${this.baseUrl}/clientes`, { params })
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Alta de cliente */
+  crearCliente(payload: any): Observable<any> {
+    return this.http
+      .post<any>(`${this.baseUrl}/clientes`, payload)
+      .pipe(catchError(this.handleError));
+  }
+
+  // --------------------------------------------------------
+  // Suscripciones / Pólizas
+  // --------------------------------------------------------
+
+  /** Consulta propuesta de póliza */
+  obtenerSuscripcion(id: number): Observable<any> {
+    return this.http
+      .get<any>(`${this.baseUrl}/suscripciones/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  /** Emisión de póliza */
+  crearSuscripcion(payload: any): Observable<any> {
+    return this.http
+      .post<any>(`${this.baseUrl}/suscripciones`, payload)
       .pipe(catchError(this.handleError));
   }
 
