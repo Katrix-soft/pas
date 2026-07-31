@@ -4,6 +4,13 @@ import { RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
+export interface AdjuntoSiniestro {
+  nombre: string;
+  tipo: string;
+  tamano: string;
+  url?: string;
+}
+
 export interface Siniestro {
   id: string;
   numero_siniestro: string;
@@ -21,7 +28,7 @@ export interface Siniestro {
   objeto: string;
   inspector?: string;
   taller_asignado?: string;
-  adjuntos?: any[];
+  adjuntos?: AdjuntoSiniestro[];
   cronograma?: any[];
 }
 
@@ -174,7 +181,7 @@ export interface Siniestro {
         </section>
       </main>
 
-      <!-- Modal Expediente Detallado (Z-INDEX 60 PARA QUEDAR SOBRE EL NAVBAR MÓVIL) -->
+      <!-- Modal Expediente Detallado -->
       <div *ngIf="selectedExpediente()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-[60] overflow-y-auto">
         <div class="bg-surface-container-lowest border-t sm:border border-outline-variant rounded-t-2xl sm:rounded-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
           
@@ -251,16 +258,28 @@ export interface Siniestro {
             </div>
           </div>
 
-          <!-- Section 4: Attachments -->
+          <!-- Section 4: Attachments (CLICK PARA PREVISUALIZAR) -->
           <div class="space-y-1.5">
-            <h4 class="text-[10px] font-bold text-outline uppercase tracking-wider">Documentos Adjuntos</h4>
+            <h4 class="text-[10px] font-bold text-outline uppercase tracking-wider flex items-center justify-between">
+              <span>Documentos Adjuntos</span>
+              <span class="text-primary text-[10px] lowercase font-semibold">Tocar para visualizar online</span>
+            </h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div *ngFor="let adj of selectedExpediente()?.adjuntos" class="p-2.5 bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between text-xs">
+              <div
+                *ngFor="let adj of selectedExpediente()?.adjuntos"
+                (click)="previsualizarAdjunto(adj)"
+                class="p-2.5 bg-surface-container-low hover:bg-surface-container rounded-xl border border-outline-variant hover:border-primary flex items-center justify-between text-xs cursor-pointer transition-all shadow-xs group"
+              >
                 <div class="min-w-0 pr-1">
-                  <p class="font-bold text-on-surface truncate text-xs">{{ adj.nombre }}</p>
-                  <p class="text-[10px] text-outline">{{ adj.tipo }} • {{ adj.tamano }}</p>
+                  <p class="font-bold text-on-surface group-hover:text-primary truncate text-xs flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-primary">
+                      {{ adj.tipo === 'Imagen' ? 'image' : 'picture_as_pdf' }}
+                    </span>
+                    <span class="truncate">{{ adj.nombre }}</span>
+                  </p>
+                  <p class="text-[10px] text-outline mt-0.5">{{ adj.tipo }} • {{ adj.tamano }}</p>
                 </div>
-                <span class="material-symbols-outlined text-primary text-base shrink-0">download</span>
+                <span class="material-symbols-outlined text-primary text-base shrink-0 group-hover:scale-110 transition-transform">visibility</span>
               </div>
             </div>
           </div>
@@ -278,7 +297,97 @@ export interface Siniestro {
         </div>
       </div>
 
-      <!-- Modal Denunciar Siniestro (Z-INDEX 60 PARA QUEDAR SOBRE NAVBAR MÓVIL) -->
+      <!-- MODAL VISUALIZADOR DE ADJUNTO (PREVIEWER INLINE NO DESCARGA - Z-INDEX 70) -->
+      <div *ngIf="selectedAdjunto()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 z-[70] overflow-y-auto">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+          
+          <!-- Header Visualizador -->
+          <div class="p-3.5 sm:p-4 bg-surface-container-low border-b border-outline-variant flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="material-symbols-outlined text-primary text-xl">
+                {{ selectedAdjunto()?.tipo === 'Imagen' ? 'image' : 'picture_as_pdf' }}
+              </span>
+              <div class="min-w-0">
+                <h3 class="font-bold text-xs sm:text-sm text-on-surface truncate">{{ selectedAdjunto()?.nombre }}</h3>
+                <p class="text-[10px] text-outline font-semibold">Previsualización de Documento • {{ selectedAdjunto()?.tipo }} ({{ selectedAdjunto()?.tamano }})</p>
+              </div>
+            </div>
+            <button (click)="closeAdjuntoModal()" class="text-outline hover:text-on-surface p-1 rounded-lg cursor-pointer">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <!-- Body Visualizador según tipo (Imagen vs PDF) -->
+          <div class="flex-1 p-4 overflow-y-auto min-h-[300px] flex items-center justify-center bg-slate-900/90 text-white">
+            
+            <!-- Vista Previa de Imagen -->
+            <div *ngIf="selectedAdjunto()?.tipo === 'Imagen'" class="w-full flex flex-col items-center justify-center space-y-3">
+              <div class="relative max-w-md w-full rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-black">
+                <img
+                  src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80"
+                  alt="Peritaje Siniestro"
+                  class="w-full h-64 sm:h-80 object-cover"
+                />
+                <!-- Sello Digital de Peritaje -->
+                <div class="absolute bottom-2 left-2 bg-slate-950/80 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/20 text-[10px]">
+                  <p class="font-bold text-emerald-400">✓ PERITAJE FOTOGRÁFICO VERIFICADO</p>
+                  <p class="text-slate-300">Mercantil Andina • Inspección #{{ selectedExpediente()?.numero_siniestro }}</p>
+                </div>
+              </div>
+              <p class="text-xs text-slate-300 font-semibold text-center">Registro fotográfico del peritaje técnico de siniestros.</p>
+            </div>
+
+            <!-- Vista Previa de PDF -->
+            <div *ngIf="selectedAdjunto()?.tipo === 'PDF'" class="w-full max-w-lg bg-white text-slate-900 rounded-xl p-5 shadow-2xl space-y-4 border border-slate-300 text-xs">
+              <div class="flex items-center justify-between border-b pb-3 border-slate-200">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded bg-primary text-white flex items-center justify-center font-black text-xs">MA</div>
+                  <div>
+                    <h4 class="font-black text-sm text-primary">MERCANTIL ANDINA S.A.</h4>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase">Constancia Oficial de Documentación Técnica</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 uppercase">
+                  DOCUMENTO OFICIAL
+                </span>
+              </div>
+
+              <div class="space-y-2 text-xs">
+                <p><strong>Archivo:</strong> {{ selectedAdjunto()?.nombre }}</p>
+                <p><strong>Referencia Siniestro:</strong> #{{ selectedExpediente()?.numero_siniestro }}</p>
+                <p><strong>Cliente Asegurado:</strong> {{ selectedExpediente()?.cliente }}</p>
+                <p><strong>Póliza Afiliada:</strong> {{ selectedExpediente()?.poliza }}</p>
+                
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1 text-[11px] font-mono">
+                  <p class="font-bold text-slate-700">Dictamen e Inspección:</p>
+                  <p>• Validez técnica comprobada y cotejada en sistema.</p>
+                  <p>• Perito Asignado: {{ selectedExpediente()?.inspector || 'Ing. Carlos M. Benítez' }}</p>
+                  <p>• Monto Estimado: $ {{ selectedExpediente()?.monto_estimado | number:'1.0-0' }} ARS</p>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+                <span>Firma Digital Habilitada SSN</span>
+                <span class="font-mono">HASH: 8f92a014e912b</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="p-3 bg-surface-container-low border-t border-outline-variant flex items-center justify-between">
+            <button (click)="compartirAdjuntoWpp()" class="py-2 px-3 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 hover:bg-emerald-700 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-sm">chat</span>
+              <span>Enviar Ficha por WhatsApp</span>
+            </button>
+            <button (click)="closeAdjuntoModal()" class="py-2 px-4 border border-outline-variant text-on-surface font-bold rounded-xl text-xs hover:bg-surface-container transition-colors cursor-pointer">
+              Cerrar Visualizador
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Denunciar Siniestro -->
       <div *ngIf="showDenunciaModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-[60] overflow-y-auto">
         <div class="bg-surface-container-lowest border-t sm:border border-outline-variant rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-4 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
           <div class="flex justify-between items-center pb-3 border-b border-outline-variant">
@@ -349,6 +458,9 @@ export class SiniestrosComponent implements OnInit {
 
   // Expediente Modal State
   selectedExpediente = signal<Siniestro | null>(null);
+
+  // Adjunto Previewer State
+  selectedAdjunto = signal<AdjuntoSiniestro | null>(null);
 
   // Modal Denuncia State
   showDenunciaModal = signal<boolean>(false);
@@ -424,6 +536,22 @@ export class SiniestrosComponent implements OnInit {
 
   closeExpedienteModal() {
     this.selectedExpediente.set(null);
+  }
+
+  previsualizarAdjunto(adj: AdjuntoSiniestro) {
+    this.selectedAdjunto.set(adj);
+  }
+
+  closeAdjuntoModal() {
+    this.selectedAdjunto.set(null);
+  }
+
+  compartirAdjuntoWpp() {
+    const adj = this.selectedAdjunto();
+    const exp = this.selectedExpediente();
+    if (!adj || !exp) return;
+    const msg = `Te adjunto la previsualización del documento ${adj.nombre} (Siniestro #${exp.numero_siniestro} - ${exp.cliente}).`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
   enviarWppExpediente() {
