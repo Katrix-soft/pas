@@ -16,23 +16,31 @@ export const isPdfModalOpen = signal(false);
       
       <!-- Unified Mobile Bottom Nav -->
       @if (!authService.isModalActive()) {
-        <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-2 py-2.5 bg-[#1c2e43] border-t border-white/10 z-50 pb-safe shadow-2xl">
-          <a routerLink="/dashboard" routerLinkActive="text-[#10b981]" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
-            <span class="material-symbols-outlined text-[22px]">grid_view</span>
-            <span class="text-[10px] mt-0.5 font-bold">Panel</span>
+        <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-1 py-2 bg-[#1c2e43] border-t border-white/10 z-50 pb-safe shadow-2xl">
+          <a routerLink="/dashboard" routerLinkActive="text-[#10b981]" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+            <span class="material-symbols-outlined text-[20px]">grid_view</span>
+            <span class="text-[9px] mt-0.5 font-bold">Panel</span>
           </a>
-          <a routerLink="/cobranzas" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
-            <span class="material-symbols-outlined text-[22px]">payments</span>
-            <span class="text-[10px] mt-0.5 font-bold">Cobros</span>
+          <a routerLink="/siniestros" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+            <span class="material-symbols-outlined text-[20px]">report_problem</span>
+            <span class="text-[9px] mt-0.5 font-bold">Siniestros</span>
           </a>
-          <a routerLink="/clientes" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
-            <span class="material-symbols-outlined text-[22px]">group</span>
-            <span class="text-[10px] mt-0.5 font-bold">Clientes</span>
+          <a routerLink="/cobranzas" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+            <span class="material-symbols-outlined text-[20px]">payments</span>
+            <span class="text-[9px] mt-0.5 font-bold">Cobros</span>
           </a>
-          <a *ngIf="role() === 'admin'" routerLink="/ticketera/kanban" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-2 rounded-xl transition-all cursor-pointer min-w-[64px] relative">
-            <span class="material-symbols-outlined text-[22px]">view_kanban</span>
-            <span class="text-[10px] mt-0.5 font-bold">Mesa</span>
-            <span class="absolute top-1 right-3 w-2 h-2 bg-[#2563eb] rounded-full border border-[#1c2e43]"></span>
+          <a routerLink="/clientes" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+            <span class="material-symbols-outlined text-[20px]">group</span>
+            <span class="text-[9px] mt-0.5 font-bold">Clientes</span>
+          </a>
+          <a routerLink="/perfil" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+            <span class="material-symbols-outlined text-[20px]">person</span>
+            <span class="text-[9px] mt-0.5 font-bold">Perfil</span>
+          </a>
+          <a *ngIf="role() === 'admin'" routerLink="/ticketera/kanban" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px] relative">
+            <span class="material-symbols-outlined text-[20px]">view_kanban</span>
+            <span class="text-[9px] mt-0.5 font-bold">Mesa</span>
+            <span class="absolute top-1 right-2 w-2 h-2 bg-[#2563eb] rounded-full border border-[#1c2e43]"></span>
           </a>
         </nav>
       }
