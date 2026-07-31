@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -12,6 +12,8 @@ interface PasTicket {
   statusTag: { text: string; css: string; containerCss: string };
   progress?: number;
   isStrikethrough?: boolean;
+  categoria?: string;
+  fecha?: string;
 }
 
 @Component({
@@ -19,244 +21,283 @@ interface PasTicket {
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="bg-background text-on-background font-body-md min-h-screen pb-24 custom-scrollbar">
-      <!-- Main Content Canvas -->
-      <main class="px-container-margin pt-sm space-y-lg max-w-7xl mx-auto">
-        <!-- Header & Filters -->
-        <section class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+    <div class="bg-background text-on-background font-body-md min-h-screen pb-24 overflow-x-hidden">
+      
+      <!-- Top Mobile Navigation Header -->
+      <header class="w-full sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex items-center justify-between h-14 px-4 sm:px-6">
+        <div class="flex items-center gap-3">
+          <button routerLink="/dashboard" class="p-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-70 cursor-pointer">
+            <span class="material-symbols-outlined text-primary text-xl">arrow_back</span>
+          </button>
           <div>
-            <div class="flex items-center gap-sm text-on-surface-variant mb-xs">
-              <span class="material-symbols-outlined text-[18px]">confirmation_number</span>
-              <span class="font-label-md text-label-md uppercase tracking-wider">Gestión</span>
-            </div>
-            <h2 class="font-headline-lg-mobile text-headline-lg-mobile md:text-headline-lg text-on-background">Mis Tickets</h2>
-            <p class="text-on-surface-variant font-body-sm">Tablero interactivo de seguimiento de trámites y pólizas</p>
+            <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight leading-none">Mis Tickets</h1>
+            <p class="text-[11px] text-on-surface-variant font-medium mt-0.5">Seguimiento interactivo de trámites</p>
           </div>
-        </section>
+        </div>
 
-        <!-- Summary Bar -->
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-md">
-          <div class="bg-surface-container-lowest border-l-4 border-primary p-md rounded-lg shadow-sm flex items-center justify-between hover:shadow-md transition-all cursor-default">
-            <div>
-              <p class="text-on-surface-variant font-label-md uppercase tracking-wider">Tickets Vigentes</p>
-              <p class="font-metric-xl text-metric-xl text-on-background">14</p>
-            </div>
-            <div class="p-sm bg-surface-container rounded-full">
-              <span class="material-symbols-outlined text-primary">confirmation_number</span>
-            </div>
-          </div>
-          <div class="bg-surface-container-lowest border-l-4 border-tertiary p-md rounded-lg shadow-sm flex items-center justify-between hover:shadow-md transition-all cursor-default">
-            <div>
-              <p class="text-on-surface-variant font-label-md uppercase tracking-wider">SLA Promedio</p>
-              <p class="font-metric-xl text-metric-xl text-on-background">48h</p>
-            </div>
-            <div class="p-sm bg-tertiary-container rounded-full text-tertiary">
-              <span class="material-symbols-outlined">timer</span>
-            </div>
-          </div>
-          <div class="bg-surface-container-lowest border-l-4 border-secondary p-md rounded-lg shadow-sm flex items-center justify-between hover:shadow-md transition-all cursor-default">
-            <div>
-              <p class="text-on-surface-variant font-label-md uppercase tracking-wider">Comisiones Pend.</p>
-              <p class="font-metric-xl text-metric-xl text-on-background">$142.5k</p>
-            </div>
-            <div class="p-sm bg-secondary-container rounded-full text-secondary">
-              <span class="material-symbols-outlined">account_balance_wallet</span>
-            </div>
-          </div>
-        </section>
+        <button (click)="abrirNuevoTicketModal()" class="bg-primary hover:bg-primary-container text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-base">add</span>
+          <span class="hidden sm:inline">Nuevo Ticket</span>
+          <span class="sm:hidden">Nuevo</span>
+        </button>
+      </header>
 
-        <!-- Kanban View -->
-        <section class="flex flex-col md:grid md:grid-cols-3 gap-lg pb-md">
+      <!-- Main Content Container -->
+      <main class="px-4 sm:px-6 py-4 max-w-7xl mx-auto space-y-6">
+        
+        <!-- Summary Cards Bar (Fully Responsive Grid) -->
+        <section class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           
-          <!-- Column: Nuevos -->
-          <div class="flex flex-col gap-md">
-            <div class="flex items-center justify-between px-xs">
-              <div class="flex items-center gap-xs">
+          <!-- Card 1: Tickets Vigentes -->
+          <div class="bg-surface-container-lowest border-l-4 border-primary p-3.5 sm:p-4 rounded-2xl shadow-xs border border-outline-variant/60 flex items-center justify-between transition-all">
+            <div>
+              <p class="text-on-surface-variant text-[10px] sm:text-xs font-black uppercase tracking-wider">Tickets Vigentes</p>
+              <p class="text-2xl sm:text-3xl font-black text-on-background mt-0.5">{{ totalVigentes() }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">confirmation_number</span>
+            </div>
+          </div>
+
+          <!-- Card 2: SLA Promedio -->
+          <div class="bg-surface-container-lowest border-l-4 border-tertiary p-3.5 sm:p-4 rounded-2xl shadow-xs border border-outline-variant/60 flex items-center justify-between transition-all">
+            <div>
+              <p class="text-on-surface-variant text-[10px] sm:text-xs font-black uppercase tracking-wider">SLA Promedio</p>
+              <p class="text-2xl sm:text-3xl font-black text-on-background mt-0.5">48h</p>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-tertiary-container text-tertiary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">timer</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Comisiones Pendientes -->
+          <div class="col-span-2 sm:col-span-1 bg-surface-container-lowest border-l-4 border-secondary p-3.5 sm:p-4 rounded-2xl shadow-xs border border-outline-variant/60 flex items-center justify-between transition-all">
+            <div>
+              <p class="text-on-surface-variant text-[10px] sm:text-xs font-black uppercase tracking-wider">Comisiones Pend.</p>
+              <p class="text-2xl sm:text-3xl font-black text-on-background mt-0.5">$142.5k</p>
+            </div>
+            <div class="w-10 h-10 rounded-2xl bg-secondary-container text-secondary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Segmented Filter Control (Mobile Tabs) -->
+        <section class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar md:hidden">
+          <button
+            (click)="tabSeleccionado.set('todos')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border cursor-pointer"
+            [ngClass]="tabSeleccionado() === 'todos' ? 'bg-primary text-white border-primary shadow-xs' : 'bg-surface-container-low text-on-surface-variant border-outline-variant'"
+          >
+            Todos los Tickets ({{ totalVigentes() + ticketsCerrado().length }})
+          </button>
+
+          <button
+            (click)="tabSeleccionado.set('por_iniciar')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border cursor-pointer flex items-center gap-1.5"
+            [ngClass]="tabSeleccionado() === 'por_iniciar' ? 'bg-primary text-white border-primary shadow-xs' : 'bg-surface-container-low text-on-surface-variant border-outline-variant'"
+          >
+            <span class="w-2 h-2 rounded-full bg-primary"></span>
+            <span>Por Iniciar ({{ ticketsPorIniciar().length }})</span>
+          </button>
+
+          <button
+            (click)="tabSeleccionado.set('en_gestion')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border cursor-pointer flex items-center gap-1.5"
+            [ngClass]="tabSeleccionado() === 'en_gestion' ? 'bg-tertiary text-white border-tertiary shadow-xs' : 'bg-surface-container-low text-on-surface-variant border-outline-variant'"
+          >
+            <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+            <span>En Gestión ({{ ticketsEnGestion().length }})</span>
+          </button>
+
+          <button
+            (click)="tabSeleccionado.set('cerrados')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 border cursor-pointer flex items-center gap-1.5"
+            [ngClass]="tabSeleccionado() === 'cerrados' ? 'bg-secondary text-white border-secondary shadow-xs' : 'bg-surface-container-low text-on-surface-variant border-outline-variant'"
+          >
+            <span class="w-2 h-2 rounded-full bg-secondary"></span>
+            <span>Cerrados ({{ ticketsCerrado().length }})</span>
+          </button>
+        </section>
+
+        <!-- Responsive Kanban View (Grid on Desktop, Dynamic Columns on Mobile) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+          
+          <!-- Column 1: Por Iniciar -->
+          <div *ngIf="tabSeleccionado() === 'todos' || tabSeleccionado() === 'por_iniciar'" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1 py-1">
+              <div class="flex items-center gap-2">
                 <span class="w-3 h-3 bg-primary rounded-full"></span>
-                <h3 class="font-headline-sm text-headline-sm">Por Iniciar</h3>
-                <span class="bg-surface-container text-on-surface-variant px-sm rounded-full font-label-md">{{ticketsPorIniciar.length}}</span>
+                <h3 class="font-extrabold text-sm text-on-background">Por Iniciar</h3>
+                <span class="bg-primary/10 text-primary text-xs font-black px-2 py-0.5 rounded-full border border-primary/20">
+                  {{ ticketsPorIniciar().length }}
+                </span>
               </div>
             </div>
             
-            <div class="kanban-column flex flex-col gap-md pb-xl transition-colors rounded-lg border-2 border-transparent">
-              
-              <div *ngFor="let item of ticketsPorIniciar" 
-                   class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm hover:shadow-md transition-all relative group" 
-                   [class]="'border-l-4 ' + (item.statusTag.css.includes('error') ? 'border-l-error' : 'border-l-primary')">
+            <div class="space-y-3">
+              <a *ngFor="let item of ticketsPorIniciar()" 
+                 routerLink="/seguimiento/detalle"
+                 class="block bg-surface-container-lowest border border-outline-variant p-4 rounded-2xl shadow-xs hover:shadow-md transition-all relative border-l-4 border-l-primary group cursor-pointer">
                 
-                <div class="flex justify-between items-start mb-4 pointer-events-none">
+                <div class="flex justify-between items-start mb-3">
                   <div>
-                    <h4 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors" [class.line-through]="item.isStrikethrough" [class.decoration-on-surface-variant]="item.isStrikethrough">{{item.title}}</h4>
-                    <p class="text-on-surface-variant font-body-sm">{{item.client}}</p>
+                    <h4 class="font-bold text-sm text-on-surface group-hover:text-primary transition-colors">{{ item.title }}</h4>
+                    <p class="text-xs text-on-surface-variant mt-0.5 font-medium">{{ item.client }}</p>
                   </div>
-                  <span [class]="item.statusTag.containerCss + ' ' + item.statusTag.css + ' text-[10px] px-sm py-[2px] rounded-full font-bold uppercase tracking-tight shadow-sm'">{{item.statusTag.text}}</span>
-                </div>
-
-                <div class="flex items-center justify-between mt-auto pt-md border-t border-outline-variant/50 pointer-events-none">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant flex items-center justify-center text-primary overflow-hidden">
-                       <span *ngIf="!item.companyLogo" class="material-symbols-outlined text-[16px]">business</span>
-                       <img *ngIf="item.companyLogo" [src]="item.companyLogo" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="font-label-md">{{item.company}}</span>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-label-md text-on-surface font-bold">{{item.value | currency:'USD':'symbol':'1.0-0'}}</p>
-                  </div>
-                </div>
-
-                <!-- Hover Overlay Action -->
-                <a routerLink="/seguimiento/detalle" class="absolute inset-0 z-10 flex items-center justify-center bg-inverse-surface/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl backdrop-blur-[1px] cursor-pointer">
-                  <span class="bg-primary text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg">
-                    Ver Detalle
-                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  <span [class]="item.statusTag.containerCss + ' ' + item.statusTag.css + ' text-[10px] px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-tight shadow-xs shrink-0'">
+                    {{ item.statusTag.text }}
                   </span>
-                </a>
+                </div>
 
+                <div class="flex items-center justify-between pt-3 border-t border-outline-variant/50 mt-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-primary overflow-hidden shrink-0">
+                      <span *ngIf="!item.companyLogo" class="material-symbols-outlined text-sm">business</span>
+                      <img *ngIf="item.companyLogo" [src]="item.companyLogo" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs font-bold text-on-surface-variant">{{ item.company }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-on-surface">{{ item.value | currency:'USD':'symbol':'1.0-0' }}</span>
+                    <span class="material-symbols-outlined text-primary text-base group-hover:translate-x-1 transition-transform">chevron_right</span>
+                  </div>
+                </div>
+              </a>
+
+              <div *ngIf="ticketsPorIniciar().length === 0" class="p-6 text-center bg-surface-container-lowest border border-outline-variant/60 rounded-2xl text-outline text-xs">
+                Sin tickets por iniciar.
               </div>
             </div>
           </div>
 
-          <!-- Column: En Gestión -->
-          <div class="flex flex-col gap-md">
-            <div class="flex items-center justify-between px-xs">
-              <div class="flex items-center gap-xs">
+          <!-- Column 2: En Gestión -->
+          <div *ngIf="tabSeleccionado() === 'todos' || tabSeleccionado() === 'en_gestion'" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1 py-1">
+              <div class="flex items-center gap-2">
                 <span class="w-3 h-3 bg-tertiary rounded-full"></span>
-                <h3 class="font-headline-sm text-headline-sm">En Gestión</h3>
-                <span class="bg-surface-container text-on-surface-variant px-sm rounded-full font-label-md">{{ticketsEnGestion.length}}</span>
+                <h3 class="font-extrabold text-sm text-on-background">En Gestión</h3>
+                <span class="bg-tertiary/10 text-tertiary text-xs font-black px-2 py-0.5 rounded-full border border-tertiary/20">
+                  {{ ticketsEnGestion().length }}
+                </span>
               </div>
             </div>
             
-            <div class="kanban-column flex flex-col gap-md pb-xl transition-colors rounded-lg border-2 border-transparent">
-                 
-              <div *ngFor="let item of ticketsEnGestion" 
-                   class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm hover:shadow-md transition-all border-l-4 border-l-tertiary relative group">
+            <div class="space-y-3">
+              <a *ngFor="let item of ticketsEnGestion()" 
+                 routerLink="/seguimiento/detalle"
+                 class="block bg-surface-container-lowest border border-outline-variant p-4 rounded-2xl shadow-xs hover:shadow-md transition-all border-l-4 border-l-tertiary group cursor-pointer">
                    
-                <div class="flex justify-between items-start mb-4 pointer-events-none">
+                <div class="flex justify-between items-start mb-3">
                   <div>
-                    <h4 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-tertiary transition-colors" [class.line-through]="item.isStrikethrough" [class.decoration-on-surface-variant]="item.isStrikethrough">{{item.title}}</h4>
-                    <p class="text-on-surface-variant font-body-sm">{{item.client}}</p>
+                    <h4 class="font-bold text-sm text-on-surface group-hover:text-tertiary transition-colors">{{ item.title }}</h4>
+                    <p class="text-xs text-on-surface-variant mt-0.5 font-medium">{{ item.client }}</p>
                   </div>
-                  <span [class]="item.statusTag.containerCss + ' ' + item.statusTag.css + ' text-[10px] px-sm py-[2px] rounded-full font-bold uppercase tracking-tight shadow-sm'">{{item.statusTag.text}}</span>
+                  <span [class]="item.statusTag.containerCss + ' ' + item.statusTag.css + ' text-[10px] px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-tight shadow-xs shrink-0'">
+                    {{ item.statusTag.text }}
+                  </span>
                 </div>
 
-                <div *ngIf="item.progress !== undefined" class="mb-4 pointer-events-none">
+                <!-- Progress Bar -->
+                <div *ngIf="item.progress !== undefined" class="mb-3">
                   <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">Avance</span>
-                    <span class="text-[10px] font-bold text-tertiary">{{item.progress}}%</span>
+                    <span class="text-[10px] font-extrabold text-on-surface-variant uppercase">Avance</span>
+                    <span class="text-[10px] font-black text-tertiary">{{ item.progress }}%</span>
                   </div>
                   <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
                     <div class="h-full bg-tertiary rounded-full transition-all duration-500" [style.width.%]="item.progress"></div>
                   </div>
                 </div>
 
-                <div class="flex items-center justify-between mt-auto pt-md border-t border-outline-variant/50 pointer-events-none">
+                <div class="flex items-center justify-between pt-3 border-t border-outline-variant/50 mt-2">
                   <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant flex items-center justify-center text-tertiary overflow-hidden">
-                       <span *ngIf="!item.companyLogo" class="material-symbols-outlined text-[16px]">business</span>
-                       <img *ngIf="item.companyLogo" [src]="item.companyLogo" class="w-full h-full object-cover">
+                    <div class="w-7 h-7 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-tertiary overflow-hidden shrink-0">
+                      <span *ngIf="!item.companyLogo" class="material-symbols-outlined text-sm">business</span>
+                      <img *ngIf="item.companyLogo" [src]="item.companyLogo" class="w-full h-full object-cover">
                     </div>
-                    <div class="flex flex-col">
-                      <span class="font-label-md">{{item.company}}</span>
-                    </div>
+                    <span class="text-xs font-bold text-on-surface-variant">{{ item.company }}</span>
                   </div>
-                  <div class="text-right">
-                    <p class="font-label-md text-on-surface font-bold">{{item.value | currency:'USD':'symbol':'1.0-0'}}</p>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-on-surface">{{ item.value | currency:'USD':'symbol':'1.0-0' }}</span>
+                    <span class="material-symbols-outlined text-tertiary text-base group-hover:translate-x-1 transition-transform">chevron_right</span>
                   </div>
                 </div>
+              </a>
 
-                <!-- Hover Overlay Action -->
-                <a routerLink="/seguimiento/detalle" class="absolute inset-0 z-10 flex items-center justify-center bg-inverse-surface/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl backdrop-blur-[1px] cursor-pointer">
-                  <span class="bg-tertiary text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg">
-                    Ver Progreso
-                    <span class="material-symbols-outlined text-[18px]">trending_up</span>
-                  </span>
-                </a>
+              <div *ngIf="ticketsEnGestion().length === 0" class="p-6 text-center bg-surface-container-lowest border border-outline-variant/60 rounded-2xl text-outline text-xs">
+                Sin tickets en gestión.
               </div>
             </div>
           </div>
 
-          <!-- Column: Cerrado -->
-          <div class="flex flex-col gap-md">
-            <div class="flex items-center justify-between px-xs">
-              <div class="flex items-center gap-xs">
+          <!-- Column 3: Cerrados -->
+          <div *ngIf="tabSeleccionado() === 'todos' || tabSeleccionado() === 'cerrados'" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1 py-1">
+              <div class="flex items-center gap-2">
                 <span class="w-3 h-3 bg-secondary rounded-full"></span>
-                <h3 class="font-headline-sm text-headline-sm">Cerrados</h3>
-                <span class="bg-surface-container text-on-surface-variant px-sm rounded-full font-label-md">{{ticketsCerrado.length}}</span>
+                <h3 class="font-extrabold text-sm text-on-background">Cerrados</h3>
+                <span class="bg-secondary/10 text-secondary text-xs font-black px-2 py-0.5 rounded-full border border-secondary/20">
+                  {{ ticketsCerrado().length }}
+                </span>
               </div>
             </div>
             
-            <div class="kanban-column flex flex-col gap-md pb-xl transition-colors rounded-lg border-2 border-transparent">
-                 
-              <div *ngFor="let item of ticketsCerrado" 
-                   class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm opacity-80 hover:opacity-100 transition-all border-l-4 border-l-secondary relative group">
+            <div class="space-y-3">
+              <a *ngFor="let item of ticketsCerrado()" 
+                 routerLink="/seguimiento/detalle"
+                 class="block bg-surface-container-lowest border border-outline-variant p-4 rounded-2xl shadow-xs opacity-90 hover:opacity-100 transition-all border-l-4 border-l-secondary group cursor-pointer">
                    
-                <div class="flex justify-between items-start mb-4 pointer-events-none">
+                <div class="flex justify-between items-start mb-3">
                   <div>
-                    <h4 class="font-headline-sm text-headline-sm text-on-surface line-through decoration-on-surface-variant/40 group-hover:text-secondary transition-colors">{{item.title}}</h4>
-                    <p class="text-on-surface-variant font-body-sm">{{item.client}}</p>
+                    <h4 class="font-bold text-sm text-on-surface line-through decoration-on-surface-variant/40 group-hover:text-secondary transition-colors">{{ item.title }}</h4>
+                    <p class="text-xs text-on-surface-variant mt-0.5 font-medium">{{ item.client }}</p>
                   </div>
-                  <span [class]="item.statusTag.containerCss + ' ' + item.statusTag.css + ' text-[10px] px-sm py-[2px] rounded-full font-bold uppercase tracking-tight shadow-sm'">{{item.statusTag.text}}</span>
-                </div>
-
-                <div class="flex items-center justify-between mt-auto pt-md border-t border-outline-variant/50 pointer-events-none">
-                  <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant flex items-center justify-center text-secondary overflow-hidden opacity-80">
-                       <span *ngIf="!item.companyLogo" class="material-symbols-outlined text-[16px]">business</span>
-                       <img *ngIf="item.companyLogo" [src]="item.companyLogo" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="font-label-md opacity-80">{{item.company}}</span>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-label-md text-secondary font-bold">{{item.value | currency:'USD':'symbol':'1.0-0'}}</p>
-                  </div>
-                </div>
-
-                <!-- Hover Overlay Action -->
-                <a routerLink="/seguimiento/detalle" class="absolute inset-0 z-10 flex items-center justify-center bg-inverse-surface/80 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl backdrop-blur-[1px] cursor-pointer">
-                  <span class="bg-secondary text-on-secondary-container font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg">
-                    Ver Archivo
-                    <span class="material-symbols-outlined text-[18px]">history</span>
+                  <span [class]="item.statusTag.containerCss + ' ' + item.statusTag.css + ' text-[10px] px-2.5 py-0.5 rounded-full font-extrabold uppercase tracking-tight shadow-xs shrink-0'">
+                    {{ item.statusTag.text }}
                   </span>
-                </a>
+                </div>
+
+                <div class="flex items-center justify-between pt-3 border-t border-outline-variant/50 mt-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-xl bg-surface-container border border-outline-variant flex items-center justify-center text-secondary overflow-hidden opacity-80 shrink-0">
+                      <span *ngIf="!item.companyLogo" class="material-symbols-outlined text-sm">business</span>
+                      <img *ngIf="item.companyLogo" [src]="item.companyLogo" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-xs font-bold text-on-surface-variant opacity-80">{{ item.company }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-black text-secondary">{{ item.value | currency:'USD':'symbol':'1.0-0' }}</span>
+                    <span class="material-symbols-outlined text-secondary text-base group-hover:translate-x-1 transition-transform">chevron_right</span>
+                  </div>
+                </div>
+              </a>
+
+              <div *ngIf="ticketsCerrado().length === 0" class="p-6 text-center bg-surface-container-lowest border border-outline-variant/60 rounded-2xl text-outline text-xs">
+                Sin tickets cerrados.
               </div>
             </div>
           </div>
         </section>
+
+        <!-- Footer Unificado -->
+        <footer class="py-6 px-4 text-center border-t border-outline-variant/40 mt-8 mb-20 md:mb-4 space-y-1">
+          <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
+          <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Operación Centralizada • Powered by <strong class="text-primary">Katrix</strong></p>
+        </footer>
       </main>
     </div>
   `,
   styles: [`
-    .kanban-column {
-      min-height: 120px;
-    }
-    @media (min-width: 768px) {
-      .kanban-column {
-        min-height: calc(100vh - 280px);
-      }
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(194, 198, 214, 0.5);
-      border-radius: 10px;
-    }
-    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-      background: rgba(114, 119, 133, 0.8);
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
   `]
 })
 export class TicketSeguimientoComponent {
-  ticketsPorIniciar: PasTicket[] = [
+  tabSeleccionado = signal<string>('todos');
+
+  ticketsPorIniciar = signal<PasTicket[]>([
     {
       id: '1',
       title: 'Renovación Integral',
@@ -273,9 +314,9 @@ export class TicketSeguimientoComponent {
       value: 8200,
       statusTag: { text: 'Nuevo', css: 'text-on-surface-variant', containerCss: 'bg-surface-container' }
     }
-  ];
+  ]);
 
-  ticketsEnGestion: PasTicket[] = [
+  ticketsEnGestion = signal<PasTicket[]>([
     {
       id: '3',
       title: 'Siniestro Hogar',
@@ -294,9 +335,9 @@ export class TicketSeguimientoComponent {
       statusTag: { text: 'Pend. Docs', css: 'text-tertiary', containerCss: 'bg-tertiary-container' },
       progress: 30
     }
-  ];
+  ]);
 
-  ticketsCerrado: PasTicket[] = [
+  ticketsCerrado = signal<PasTicket[]>([
     {
       id: '4',
       title: 'RC Profesional',
@@ -306,5 +347,11 @@ export class TicketSeguimientoComponent {
       statusTag: { text: 'Finalizado', css: 'text-on-secondary-container', containerCss: 'bg-secondary-container' },
       isStrikethrough: true
     }
-  ]
+  ]);
+
+  totalVigentes = computed(() => this.ticketsPorIniciar().length + this.ticketsEnGestion().length);
+
+  abrirNuevoTicketModal() {
+    alert('💡 Formulario para crear un nuevo Ticket de Seguimiento.');
+  }
 }
