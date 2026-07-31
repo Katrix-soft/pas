@@ -764,6 +764,27 @@ async def mercantil_perfil_productor():
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
+@app.get("/api/v1/quotations/mercantil/siniestros", tags=["Quotations - Mercantil"])
+async def mercantil_obtener_siniestros(q: Optional[str] = None):
+    """Retorna el listado oficial de siniestros registrados para la cartera del PAS"""
+    try:
+        client = get_mercantil_client()
+        return await client.obtener_siniestros(q or "")
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+@app.post("/api/v1/quotations/mercantil/siniestros", tags=["Quotations - Mercantil"])
+async def mercantil_crear_siniestro(payload: dict):
+    """Registra la denuncia inicial de un nuevo siniestro de póliza"""
+    try:
+        client = get_mercantil_client()
+        return await client.crear_denuncia_siniestro(payload)
+    except MercantilAndinaError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+
 @app.get("/api/v1/quotations/mercantil/clientes", tags=["Quotations - Mercantil"])
 async def mercantil_buscar_clientes(q: Optional[str] = None):
     """Búsqueda de clientes por DNI/CUIL en Mercantil Andina"""
