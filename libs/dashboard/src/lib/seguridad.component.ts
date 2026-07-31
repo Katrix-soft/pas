@@ -149,6 +149,12 @@ export interface RegistroAuditoria {
             Guardar Ajustes de Seguridad
           </button>
         </div>
+
+        <!-- Footer Unificado -->
+        <footer class="py-6 px-4 text-center border-t border-outline-variant/40 mt-8 mb-20 md:mb-4 space-y-1">
+          <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
+          <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Operación Centralizada • Powered by <strong class="text-primary">Katrix</strong></p>
+        </footer>
       </main>
 
       <!-- MODAL GESTIÓN COMPLETA DE DISPOSITIVOS VINCULADOS & AUDITORÍA DE ACCESOS -->

@@ -222,6 +222,17 @@ input, textarea {
   }
 }
 
+/* Marca de Agua de Seguridad Diagonal Tracable (Watermark) */
+.security-watermark-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160' viewBox='0 0 320 160'><text x='20' y='80' fill='%20058be' font-size='11' font-family='sans-serif' font-weight='bold' transform='rotate(-22, 160, 80)'>PAS #86992 • CONFIDENCIAL JC ORGANIZADORES</text></svg>");
+  background-repeat: repeat;
+}
+
 /* Overlay de Apagón de Pantalla (Screen Blackout Overlay) */
 #secure-screen-overlay {
   position: fixed;
@@ -233,7 +244,7 @@ input, textarea {
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  transition: opacity 0.15s ease-in-out;
+  transition: opacity 0.1s ease-in-out;
   pointer-events: none;
   opacity: 0;
   font-family: 'Manrope', sans-serif;
@@ -244,5 +255,10 @@ input, textarea {
 body.screen-blackout #secure-screen-overlay {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Filtro de Desenfoque al Desenfocar la Pantalla (Efecto Banco) */
+body.screen-blackout app-root {
+  filter: blur(20px) grayscale(100%);
 }
 

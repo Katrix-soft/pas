@@ -675,9 +675,9 @@ import { AuthService } from './services/auth.service';
         }
 
         <!-- Global Footer Info (Admin & PAS) -->
-        <footer class="py-md text-center border-t border-outline-variant mt-auto mx-container-margin md:mx-lg">
-          <p class="text-label-md text-outline">© 2026 JC Organizadores - Operación Centralizada</p>
-          <p class="text-[10px] text-outline mt-1 uppercase tracking-widest font-bold text-primary">Powered by Katrix.</p>
+        <footer class="py-6 px-4 text-center border-t border-outline-variant/40 mt-8 mb-20 md:mb-4 space-y-1">
+          <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
+          <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Operación Centralizada • Powered by <strong class="text-primary">Katrix</strong></p>
         </footer>
       </main>
     </div>
