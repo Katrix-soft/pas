@@ -67,6 +67,18 @@ export interface AlertaNotificacion {
             </button>
           </div>
 
+          <!-- Android PWA Installation & Battery Optimization Checklist -->
+          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-3.5 space-y-2 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-emerald-400 text-lg">install_mobile</span>
+              <h3 class="font-extrabold text-white text-xs">Recomendación PWA Instalada (Modo Standalone) & Batería:</h3>
+            </div>
+            <ul class="space-y-1.5 text-white/80 text-[11px] list-disc pl-4 leading-relaxed">
+              <li><strong>Instalar PWA en Android:</strong> Tocá <strong>⋮ (Menú de Chrome)</strong> → <strong>"Instalar aplicación"</strong> o <strong>"Agregar a pantalla principal"</strong>. Las PWA instaladas en modo ejecutable tienen prioridad nativa total en la persiana de Android.</li>
+              <li><strong>Optimización de Batería:</strong> En celulares Samsung/Xiaomi, andá a <em>Ajustes → Aplicaciones → Chrome / JC PAS → Batería → Seleccioná <strong>"Sin restricciones"</strong></em> para evitar que el sistema duerma las notificaciones en segundo plano.</li>
+            </ul>
+          </div>
+
           <!-- iPhone iOS Specific Instructions Banner -->
           <div *ngIf="isIosDevice()" class="bg-indigo-950/80 border border-indigo-500/40 rounded-xl p-3.5 text-xs text-indigo-100 flex items-start gap-3">
             <span class="material-symbols-outlined text-indigo-400 text-xl shrink-0 mt-0.5">apple</span>
