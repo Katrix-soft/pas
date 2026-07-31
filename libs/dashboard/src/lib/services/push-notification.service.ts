@@ -15,8 +15,9 @@ export interface PushPopAlert {
 
 function urlBase64ToUint8Array(base64String: string) {
   if (!base64String) return new Uint8Array(0);
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const cleanBase64 = base64String.trim();
+  const padding = '='.repeat((4 - (cleanBase64.length % 4)) % 4);
+  const base64 = (cleanBase64 + padding).replace(/\-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
@@ -54,7 +55,7 @@ export class PushNotificationService {
     try {
       const res = await firstValueFrom(this.http.get<{ public_key: string }>('/api/v1/push/vapid-public-key'));
       if (res && res.public_key) {
-        this.vapidPublicKey = res.public_key;
+        this.vapidPublicKey = res.public_key.trim();
         console.log('🔑 Key VAPID Pública cargada desde backend:', this.vapidPublicKey);
       }
     } catch (err) {
@@ -112,60 +113,90 @@ export class PushNotificationService {
   }
 
   async suscribirDispositivoBackend() {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+      console.warn('⚠️ ServiceWorker no disponible en navigator.');
+      return;
+    }
 
     try {
-      // 1. Garantizar obtención de clave VAPID pública
+      // 1. Obtener la clave VAPID pública del backend
+      console.log('🔄 Solicitando clave VAPID pública al backend FastAPI...');
       const publicKey = await this.fetchVapidPublicKey();
       if (!publicKey) {
-        console.error('❌ Error: No se dispone de la VAPID_PUBLIC_KEY para suscribir.');
+        console.error('❌ Error grave: La VAPID_PUBLIC_KEY retornada por el backend está vacía.');
         return;
       }
 
-      // 2. Obtener o registrar Service Worker
-      let reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) {
-        reg = await navigator.serviceWorker.register('/sw.js');
-        await navigator.serviceWorker.ready;
+      // 2. Registrar y esperar a que el Service Worker esté 100% LISTO y ACTIVO
+      console.log('🔄 Registrando y esperando activación del Service Worker (/sw.js)...');
+      await navigator.serviceWorker.register('/sw.js');
+      const reg = await navigator.serviceWorker.ready;
+
+      if (!reg || !reg.pushManager) {
+        console.error('❌ Error: reg.pushManager no está disponible en este dispositivo/navegador.');
+        return;
       }
 
-      if (reg && reg.pushManager) {
-        // 3. Verificar si ya existe suscripción previa o crear nueva
-        let subscription = await reg.pushManager.getSubscription();
-        if (!subscription) {
-          const applicationServerKey = urlBase64ToUint8Array(publicKey);
+      // 3. Obtener suscripción activa o crear una nueva con try/catch explícito
+      let subscription: PushSubscription | null = null;
+      try {
+        subscription = await reg.pushManager.getSubscription();
+      } catch (getErr) {
+        console.warn('⚠️ Error al consultar getSubscription():', getErr);
+      }
+
+      if (!subscription) {
+        console.log('🔑 Convirtiendo VAPID_PUBLIC_KEY a Uint8Array...');
+        const convertedKey = urlBase64ToUint8Array(publicKey);
+        console.log(`🔑 Key VAPID convertida (${convertedKey.length} bytes):`, convertedKey);
+
+        console.log('📲 Invocando reg.pushManager.subscribe()...');
+        try {
           subscription = await reg.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: applicationServerKey
+            applicationServerKey: convertedKey
           });
+          console.log('✅ reg.pushManager.subscribe() exitoso:', subscription);
+        } catch (subErr: any) {
+          console.error('❌ ERROR GRAVE al ejecutar reg.pushManager.subscribe():', subErr);
+          alert(`⚠️ No se pudo suscribir el celular al servicio de Push: ${subErr?.message || subErr}`);
+          return;
         }
-
-        const subJson = subscription.toJSON();
-        console.log('📲 Obtenida PushSubscription del navegador:', subJson);
-
-        const payload = {
-          endpoint: subJson.endpoint,
-          keys: {
-            p256dh: subJson.keys?.['p256dh'] || '',
-            auth: subJson.keys?.['auth'] || ''
-          }
-        };
-
-        console.log('🚀 Enviando POST /api/v1/push/subscribe con el objeto:', payload);
-
-        // 4. Enviar suscripción VAPID al backend FastAPI
-        this.http.post('/api/v1/push/subscribe', payload).subscribe({
-          next: (res: any) => {
-            this.isSubscribedBackend.set(true);
-            console.log('✅ Suscripción VAPID guardada con éxito en el backend FastAPI! Respuesta:', res);
-          },
-          error: (err) => {
-            console.error('❌ Error guardando suscripción VAPID en backend:', err);
-          }
-        });
+      } else {
+        console.log('ℹ️ Se encontró una PushSubscription activa existente:', subscription);
       }
-    } catch (err) {
-      console.error('❌ Error durante el proceso de suscripción Push VAPID:', err);
+
+      if (!subscription) {
+        console.error('❌ La suscripción PushSubscription obtenida es nula.');
+        return;
+      }
+
+      const subJson = subscription.toJSON();
+      console.log('📲 PushSubscription objeto JSON obtenido:', subJson);
+
+      const payload = {
+        endpoint: subJson.endpoint,
+        keys: {
+          p256dh: subJson.keys?.['p256dh'] || '',
+          auth: subJson.keys?.['auth'] || ''
+        }
+      };
+
+      console.log('🚀 Enviando POST /api/v1/push/subscribe con el objeto:', payload);
+
+      // 4. Enviar suscripción VAPID al backend FastAPI
+      this.http.post('/api/v1/push/subscribe', payload).subscribe({
+        next: (res: any) => {
+          this.isSubscribedBackend.set(true);
+          console.log('✅ ¡ÉXITO! Suscripción VAPID guardada en backend FastAPI:', res);
+        },
+        error: (err) => {
+          console.error('❌ Error enviando POST /api/v1/push/subscribe al backend:', err);
+        }
+      });
+
+    } catch (err: any) {
+      console.error('❌ Excepción general en suscribirDispositivoBackend():', err);
     }
   }
 
