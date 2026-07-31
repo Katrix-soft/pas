@@ -30,19 +30,19 @@ export interface Siniestro {
   standalone: true,
   imports: [CommonModule, RouterLink, HttpClientModule, FormsModule],
   template: `
-    <div class="bg-surface text-on-surface font-body-md min-h-screen pb-24 overflow-x-hidden">
-      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-4 sm:space-y-6">
+    <div class="bg-surface text-on-surface font-body-md min-h-screen pb-36 md:pb-12 overflow-x-hidden">
+      <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 space-y-4">
         
         <!-- Header Section -->
-        <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-surface-container-lowest p-4 sm:p-5 rounded-2xl border border-outline-variant shadow-sm">
+        <section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-surface-container-lowest p-4 sm:p-5 rounded-2xl border border-outline-variant shadow-xs">
           <div>
-            <h1 class="text-xl sm:text-2xl font-extrabold text-on-surface flex items-center gap-2">
+            <h1 class="text-lg sm:text-2xl font-extrabold text-on-surface flex items-center gap-2">
               <span class="material-symbols-outlined text-primary text-2xl">report_problem</span>
-              Gestión & Seguimiento de Siniestros
+              <span>Gestión de Siniestros</span>
             </h1>
-            <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Control en tiempo real de denuncias, inspecciones y liquidaciones de cartera.</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">Denuncias, estado de inspección y peritajes en tiempo real.</p>
           </div>
-          <button (click)="openDenunciaModal()" class="w-full sm:w-auto bg-primary text-on-primary px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-primary-container transition-all shadow-sm cursor-pointer">
+          <button (click)="openDenunciaModal()" class="w-full sm:w-auto bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-primary-container transition-all shadow-xs cursor-pointer">
             <span class="material-symbols-outlined text-base">add_alert</span>
             <span>Denunciar Siniestro</span>
           </button>
@@ -56,8 +56,8 @@ export interface Siniestro {
           <input
             [(ngModel)]="searchQuery"
             (ngModelChange)="onSearchChange()"
-            class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm text-on-surface placeholder-on-surface-variant transition-all shadow-xs"
-            placeholder="Buscar por número de siniestro, cliente, póliza o tipo de incidente..."
+            class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-xs sm:text-sm text-on-surface placeholder-on-surface-variant transition-all shadow-xs"
+            placeholder="Buscar por siniestro, cliente o póliza..."
             type="text"
           />
         </section>
@@ -68,7 +68,7 @@ export interface Siniestro {
             *ngFor="let f of filters"
             (click)="setActiveFilter(f)"
             [class]="activeFilter() === f ? 'bg-primary text-white border-primary shadow-xs font-bold' : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant hover:border-primary hover:text-primary font-medium'"
-            class="whitespace-nowrap px-4 py-1.5 rounded-full border text-xs transition-colors cursor-pointer shrink-0"
+            class="whitespace-nowrap px-3.5 py-1.5 rounded-full border text-xs transition-colors cursor-pointer shrink-0"
           >
             {{ f }}
           </button>
@@ -76,18 +76,17 @@ export interface Siniestro {
 
         <!-- Loading Spinner -->
         <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-12 space-y-3">
-          <span class="material-symbols-outlined text-primary text-4xl animate-spin">sync</span>
-          <p class="text-xs sm:text-sm font-bold text-outline">Cargando siniestros registrados en la API...</p>
+          <span class="material-symbols-outlined text-primary text-3xl animate-spin">sync</span>
+          <p class="text-xs font-bold text-outline">Cargando expediente de siniestros...</p>
         </div>
 
         <!-- Siniestros Listing -->
-        <section *ngIf="!isLoading()" class="space-y-3 sm:space-y-4">
+        <section *ngIf="!isLoading()" class="space-y-3">
           
           <!-- Empty State -->
-          <div *ngIf="filteredSiniestros().length === 0" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-8 text-center space-y-3 shadow-xs">
-            <span class="material-symbols-outlined text-outline text-4xl">folder_off</span>
-            <p class="text-sm font-bold text-on-surface">No se encontraron siniestros para el criterio seleccionado.</p>
-            <p class="text-xs text-on-surface-variant">Prueba borrar el buscador o seleccionar la pestaña "Todos".</p>
+          <div *ngIf="filteredSiniestros().length === 0" class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 text-center space-y-2 shadow-xs">
+            <span class="material-symbols-outlined text-outline text-3xl">folder_off</span>
+            <p class="text-xs sm:text-sm font-bold text-on-surface">Sin resultados para esta búsqueda.</p>
           </div>
 
           <!-- Cards per Siniestro -->
@@ -100,20 +99,32 @@ export interface Siniestro {
               'border-l-amber-500': item.estado === 'Pendiente'
             }"
           >
-            <div class="p-4 sm:p-5 flex flex-col space-y-3">
+            <div class="p-3.5 sm:p-5 flex flex-col space-y-3">
               <!-- Top Row: Client & Status Badge -->
-              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-outline-variant/40">
-                <div>
-                  <h3 class="text-base sm:text-lg font-bold text-on-surface">{{ item.cliente }}</h3>
-                  <div class="flex items-center gap-2 text-xs text-on-surface-variant font-medium mt-0.5">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2.5 border-b border-outline-variant/40">
+                <div class="min-w-0 w-full sm:w-auto">
+                  <div class="flex items-center justify-between sm:justify-start gap-2">
+                    <h3 class="text-sm sm:text-base font-bold text-on-surface truncate">{{ item.cliente }}</h3>
+                    <span
+                      class="sm:hidden px-2.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 border"
+                      [ngClass]="{
+                        'bg-indigo-500/10 text-indigo-600 border-indigo-500/20': item.estado === 'En Inspección',
+                        'bg-emerald-500/10 text-emerald-600 border-emerald-500/20': item.estado === 'Liquidado',
+                        'bg-amber-500/10 text-amber-600 border-amber-500/20': item.estado === 'Pendiente'
+                      }"
+                    >
+                      {{ item.estado }}
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-on-surface-variant font-medium mt-1">
                     <span class="font-bold text-primary">Siniestro #{{ item.numero_siniestro }}</span>
-                    <span>•</span>
-                    <span>Póliza: <strong>{{ item.poliza }}</strong></span>
+                    <span class="hidden sm:inline">•</span>
+                    <span class="text-[11px] sm:text-xs">Póliza: <strong>{{ item.poliza }}</strong></span>
                   </div>
                 </div>
 
                 <span
-                  class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shrink-0 border"
+                  class="hidden sm:flex px-3 py-1 rounded-full text-xs font-bold items-center gap-1.5 shrink-0 border"
                   [ngClass]="{
                     'bg-indigo-500/10 text-indigo-600 border-indigo-500/20': item.estado === 'En Inspección',
                     'bg-emerald-500/10 text-emerald-600 border-emerald-500/20': item.estado === 'Liquidado',
@@ -130,54 +141,52 @@ export interface Siniestro {
               </div>
 
               <!-- Details Grid -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm">
-                <div>
-                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider">Tipo de Incidente / Ramo</p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                <div class="bg-surface-container-low/50 p-2.5 rounded-xl border border-outline-variant/30">
+                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider">Tipo & Ramo</p>
                   <p class="font-bold text-on-surface mt-0.5">{{ item.tipo_siniestro }}</p>
-                  <p class="text-xs text-on-surface-variant">{{ item.ramo }}</p>
+                  <p class="text-[11px] text-on-surface-variant">{{ item.ramo }}</p>
                 </div>
-                <div>
-                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider">Fechas de Ocurrencia / Denuncia</p>
+                <div class="bg-surface-container-low/50 p-2.5 rounded-xl border border-outline-variant/30">
+                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider">Fechas</p>
                   <p class="font-semibold text-on-surface mt-0.5">Ocurrió: {{ item.fecha_ocurrencia }}</p>
-                  <p class="text-xs text-on-surface-variant">Denunciado: {{ item.fecha_denuncia }}</p>
+                  <p class="text-[11px] text-on-surface-variant">Denuncia: {{ item.fecha_denuncia }}</p>
                 </div>
-                <div>
-                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider">Compañía & Asignación</p>
+                <div class="bg-surface-container-low/50 p-2.5 rounded-xl border border-outline-variant/30">
+                  <p class="text-[10px] font-bold text-outline uppercase tracking-wider">Aseguradora & Taller</p>
                   <p class="font-bold text-indigo-600 mt-0.5">{{ item.compania }}</p>
-                  <p class="text-xs text-on-surface-variant truncate" [title]="item.taller_asignado">{{ item.taller_asignado || 'En evaluación' }}</p>
+                  <p class="text-[11px] text-on-surface-variant truncate" [title]="item.taller_asignado">{{ item.taller_asignado || 'En evaluación' }}</p>
                 </div>
               </div>
 
               <!-- Objeto & Bottom Action Bar -->
-              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-3 border-t border-outline-variant/40">
-                <div class="text-xs text-on-surface-variant">
-                  <span class="font-semibold text-on-surface">Bien Asegurado:</span> {{ item.objeto }}
+              <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 pt-2 border-t border-outline-variant/40">
+                <div class="text-xs text-on-surface-variant truncate">
+                  <span class="font-semibold text-on-surface">Bien:</span> {{ item.objeto }}
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                  <button (click)="verExpediente(item)" class="w-full sm:w-auto px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
-                    <span>Ver Expediente Completo</span>
-                    <span class="material-symbols-outlined text-sm">visibility</span>
-                  </button>
-                </div>
+                <button (click)="verExpediente(item)" class="w-full sm:w-auto px-4 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer shrink-0">
+                  <span>Ver Expediente Completo</span>
+                  <span class="material-symbols-outlined text-sm">visibility</span>
+                </button>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <!-- Modal Expediente Detallado -->
-      <div *ngIf="selectedExpediente()" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto my-auto">
+      <!-- Modal Expediente Detallado (Z-INDEX 60 PARA QUEDAR SOBRE EL NAVBAR MÓVIL) -->
+      <div *ngIf="selectedExpediente()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-[60] overflow-y-auto">
+        <div class="bg-surface-container-lowest border-t sm:border border-outline-variant rounded-t-2xl sm:rounded-2xl max-w-2xl w-full p-4 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
           
           <!-- Modal Header -->
           <div class="flex justify-between items-start pb-3 border-b border-outline-variant">
             <div>
               <div class="flex items-center gap-2">
-                <span class="text-xs font-black bg-primary/10 text-primary px-2.5 py-0.5 rounded-full border border-primary/20">EXPEDIENTE OFICIAL</span>
+                <span class="text-[10px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">EXPEDIENTE OFICIAL</span>
                 <span class="text-xs text-on-surface-variant font-bold">Mercantil Andina</span>
               </div>
-              <h2 class="text-lg sm:text-xl font-black text-on-surface mt-1">Siniestro #{{ selectedExpediente()?.numero_siniestro }}</h2>
-              <p class="text-xs text-on-surface-variant font-medium">Cliente: <strong>{{ selectedExpediente()?.cliente }}</strong> (DNI/ID #{{ selectedExpediente()?.cliente_id }})</p>
+              <h2 class="text-base sm:text-xl font-black text-on-surface mt-1">Siniestro #{{ selectedExpediente()?.numero_siniestro }}</h2>
+              <p class="text-xs text-on-surface-variant font-medium">Cliente: <strong>{{ selectedExpediente()?.cliente }}</strong></p>
             </div>
             <button (click)="closeExpedienteModal()" class="text-outline hover:text-on-surface p-1 rounded-lg cursor-pointer">
               <span class="material-symbols-outlined">close</span>
@@ -185,11 +194,11 @@ export interface Siniestro {
           </div>
 
           <!-- Section 1: Core Details -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-surface-container-low p-4 rounded-xl border border-outline-variant text-xs sm:text-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-surface-container-low p-3.5 rounded-xl border border-outline-variant text-xs">
             <div>
-              <p class="text-[10px] font-bold text-outline uppercase">Póliza Afiliada</p>
+              <p class="text-[10px] font-bold text-outline uppercase">Póliza & Ramo</p>
               <p class="font-bold text-primary text-sm">{{ selectedExpediente()?.poliza }}</p>
-              <p class="text-xs text-on-surface-variant mt-0.5">{{ selectedExpediente()?.ramo }}</p>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">{{ selectedExpediente()?.ramo }}</p>
             </div>
             <div>
               <p class="text-[10px] font-bold text-outline uppercase">Estado de Tramitación</p>
@@ -203,39 +212,39 @@ export interface Siniestro {
               </span>
             </div>
             <div class="sm:col-span-2 pt-2 border-t border-outline-variant/40">
-              <p class="text-[10px] font-bold text-outline uppercase">Bien Afiliado & Dominio</p>
+              <p class="text-[10px] font-bold text-outline uppercase">Bien Asegurado</p>
               <p class="font-bold text-on-surface">{{ selectedExpediente()?.objeto }}</p>
             </div>
           </div>
 
           <!-- Section 2: Technical Inspections & Amounts -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
-            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
-              <p class="text-[10px] font-bold text-outline uppercase">Perito / Inspector Asignado</p>
-              <p class="font-bold text-on-surface">{{ selectedExpediente()?.inspector || 'Sin asignar' }}</p>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl">
+              <p class="text-[10px] font-bold text-outline uppercase">Inspector</p>
+              <p class="font-bold text-on-surface truncate">{{ selectedExpediente()?.inspector || 'Sin asignar' }}</p>
             </div>
-            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
-              <p class="text-[10px] font-bold text-outline uppercase">Taller Oficial / Prestador</p>
+            <div class="p-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl">
+              <p class="text-[10px] font-bold text-outline uppercase">Taller / Prestador</p>
               <p class="font-bold text-on-surface truncate">{{ selectedExpediente()?.taller_asignado || 'Sin asignar' }}</p>
             </div>
-            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
-              <p class="text-[10px] font-bold text-outline uppercase">Monto Estimado</p>
-              <p class="font-black text-sm text-primary">$ {{ selectedExpediente()?.monto_estimado | number:'1.0-0' }} ARS</p>
+            <div class="p-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl">
+              <p class="text-[10px] font-bold text-outline uppercase">Estimado</p>
+              <p class="font-black text-xs sm:text-sm text-primary">$ {{ selectedExpediente()?.monto_estimado | number:'1.0-0' }}</p>
             </div>
-            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
-              <p class="text-[10px] font-bold text-outline uppercase">Monto Liquidado</p>
-              <p class="font-black text-sm text-emerald-600">$ {{ selectedExpediente()?.monto_liquidado | number:'1.0-0' }} ARS</p>
+            <div class="p-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl">
+              <p class="text-[10px] font-bold text-outline uppercase">Liquidado</p>
+              <p class="font-black text-xs sm:text-sm text-emerald-600">$ {{ selectedExpediente()?.monto_liquidado | number:'1.0-0' }}</p>
             </div>
           </div>
 
           <!-- Section 3: Timeline Cronograma -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-outline uppercase tracking-wider">Cronograma de Trámite</h4>
+          <div class="space-y-1.5">
+            <h4 class="text-[10px] font-bold text-outline uppercase tracking-wider">Cronograma del Trámite</h4>
             <div class="space-y-2 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant">
-              <div *ngFor="let item of selectedExpediente()?.cronograma" class="flex items-start gap-3 text-xs">
-                <div class="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0"></div>
+              <div *ngFor="let item of selectedExpediente()?.cronograma" class="flex items-start gap-2.5 text-xs">
+                <div class="w-2 h-2 rounded-full bg-primary mt-1 shrink-0"></div>
                 <div>
-                  <p class="font-bold text-on-surface">{{ item.titulo }} <span class="text-outline font-normal">({{ item.fecha }})</span></p>
+                  <p class="font-bold text-on-surface text-xs">{{ item.titulo }} <span class="text-outline font-normal">({{ item.fecha }})</span></p>
                   <p class="text-on-surface-variant text-[11px]">{{ item.descripcion }}</p>
                 </div>
               </div>
@@ -243,12 +252,12 @@ export interface Siniestro {
           </div>
 
           <!-- Section 4: Attachments -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-outline uppercase tracking-wider">Documentos y Fotos Adjuntas</h4>
+          <div class="space-y-1.5">
+            <h4 class="text-[10px] font-bold text-outline uppercase tracking-wider">Documentos Adjuntos</h4>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div *ngFor="let adj of selectedExpediente()?.adjuntos" class="p-2.5 bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between text-xs">
                 <div class="min-w-0 pr-1">
-                  <p class="font-bold text-on-surface truncate">{{ adj.nombre }}</p>
+                  <p class="font-bold text-on-surface truncate text-xs">{{ adj.nombre }}</p>
                   <p class="text-[10px] text-outline">{{ adj.tipo }} • {{ adj.tamano }}</p>
                 </div>
                 <span class="material-symbols-outlined text-primary text-base shrink-0">download</span>
@@ -257,13 +266,64 @@ export interface Siniestro {
           </div>
 
           <!-- Modal Action Buttons -->
-          <div class="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-outline-variant">
-            <button (click)="enviarWppExpediente()" class="w-full sm:w-auto flex-1 py-2.5 px-4 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all cursor-pointer">
+          <div class="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-outline-variant pb-safe">
+            <button (click)="enviarWppExpediente()" class="w-full sm:flex-1 py-3 px-4 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all cursor-pointer">
               <span class="material-symbols-outlined text-base">chat</span>
               <span>Enviar Estado por WhatsApp</span>
             </button>
-            <button (click)="closeExpedienteModal()" class="w-full sm:w-auto px-5 py-2.5 border border-outline-variant text-on-surface font-bold rounded-xl text-xs hover:bg-surface-container transition-colors cursor-pointer">
+            <button (click)="closeExpedienteModal()" class="w-full sm:w-auto px-5 py-3 border border-outline-variant text-on-surface font-bold rounded-xl text-xs hover:bg-surface-container transition-colors cursor-pointer">
               Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Denunciar Siniestro (Z-INDEX 60 PARA QUEDAR SOBRE NAVBAR MÓVIL) -->
+      <div *ngIf="showDenunciaModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 z-[60] overflow-y-auto">
+        <div class="bg-surface-container-lowest border-t sm:border border-outline-variant rounded-t-2xl sm:rounded-2xl max-w-lg w-full p-4 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+          <div class="flex justify-between items-center pb-3 border-b border-outline-variant">
+            <h3 class="font-bold text-base sm:text-lg text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">add_alert</span>
+              Denunciar Nuevo Siniestro
+            </h3>
+            <button (click)="closeDenunciaModal()" class="text-outline hover:text-on-surface p-1 rounded-lg cursor-pointer">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm">
+            <div>
+              <label class="block font-bold text-outline text-[10px] uppercase mb-1">Cliente Afectado</label>
+              <input [(ngModel)]="newCliente" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-xs sm:text-sm" placeholder="Ej: BAHAMONDE JOSE ANTONIO" />
+            </div>
+            <div>
+              <label class="block font-bold text-outline text-[10px] uppercase mb-1">Número de Póliza</label>
+              <input [(ngModel)]="newPoliza" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-xs sm:text-sm" placeholder="Ej: 5-894210-242193" />
+            </div>
+            <div>
+              <label class="block font-bold text-outline text-[10px] uppercase mb-1">Tipo de Incidente / Daño</label>
+              <select [(ngModel)]="newTipo" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-xs sm:text-sm">
+                <option value="Robo Parcial - Rueda / Auxilio">Robo Parcial - Rueda / Auxilio</option>
+                <option value="Robo Total de Vehículo">Robo Total de Vehículo</option>
+                <option value="Rotura de Cristales / Parabrisas">Rotura de Cristales / Parabrisas</option>
+                <option value="Daños por Granizo e Inundación">Daños por Granizo e Inundación</option>
+                <option value="Responsabilidad Civil - Colisión">Responsabilidad Civil - Colisión</option>
+                <option value="Incendio Hogar / Comercio">Incendio Hogar / Comercio</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-outline text-[10px] uppercase mb-1">Fecha de Ocurrencia</label>
+              <input type="date" [(ngModel)]="newFecha" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-xs sm:text-sm" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 pt-3 border-t border-outline-variant pb-safe">
+            <button (click)="closeDenunciaModal()" class="flex-1 py-3 border border-outline-variant text-on-surface font-bold rounded-xl text-xs hover:bg-surface-container transition-colors cursor-pointer">
+              Cancelar
+            </button>
+            <button (click)="submitDenuncia()" [disabled]="isSubmitting()" class="flex-1 py-3 bg-primary text-white font-bold rounded-xl text-xs hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              <span *ngIf="isSubmitting()" class="material-symbols-outlined text-sm animate-spin">sync</span>
+              <span>{{ isSubmitting() ? 'Registrando...' : 'Confirmar Denuncia' }}</span>
             </button>
           </div>
         </div>
