@@ -1138,8 +1138,8 @@ async def cooperacion_obtener_pdf(
 # ------------------------------------------------------------
 from pywebpush import webpush, WebPushException
 
-VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "BEhHZHgXL2UXdezMYIswGk8YX2B6-j_vhnL1snwIdedlRH2S-oEZ5uMaFz1gGpNa6kADwXTBiYWMMx4Isv3sOuA")
-VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "sG0y-nwi67EQblB3HeLxP8G1433KLVifrxtoPMbu4Qk")
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "")
+VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "")
 VAPID_CLAIMS_EMAIL = os.getenv("VAPID_CLAIMS_EMAIL", "mailto:soporte@katrix.com.ar")
 
 class PushSubscriptionSchema(BaseModel):

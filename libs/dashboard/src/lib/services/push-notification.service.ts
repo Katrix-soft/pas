@@ -35,7 +35,7 @@ export class PushNotificationService {
   isSubscribedBackend = signal<boolean>(false);
   countdownSecs = signal<number>(0);
 
-  vapidPublicKey = 'BEhHZHgXL2UXdezMYIswGk8YX2B6-j_vhnL1snwIdedlRH2S-oEZ5uMaFz1gGpNa6kADwXTBiYWMMx4Isv3sOuA';
+  vapidPublicKey = '';
 
   constructor() {
     if (typeof window !== 'undefined') {
