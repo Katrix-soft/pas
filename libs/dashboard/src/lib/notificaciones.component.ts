@@ -1,176 +1,220 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+
+export interface AlertaNotificacion {
+  id: string;
+  titulo: string;
+  subtitulo: string;
+  tipo: 'error' | 'warning' | 'info' | 'success';
+  fecha: string;
+  leido: boolean;
+  link?: string;
+}
 
 @Component({
   selector: 'lib-notificaciones',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, HttpClientModule, FormsModule],
   template: `
-    <div class="flex flex-col min-h-screen text-on-surface bg-surface">
+    <div class="flex flex-col min-h-screen text-on-surface bg-surface font-body-md pb-24 overflow-x-hidden">
       <!-- TopAppBar -->
-      <header class="w-full sticky top-0 z-50 bg-surface border-b border-outline-variant flex items-center h-16 px-md w-full">
-        <button routerLink="/perfil" class="mr-4 p-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-70 cursor-pointer">
-          <span class="material-symbols-outlined text-primary" data-icon="arrow_back">arrow_back</span>
-        </button>
-        <h1 class="font-headline-sm text-headline-sm text-primary">Configuración de Notificaciones</h1>
+      <header class="w-full sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex items-center justify-between h-14 px-4 sm:px-6">
+        <div class="flex items-center gap-3">
+          <button routerLink="/dashboard" class="p-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-70 cursor-pointer">
+            <span class="material-symbols-outlined text-primary text-xl">arrow_back</span>
+          </button>
+          <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Centro de Alertas & Notificaciones</h1>
+        </div>
       </header>
 
       <!-- Main Content -->
-      <main class="flex-grow px-md pt-lg pb-32 max-w-2xl mx-auto w-full">
-        <!-- Intro Text -->
-        <p class="font-body-md text-body-md text-on-surface-variant mb-lg px-2">
-          Elige qué alertas deseas recibir para mantenerte al tanto de tu cartera.
-        </p>
+      <main class="flex-grow px-4 sm:px-6 py-4 max-w-4xl mx-auto w-full space-y-6">
+        
+        <!-- Live Alerts Feed from API -->
+        <section class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold text-outline uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-primary text-base">notifications_active</span>
+              <span>Alertas Recientes de la Cartera</span>
+            </h2>
+            <span class="text-xs text-primary font-bold bg-primary-container/20 px-2.5 py-0.5 rounded-full border border-primary/20">
+              {{ alertList().length }} Alertas
+            </span>
+          </div>
 
-        <!-- Notification Sections -->
-        <div class="space-y-lg">
+          <div class="space-y-2.5">
+            <div
+              *ngFor="let alert of alertList()"
+              class="p-4 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xs hover:shadow-md transition-all flex items-start justify-between gap-3 border-l-4"
+              [ngClass]="{
+                'border-l-error': alert.tipo === 'error',
+                'border-l-amber-500': alert.tipo === 'warning',
+                'border-l-primary': alert.tipo === 'info',
+                'border-l-emerald-600': alert.tipo === 'success'
+              }"
+            >
+              <div class="flex items-start gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                     [ngClass]="{
+                       'bg-error/10 text-error': alert.tipo === 'error',
+                       'bg-amber-500/10 text-amber-600': alert.tipo === 'warning',
+                       'bg-primary/10 text-primary': alert.tipo === 'info',
+                       'bg-emerald-500/10 text-emerald-600': alert.tipo === 'success'
+                     }">
+                  <span class="material-symbols-outlined text-lg">
+                    {{ alert.tipo === 'error' ? 'priority_high' : alert.tipo === 'warning' ? 'warning' : alert.tipo === 'success' ? 'check_circle' : 'info' }}
+                  </span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="font-bold text-xs sm:text-sm text-on-surface truncate">{{ alert.titulo }}</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">{{ alert.subtitulo }}</p>
+                  <p class="text-[10px] text-outline mt-1 font-semibold">{{ alert.fecha }}</p>
+                </div>
+              </div>
+              
+              <a *ngIf="alert.link" [routerLink]="alert.link" class="text-xs font-bold text-primary hover:underline shrink-0 p-1">
+                Ver →
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Preference Toggles -->
+        <section class="space-y-4">
+          <h2 class="text-xs font-bold text-outline uppercase tracking-wider">Configuración de Canales de Alerta</h2>
+
           <!-- Section: Cartera -->
-          <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            <div class="px-md py-sm bg-surface-container-low border-b border-outline-variant">
-              <h2 class="font-label-md text-label-md text-primary uppercase">Notificaciones de Cartera</h2>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
+            <div class="px-4 py-2.5 bg-surface-container-low border-b border-outline-variant flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-base">folder_special</span>
+              <h3 class="text-xs font-bold text-primary uppercase">Eventos de Cartera</h3>
             </div>
-            <div class="divide-y divide-outline-variant">
-              <!-- Row 1 -->
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer group">
-                <span class="font-body-md text-body-md text-on-surface">Nuevas Pólizas Emitidas</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input checked class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors duration-200">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform duration-200 shadow-sm"></div>
-                  </div>
-                </div>
+            <div class="divide-y divide-outline-variant text-xs sm:text-sm">
+              <label class="flex items-center justify-between p-3.5 sm:p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+                <span class="font-semibold text-on-surface">Nuevas Pólizas Emitidas</span>
+                <input type="checkbox" [(ngModel)]="prefEmitidas" class="w-5 h-5 accent-primary cursor-pointer">
               </label>
-              <!-- Row 2 -->
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer group">
-                <span class="font-body-md text-body-md text-on-surface">Próximas Renovaciones</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input checked class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors duration-200">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform duration-200 shadow-sm"></div>
-                  </div>
-                </div>
+              <label class="flex items-center justify-between p-3.5 sm:p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+                <span class="font-semibold text-on-surface">Próximas Renovaciones (30 días)</span>
+                <input type="checkbox" [(ngModel)]="prefRenovaciones" class="w-5 h-5 accent-primary cursor-pointer">
               </label>
             </div>
-          </section>
+          </div>
 
           <!-- Section: Cobranzas -->
-          <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            <div class="px-md py-sm bg-surface-container-low border-b border-outline-variant">
-              <h2 class="font-label-md text-label-md text-primary uppercase">Gestión de Cobranzas</h2>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
+            <div class="px-4 py-2.5 bg-surface-container-low border-b border-outline-variant flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-base">payments</span>
+              <h3 class="text-xs font-bold text-primary uppercase">Cobranzas y Morosidad</h3>
             </div>
-            <div class="divide-y divide-outline-variant">
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer">
-                <span class="font-body-md text-body-md text-on-surface">Pagos Rechazados</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input checked class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform shadow-sm"></div>
-                  </div>
-                </div>
+            <div class="divide-y divide-outline-variant text-xs sm:text-sm">
+              <label class="flex items-center justify-between p-3.5 sm:p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+                <span class="font-semibold text-on-surface">Rechazos de Débito Automático</span>
+                <input type="checkbox" [(ngModel)]="prefRechazos" class="w-5 h-5 accent-primary cursor-pointer">
               </label>
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer">
-                <span class="font-body-md text-body-md text-on-surface">Pólizas con Deuda</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input checked class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform shadow-sm"></div>
-                  </div>
-                </div>
+              <label class="flex items-center justify-between p-3.5 sm:p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+                <span class="font-semibold text-on-surface">Alertas de Cuotas Vencidas</span>
+                <input type="checkbox" [(ngModel)]="prefDeuda" class="w-5 h-5 accent-primary cursor-pointer">
               </label>
             </div>
-          </section>
+          </div>
 
           <!-- Section: Siniestros -->
-          <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            <div class="px-md py-sm bg-surface-container-low border-b border-outline-variant">
-              <h2 class="font-label-md text-label-md text-primary uppercase">Siniestros</h2>
+          <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
+            <div class="px-4 py-2.5 bg-surface-container-low border-b border-outline-variant flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-base">report_problem</span>
+              <h3 class="text-xs font-bold text-primary uppercase">Tramitación de Siniestros</h3>
             </div>
-            <div class="divide-y divide-outline-variant">
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer">
-                <span class="font-body-md text-body-md text-on-surface">Actualización de Estado</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input checked class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform shadow-sm"></div>
-                  </div>
-                </div>
+            <div class="divide-y divide-outline-variant text-xs sm:text-sm">
+              <label class="flex items-center justify-between p-3.5 sm:p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+                <span class="font-semibold text-on-surface">Cambios de Estado en Inspecciones</span>
+                <input type="checkbox" [(ngModel)]="prefInspeccion" class="w-5 h-5 accent-primary cursor-pointer">
               </label>
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer">
-                <span class="font-body-md text-body-md text-on-surface">Nuevos Siniestros Reportados</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform shadow-sm"></div>
-                  </div>
-                </div>
+              <label class="flex items-center justify-between p-3.5 sm:p-4 hover:bg-surface-container-high transition-colors cursor-pointer">
+                <span class="font-semibold text-on-surface">Liquidación de Pagos y Talleres</span>
+                <input type="checkbox" [(ngModel)]="prefLiquidacion" class="w-5 h-5 accent-primary cursor-pointer">
               </label>
             </div>
-          </section>
+          </div>
 
-          <!-- Section: Canales -->
-          <section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-            <div class="px-md py-sm bg-surface-container-low border-b border-outline-variant">
-              <h2 class="font-label-md text-label-md text-primary uppercase">Canales de Envío</h2>
-            </div>
-            <div class="divide-y divide-outline-variant">
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer">
-                <span class="font-body-md text-body-md text-on-surface">Notificaciones Push</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input checked class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform shadow-sm"></div>
-                  </div>
-                </div>
-              </label>
-              <label class="flex items-center justify-between p-md hover:bg-surface-container-high transition-colors cursor-pointer">
-                <span class="font-body-md text-body-md text-on-surface">Correo Electrónico</span>
-                <div class="relative inline-block w-10 h-5">
-                  <input class="toggle-checkbox absolute opacity-0 w-0 h-0" type="checkbox">
-                  <div class="toggle-slot block bg-outline-variant w-10 h-5 rounded-full transition-colors">
-                    <div class="toggle-dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform shadow-sm"></div>
-                  </div>
-                </div>
-              </label>
-            </div>
-          </section>
-
-          <!-- Action Button -->
-          <div class="pt-lg pb-md">
-            <button class="w-full bg-primary text-on-primary font-headline-sm text-headline-sm py-4 rounded-xl shadow-sm active:scale-[0.98] transition-all hover:bg-primary-container hover:text-on-primary-container cursor-pointer" id="save-btn" (click)="saveChanges($event)">
-              Guardar Cambios
+          <!-- Save Button -->
+          <div class="pt-2">
+            <button
+              (click)="saveChanges($event)"
+              class="w-full bg-primary text-white font-bold py-3 rounded-xl shadow-xs transition-all hover:bg-primary-container active:scale-[0.99] cursor-pointer text-sm"
+            >
+              Guardar Preferencias de Notificación
             </button>
           </div>
-        </div>
+        </section>
+
       </main>
-
-
     </div>
-`,
+  `,
   styles: [`
-    .toggle-checkbox:checked + .toggle-slot {
-        background-color: #0058be;
-    }
-    .toggle-checkbox:checked + .toggle-slot .toggle-dot {
-        transform: translateX(1.25rem);
-    }
-    .scroll-mask {
-        mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-    }
-`]
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  `]
 })
-export class NotificacionesComponent {
+export class NotificacionesComponent implements OnInit {
+  private http = inject(HttpClient);
+
+  alertList = signal<AlertaNotificacion[]>([]);
+
+  prefEmitidas = true;
+  prefRenovaciones = true;
+  prefRechazos = true;
+  prefDeuda = true;
+  prefInspeccion = true;
+  prefLiquidacion = true;
+
+  ngOnInit() {
+    this.cargarAlertas();
+  }
+
+  cargarAlertas() {
+    this.http.get<any>('/api/v1/quotations/mercantil/siniestros').subscribe({
+      next: (res) => {
+        const datos = res?.datos || [];
+        const alertasSiniestros: AlertaNotificacion[] = datos.map((s: any) => ({
+          id: s.numero_siniestro,
+          titulo: `Siniestro #${s.numero_siniestro} - ${s.estado}`,
+          subtitulo: `${s.cliente} • ${s.tipo_siniestro} (${s.compania})`,
+          tipo: s.estado === 'En Inspección' ? 'warning' : s.estado === 'Liquidado' ? 'success' : 'info',
+          fecha: `Denunciado el ${s.fecha_denuncia}`,
+          leido: false,
+          link: '/siniestros'
+        }));
+
+        const alertaDeuda: AlertaNotificacion = {
+          id: 'deuda-1',
+          titulo: 'Alerta de Cobranzas: 5 Pólizas con Deuda',
+          subtitulo: 'Se registran $420.000 ARS pendientes de cobro.',
+          tipo: 'error',
+          fecha: 'Hoy 09:30 hs',
+          leido: false,
+          link: '/cobranzas'
+        };
+
+        this.alertList.set([alertaDeuda, ...alertasSiniestros]);
+      },
+      error: () => {}
+    });
+  }
+
   saveChanges(event: Event) {
     const btn = event.target as HTMLElement;
     const originalText = btn.innerText;
-    btn.innerText = '¡Guardado!';
-    btn.classList.add('bg-secondary');
+    btn.innerText = '¡Preferencias Guardadas!';
+    btn.classList.add('bg-emerald-600');
     btn.classList.remove('bg-primary');
     
     setTimeout(() => {
-        btn.innerText = originalText;
-        btn.classList.remove('bg-secondary');
-        btn.classList.add('bg-primary');
+      btn.innerText = originalText;
+      btn.classList.remove('bg-emerald-600');
+      btn.classList.add('bg-primary');
     }, 2000);
   }
 }

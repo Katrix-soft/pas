@@ -21,6 +21,8 @@ export interface Siniestro {
   objeto: string;
   inspector?: string;
   taller_asignado?: string;
+  adjuntos?: any[];
+  cronograma?: any[];
 }
 
 @Component({
@@ -46,21 +48,18 @@ export interface Siniestro {
           </button>
         </section>
 
-        <!-- Search Bar & Stats Cards -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4">
-          <!-- Search Input -->
-          <div class="md:col-span-4 relative">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <span class="material-symbols-outlined text-outline text-lg">search</span>
-            </div>
-            <input
-              [(ngModel)]="searchQuery"
-              (ngModelChange)="onSearchChange()"
-              class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm text-on-surface placeholder-on-surface-variant transition-all shadow-xs"
-              placeholder="Buscar por número de siniestro, cliente, póliza o tipo de incidente..."
-              type="text"
-            />
+        <!-- Search Bar -->
+        <section class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <span class="material-symbols-outlined text-outline text-lg">search</span>
           </div>
+          <input
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange()"
+            class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm text-on-surface placeholder-on-surface-variant transition-all shadow-xs"
+            placeholder="Buscar por número de siniestro, cliente, póliza o tipo de incidente..."
+            type="text"
+          />
         </section>
 
         <!-- Filter Chips -->
@@ -155,9 +154,9 @@ export interface Siniestro {
                   <span class="font-semibold text-on-surface">Bien Asegurado:</span> {{ item.objeto }}
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                  <button (click)="verDetalle(item)" class="w-full sm:w-auto px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
-                    <span>Ver Expediente</span>
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  <button (click)="verExpediente(item)" class="w-full sm:w-auto px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+                    <span>Ver Expediente Completo</span>
+                    <span class="material-symbols-outlined text-sm">visibility</span>
                   </button>
                 </div>
               </div>
@@ -166,57 +165,105 @@ export interface Siniestro {
         </section>
       </main>
 
-      <!-- FAB Floating Button for Mobile -->
-      <button (click)="openDenunciaModal()" class="fixed right-4 bottom-20 sm:bottom-8 w-13 h-13 bg-primary text-on-primary rounded-2xl shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40 cursor-pointer">
-        <span class="material-symbols-outlined text-2xl">add</span>
-      </button>
-
-      <!-- Modal Denunciar Siniestro -->
-      <div *ngIf="showDenunciaModal()" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-xl">
-          <div class="flex justify-between items-center pb-3 border-b border-outline-variant">
-            <h3 class="font-bold text-lg text-on-surface flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">add_alert</span>
-              Denunciar Nuevo Siniestro
-            </h3>
-            <button (click)="closeDenunciaModal()" class="text-outline hover:text-on-surface p-1 rounded-lg cursor-pointer">
+      <!-- Modal Expediente Detallado -->
+      <div *ngIf="selectedExpediente()" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto my-auto">
+          
+          <!-- Modal Header -->
+          <div class="flex justify-between items-start pb-3 border-b border-outline-variant">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black bg-primary/10 text-primary px-2.5 py-0.5 rounded-full border border-primary/20">EXPEDIENTE OFICIAL</span>
+                <span class="text-xs text-on-surface-variant font-bold">Mercantil Andina</span>
+              </div>
+              <h2 class="text-lg sm:text-xl font-black text-on-surface mt-1">Siniestro #{{ selectedExpediente()?.numero_siniestro }}</h2>
+              <p class="text-xs text-on-surface-variant font-medium">Cliente: <strong>{{ selectedExpediente()?.cliente }}</strong> (DNI/ID #{{ selectedExpediente()?.cliente_id }})</p>
+            </div>
+            <button (click)="closeExpedienteModal()" class="text-outline hover:text-on-surface p-1 rounded-lg cursor-pointer">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          <div class="space-y-3 text-xs sm:text-sm">
+          <!-- Section 1: Core Details -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-surface-container-low p-4 rounded-xl border border-outline-variant text-xs sm:text-sm">
             <div>
-              <label class="block font-bold text-outline text-[11px] uppercase mb-1">Cliente Afectado</label>
-              <input [(ngModel)]="newCliente" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-sm" placeholder="Ej: BAHAMONDE JOSE ANTONIO" />
+              <p class="text-[10px] font-bold text-outline uppercase">Póliza Afiliada</p>
+              <p class="font-bold text-primary text-sm">{{ selectedExpediente()?.poliza }}</p>
+              <p class="text-xs text-on-surface-variant mt-0.5">{{ selectedExpediente()?.ramo }}</p>
             </div>
             <div>
-              <label class="block font-bold text-outline text-[11px] uppercase mb-1">Número de Póliza</label>
-              <input [(ngModel)]="newPoliza" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-sm" placeholder="Ej: 5-894210-242193" />
+              <p class="text-[10px] font-bold text-outline uppercase">Estado de Tramitación</p>
+              <span class="font-bold px-2.5 py-0.5 rounded-full text-xs inline-block mt-0.5"
+                [ngClass]="{
+                  'bg-indigo-500/10 text-indigo-600 border border-indigo-500/20': selectedExpediente()?.estado === 'En Inspección',
+                  'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20': selectedExpediente()?.estado === 'Liquidado',
+                  'bg-amber-500/10 text-amber-600 border border-amber-500/20': selectedExpediente()?.estado === 'Pendiente'
+                }">
+                {{ selectedExpediente()?.estado }}
+              </span>
             </div>
-            <div>
-              <label class="block font-bold text-outline text-[11px] uppercase mb-1">Tipo de Incidente / Daño</label>
-              <select [(ngModel)]="newTipo" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-sm">
-                <option value="Robo Parcial - Rueda / Auxilio">Robo Parcial - Rueda / Auxilio</option>
-                <option value="Robo Total de Vehículo">Robo Total de Vehículo</option>
-                <option value="Rotura de Cristales / Parabrisas">Rotura de Cristales / Parabrisas</option>
-                <option value="Daños por Granizo e Inundación">Daños por Granizo e Inundación</option>
-                <option value="Responsabilidad Civil - Colisión">Responsabilidad Civil - Colisión</option>
-                <option value="Incendio Hogar / Comercio">Incendio Hogar / Comercio</option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-bold text-outline text-[11px] uppercase mb-1">Fecha de Ocurrencia</label>
-              <input type="date" [(ngModel)]="newFecha" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface text-sm" />
+            <div class="sm:col-span-2 pt-2 border-t border-outline-variant/40">
+              <p class="text-[10px] font-bold text-outline uppercase">Bien Afiliado & Dominio</p>
+              <p class="font-bold text-on-surface">{{ selectedExpediente()?.objeto }}</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-2 pt-3 border-t border-outline-variant">
-            <button (click)="closeDenunciaModal()" class="flex-1 py-3 border border-outline-variant text-on-surface font-bold rounded-xl text-xs hover:bg-surface-container transition-colors cursor-pointer">
-              Cancelar
+          <!-- Section 2: Technical Inspections & Amounts -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
+              <p class="text-[10px] font-bold text-outline uppercase">Perito / Inspector Asignado</p>
+              <p class="font-bold text-on-surface">{{ selectedExpediente()?.inspector || 'Sin asignar' }}</p>
+            </div>
+            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
+              <p class="text-[10px] font-bold text-outline uppercase">Taller Oficial / Prestador</p>
+              <p class="font-bold text-on-surface truncate">{{ selectedExpediente()?.taller_asignado || 'Sin asignar' }}</p>
+            </div>
+            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
+              <p class="text-[10px] font-bold text-outline uppercase">Monto Estimado</p>
+              <p class="font-black text-sm text-primary">$ {{ selectedExpediente()?.monto_estimado | number:'1.0-0' }} ARS</p>
+            </div>
+            <div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl space-y-1">
+              <p class="text-[10px] font-bold text-outline uppercase">Monto Liquidado</p>
+              <p class="font-black text-sm text-emerald-600">$ {{ selectedExpediente()?.monto_liquidado | number:'1.0-0' }} ARS</p>
+            </div>
+          </div>
+
+          <!-- Section 3: Timeline Cronograma -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-outline uppercase tracking-wider">Cronograma de Trámite</h4>
+            <div class="space-y-2 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant">
+              <div *ngFor="let item of selectedExpediente()?.cronograma" class="flex items-start gap-3 text-xs">
+                <div class="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0"></div>
+                <div>
+                  <p class="font-bold text-on-surface">{{ item.titulo }} <span class="text-outline font-normal">({{ item.fecha }})</span></p>
+                  <p class="text-on-surface-variant text-[11px]">{{ item.descripcion }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Attachments -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-outline uppercase tracking-wider">Documentos y Fotos Adjuntas</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div *ngFor="let adj of selectedExpediente()?.adjuntos" class="p-2.5 bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between text-xs">
+                <div class="min-w-0 pr-1">
+                  <p class="font-bold text-on-surface truncate">{{ adj.nombre }}</p>
+                  <p class="text-[10px] text-outline">{{ adj.tipo }} • {{ adj.tamano }}</p>
+                </div>
+                <span class="material-symbols-outlined text-primary text-base shrink-0">download</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Action Buttons -->
+          <div class="flex flex-col sm:flex-row items-center gap-2 pt-3 border-t border-outline-variant">
+            <button (click)="enviarWppExpediente()" class="w-full sm:w-auto flex-1 py-2.5 px-4 bg-emerald-600 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all cursor-pointer">
+              <span class="material-symbols-outlined text-base">chat</span>
+              <span>Enviar Estado por WhatsApp</span>
             </button>
-            <button (click)="submitDenuncia()" [disabled]="isSubmitting()" class="flex-1 py-3 bg-primary text-white font-bold rounded-xl text-xs hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-              <span *ngIf="isSubmitting()" class="material-symbols-outlined text-sm animate-spin">sync</span>
-              <span>{{ isSubmitting() ? 'Registrando...' : 'Confirmar Denuncia' }}</span>
+            <button (click)="closeExpedienteModal()" class="w-full sm:w-auto px-5 py-2.5 border border-outline-variant text-on-surface font-bold rounded-xl text-xs hover:bg-surface-container transition-colors cursor-pointer">
+              Cerrar
             </button>
           </div>
         </div>
@@ -240,7 +287,10 @@ export class SiniestrosComponent implements OnInit {
   activeFilter = signal<string>('Todos');
   searchQuery = '';
 
-  // Modal State
+  // Expediente Modal State
+  selectedExpediente = signal<Siniestro | null>(null);
+
+  // Modal Denuncia State
   showDenunciaModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
   newCliente = '';
@@ -297,8 +347,31 @@ export class SiniestrosComponent implements OnInit {
     this.filteredSiniestros.set(list);
   }
 
-  verDetalle(item: Siniestro) {
-    alert(`Consulta de expediente #${item.numero_siniestro} (${item.cliente}): estado ${item.estado}.`);
+  verExpediente(item: Siniestro) {
+    this.http.get<any>(`/api/v1/quotations/mercantil/siniestros/${item.numero_siniestro}`).subscribe({
+      next: (res) => {
+        if (res?.expediente) {
+          this.selectedExpediente.set(res.expediente);
+        } else {
+          this.selectedExpediente.set(item);
+        }
+      },
+      error: () => {
+        this.selectedExpediente.set(item);
+      }
+    });
+  }
+
+  closeExpedienteModal() {
+    this.selectedExpediente.set(null);
+  }
+
+  enviarWppExpediente() {
+    const exp = this.selectedExpediente();
+    if (!exp) return;
+    const msg = `Hola ${exp.cliente}, te contacto de JC Organizadores. Tu siniestro #${exp.numero_siniestro} (${exp.tipo_siniestro}) se encuentra en estado: ${exp.estado.toUpperCase()}. Quedamos a disposición.`;
+    const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   }
 
   openDenunciaModal() {

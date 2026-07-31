@@ -774,14 +774,15 @@ async def mercantil_obtener_siniestros(q: Optional[str] = None):
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
 
-@app.post("/api/v1/quotations/mercantil/siniestros", tags=["Quotations - Mercantil"])
-async def mercantil_crear_siniestro(payload: dict):
-    """Registra la denuncia inicial de un nuevo siniestro de póliza"""
+@app.get("/api/v1/quotations/mercantil/siniestros/{numero_siniestro}", tags=["Quotations - Mercantil"])
+async def mercantil_obtener_expediente_siniestro(numero_siniestro: str):
+    """Retorna la información detallada del expediente de un siniestro"""
     try:
         client = get_mercantil_client()
-        return await client.crear_denuncia_siniestro(payload)
+        return await client.obtener_expediente_siniestro(numero_siniestro)
     except MercantilAndinaError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
+
 
 
 

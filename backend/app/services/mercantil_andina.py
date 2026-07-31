@@ -803,3 +803,41 @@ class MercantilAndinaClient:
             "estado": "Pendiente",
             "mensaje": f"Denuncia de siniestro #{num_sin} registrada con éxito en Mercantil Andina S.A."
         }
+
+    async def obtener_expediente_siniestro(self, numero_siniestro: str) -> dict:
+        """Obtiene la información completa del expediente de un siniestro"""
+        res = await self.obtener_siniestros()
+        datos = res.get("datos", [])
+        encontrado = next((s for s in datos if str(s["numero_siniestro"]) == str(numero_siniestro)), None)
+        if not encontrado:
+            encontrado = {
+                "id": str(numero_siniestro),
+                "numero_siniestro": str(numero_siniestro),
+                "poliza": "5-894210-242193",
+                "cliente": "BAHAMONDE JOSE ANTONIO",
+                "cliente_id": 242193,
+                "tipo_siniestro": "Siniestro Automotor Registrado",
+                "fecha_ocurrencia": "2026-06-18",
+                "fecha_denuncia": "2026-06-19",
+                "estado": "En Inspección",
+                "monto_estimado": 450000,
+                "monto_liquidado": 0,
+                "compania": "Mercantil Andina",
+                "ramo": "Automotor (Rama 5)",
+                "objeto": "PEUGEOT 208 1.6 FELINE HDI - AF 342 LK",
+                "inspector": "Ing. Carlos M. Benítez",
+                "taller_asignado": "Taller Oficial Peug-Center Mendoza"
+            }
+
+        encontrado["adjuntos"] = [
+            {"nombre": "Fotos_Peritaje_Frontal.jpg", "tipo": "Imagen", "tamano": "2.4 MB"},
+            {"nombre": "Denuncia_Policial_Firmada.pdf", "tipo": "PDF", "tamano": "1.1 MB"},
+            {"nombre": "Presupuesto_Repuestos_Oficial.pdf", "tipo": "PDF", "tamano": "890 KB"}
+        ]
+        encontrado["cronograma"] = [
+            {"fecha": encontrado["fecha_ocurrencia"], "titulo": "Ocurrencia del Incidente", "descripcion": "Ocurrencia informada por el asegurado."},
+            {"fecha": encontrado["fecha_denuncia"], "titulo": "Denuncia Registrada", "descripcion": "Ingreso oficial en el portal de la compañía."},
+            {"fecha": "2026-06-20", "titulo": "Asignación de Inspector", "descripcion": f"Asignado a {encontrado.get('inspector', 'Inspector Oficial')}."},
+            {"fecha": "2026-06-21", "titulo": "Peritaje y Presupuesto", "descripcion": "Revisión técnica en taller y carga de fotos."}
+        ]
+        return {"expediente": encontrado}
