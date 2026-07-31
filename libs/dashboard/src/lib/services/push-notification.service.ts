@@ -18,6 +18,7 @@ export class PushNotificationService {
   activeToast = signal<PushPopAlert | null>(null);
   pushPermissionStatus = signal<string>('default');
   isHttps = signal<boolean>(true);
+  countdownSecs = signal<number>(0);
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -39,7 +40,7 @@ export class PushNotificationService {
     }
 
     if (!this.isHttps()) {
-      alert('⚠️ Para recibir notificaciones nativas en la persiana de Android con la app cerrada o bloqueada, se requiere conexión cifrada HTTPS en el servidor.\n\nMientras tanto, recibirás todas las alertas en la ventana emergente dentro de la app.');
+      alert('⚠️ NOTA SOBRE PERSIANA ANDROID/iOS:\n\nPara notificaciones nativas en la persiana de tu celular con la pantalla apagada o app minimizada, los navegadores (Chrome/Safari) exigen conexión cifrada HTTPS en el servidor.\n\nMientras tanto, recibirás todas las alertas emergentes estilo WhatsApp dentro de la app.');
     }
 
     let permission = Notification.permission;
@@ -77,7 +78,7 @@ export class PushNotificationService {
     return permission;
   }
 
-  async emitirAlerta(alerta: PushPopAlert) {
+  async emitirAlerta(alerta: PushPopAlert, delayMs: number = 0) {
     // 1. Activar Toast emergente en pantalla (Signal)
     this.activeToast.set(alerta);
 
@@ -89,8 +90,8 @@ export class PushNotificationService {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
         gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
         osc.connect(gain);
@@ -105,7 +106,7 @@ export class PushNotificationService {
       try { navigator.vibrate([200, 100, 200, 100, 250]); } catch (e) {}
     }
 
-    // 4. Intentar enviar a la persiana del Sistema Operativo (Android / iOS / Windows)
+    // 4. Enviar mensaje al Service Worker para forzar notificación en persiana del SO (Android/iOS)
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       const options: any = {
         body: alerta.mensaje,
@@ -120,15 +121,24 @@ export class PushNotificationService {
 
       if ('serviceWorker' in navigator) {
         try {
-          let reg = await navigator.serviceWorker.getRegistration();
-          if (!reg) {
-            reg = await navigator.serviceWorker.register('/sw.js');
-          }
-          if (reg && reg.showNotification) {
-            await reg.showNotification(alerta.titulo, options);
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (reg && reg.active) {
+            // PostMessage al Service Worker para forzar la notificación en persiana Android
+            reg.active.postMessage({
+              type: 'SHOW_NOTIFICATION',
+              title: alerta.titulo,
+              options: options,
+              delayMs: delayMs
+            });
+          } else if (reg && reg.showNotification) {
+            if (delayMs > 0) {
+              setTimeout(() => reg.showNotification(alerta.titulo, options), delayMs);
+            } else {
+              reg.showNotification(alerta.titulo, options);
+            }
           }
         } catch (e) {
-          console.warn('SW Push Notice:', e);
+          console.warn('SW PostMessage Error:', e);
         }
       }
     }
@@ -139,5 +149,22 @@ export class PushNotificationService {
         this.activeToast.set(null);
       }
     }, 6500);
+  }
+
+  probarPersianaAndroidConCuentaRegresiva(alerta: PushPopAlert) {
+    this.countdownSecs.set(4);
+    
+    const interval = setInterval(() => {
+      const current = this.countdownSecs();
+      if (current > 1) {
+        this.countdownSecs.set(current - 1);
+      } else {
+        clearInterval(interval);
+        this.countdownSecs.set(0);
+      }
+    }, 1000);
+
+    // Disparar a la persiana a los 3.5 segundos
+    this.emitirAlerta(alerta, 3500);
   }
 }

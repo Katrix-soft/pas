@@ -81,6 +81,27 @@ export interface AlertaNotificacion {
             </div>
           </div>
 
+          <!-- PROBAR PERSIANA ANDROID (CON RETRASO DE 4 SEGS PARA MINIMIZAR) -->
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-[#25d366] uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base">phonelink_ring</span>
+                <span>Probar Notificación en Persiana de Android (App Minimizada)</span>
+              </span>
+            </div>
+            <p class="text-[11px] text-white/70 leading-relaxed">
+              Android silencia las notificaciones de la persiana mientras la app está abierta en pantalla. Presioná el botón de abajo y <strong>minimizá Chrome o bloqueá la pantalla</strong> para ver la notificación en la persiana desplegable del teléfono.
+            </p>
+            <button
+              (click)="probarPersianaAndroidMinimizada()"
+              [disabled]="pushService.countdownSecs() > 0"
+              class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+              <span class="material-symbols-outlined text-base">send</span>
+              <span *ngIf="pushService.countdownSecs() === 0">🚨 Probar Push en Persiana Android (Minimizar App ahora)</span>
+              <span *ngIf="pushService.countdownSecs() > 0">⏰ ¡MINIMIZÁ LA APP AHORA! Disparando en {{ pushService.countdownSecs() }}s...</span>
+            </button>
+          </div>
+
           <!-- Simulation Quick Buttons (WhatsApp Push Style) -->
           <div class="pt-3 border-t border-white/10 space-y-2">
             <div class="flex items-center justify-between">
@@ -322,6 +343,19 @@ export class NotificacionesComponent implements OnInit {
 
   solicitarPermisoPush() {
     this.pushService.solicitarPermiso();
+  }
+
+  probarPersianaAndroidMinimizada() {
+    this.pushService.probarPersianaAndroidConCuentaRegresiva({
+      id: 'persiana-' + Date.now(),
+      titulo: '🚨 ALERTA PERSIANA ANDROID: Siniestro #98412',
+      mensaje: 'Mercantil Andina autorizó la liquidación del siniestro en Taller Cuyo SRL.',
+      tipo: 'siniestro',
+      icon: 'report_problem',
+      remitente: '🚨 PERSIANA ANDROID OK',
+      link: '/siniestros',
+      hora: 'Ahora'
+    });
   }
 
   simularAlertaSiniestro() {

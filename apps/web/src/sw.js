@@ -7,6 +7,7 @@ self.addEventListener('activate', function(event) {
   event.waitUntil(self.clients.claim());
 });
 
+// Escuchar notificaciones Push remotas desde el servidor
 self.addEventListener('push', function(event) {
   let data = { title: 'JC Broker PAS', body: 'Nueva notificación de la cartera.', link: '/dashboard' };
   try {
@@ -23,20 +24,32 @@ self.addEventListener('push', function(event) {
     body: data.body,
     icon: '/assets/icons/icon-192x192.png',
     badge: '/assets/icons/icon-192x192.png',
-    vibrate: [200, 100, 200, 100, 200],
-    tag: 'jc-pas-pop-' + Date.now(),
+    vibrate: [300, 100, 300, 100, 300],
+    tag: 'jc-pas-push-' + Date.now(),
     renotify: true,
     requireInteraction: true,
-    data: { url: data.link || '/dashboard' },
-    actions: [
-      { action: 'open', title: 'Ver en PAS' },
-      { action: 'close', title: 'Descartar' }
-    ]
+    data: { url: data.link || '/dashboard' }
   };
 
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
+// Escuchar mensajes locales postMessage desde la aplicación web
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, options, delayMs } = event.data;
+    
+    if (delayMs && delayMs > 0) {
+      setTimeout(() => {
+        self.registration.showNotification(title, options);
+      }, delayMs);
+    } else {
+      self.registration.showNotification(title, options);
+    }
+  }
+});
+
+// Manejador de clics en la notificación de la persiana nativa del celular
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
   if (event.action === 'close') return;
