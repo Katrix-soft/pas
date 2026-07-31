@@ -47,10 +47,16 @@ export interface AlertaNotificacion {
                 <span class="material-symbols-outlined text-2xl">chat</span>
               </div>
               <div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <h2 class="font-black text-base text-white">Alertas Push Emergentes en Celular (Android / iPhone)</h2>
-                  <span class="bg-[#25d366]/20 text-[#25d366] text-[10px] font-black px-2 py-0.5 rounded uppercase border border-[#25d366]/30">
-                    {{ pushService.pushPermissionStatus() === 'granted' ? 'HABILITADO' : 'PERMISO REQUERIDO' }}
+                  
+                  <span *ngIf="pushService.isSubscribedBackend()" class="bg-[#25d366]/20 text-[#25d366] text-[10px] font-black px-2 py-0.5 rounded uppercase border border-[#25d366]/30 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#25d366]"></span>
+                    SUSCRITO EN BACKEND (200 OK)
+                  </span>
+
+                  <span *ngIf="!pushService.isSubscribedBackend()" class="bg-amber-500/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded uppercase border border-amber-500/30">
+                    PENDIENTE DE ACTIVAR
                   </span>
                 </div>
                 <p class="text-xs text-white/80 mt-1 leading-relaxed">
@@ -61,9 +67,13 @@ export interface AlertaNotificacion {
 
             <button
               (click)="solicitarPermisoPush()"
-              class="w-full sm:w-auto px-4 py-3 bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0">
+              [disabled]="pushService.isSubscribing()"
+              class="w-full sm:w-auto px-4 py-3 bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50">
               <span class="material-symbols-outlined text-lg">notifications_active</span>
-              <span>{{ pushService.pushPermissionStatus() === 'granted' ? 'Alertas Push Activas en SO' : 'Activar Notificaciones Push' }}</span>
+              <span *ngIf="pushService.isSubscribing()">Procesando suscripción VAPID...</span>
+              <span *ngIf="!pushService.isSubscribing()">
+                {{ pushService.isSubscribedBackend() ? '✅ Suscripción Activa en Backend' : 'Activar Notificaciones Push' }}
+              </span>
             </button>
           </div>
 
@@ -106,8 +116,8 @@ export interface AlertaNotificacion {
             </p>
             <button
               (click)="probarPersianaAndroidMinimizada()"
-              [disabled]="pushService.countdownSecs() > 0"
-              class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+              [disabled]="pushService.countdownSecs() > 0 || !pushService.isSubscribedBackend()"
+              class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40">
               <span class="material-symbols-outlined text-base">send</span>
               <span *ngIf="pushService.countdownSecs() === 0">🚨 Probar Push en Persiana Android (Minimizar App ahora)</span>
               <span *ngIf="pushService.countdownSecs() > 0">⏰ ¡MINIMIZÁ LA APP AHORA! Disparando en {{ pushService.countdownSecs() }}s...</span>
@@ -117,16 +127,17 @@ export interface AlertaNotificacion {
           <!-- Simulation Quick Buttons (WhatsApp Push Style) -->
           <div class="pt-3 border-t border-white/10 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-[11px] text-white/60 font-bold uppercase tracking-wider">Simular Notificación Push Emergente tipo WhatsApp:</span>
+              <span class="text-[11px] text-white/60 font-bold uppercase tracking-wider">Simular Notificación Push Emergente VAPID (Google / Apple):</span>
+              <span *ngIf="!pushService.isSubscribedBackend()" class="text-[10px] text-amber-400 font-bold">⚠️ Requiere activar suscripción primero</span>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button (click)="simularAlertaSiniestro()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95">
+              <button (click)="simularAlertaSiniestro()" [disabled]="!pushService.isSubscribedBackend()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95 disabled:opacity-40">
                 <span>🚨 Probar Push: Siniestro #98412</span>
               </button>
-              <button (click)="simularAlertaCobranza()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95">
+              <button (click)="simularAlertaCobranza()" [disabled]="!pushService.isSubscribedBackend()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95 disabled:opacity-40">
                 <span>💳 Probar Push: Cuota Vencida</span>
               </button>
-              <button (click)="simularAlertaEmision()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95">
+              <button (click)="simularAlertaEmision()" [disabled]="!pushService.isSubscribedBackend()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95 disabled:opacity-40">
                 <span>✅ Probar Push: Póliza Emitida</span>
               </button>
             </div>
@@ -354,10 +365,14 @@ export class NotificacionesComponent implements OnInit {
   }
 
   solicitarPermisoPush() {
-    this.pushService.solicitarPermiso();
+    this.pushService.solicitarPermisoYSuscribir();
   }
 
   probarPersianaAndroidMinimizada() {
+    if (!this.pushService.isSubscribedBackend()) {
+      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
+      return;
+    }
     this.pushService.probarPersianaAndroidConCuentaRegresiva({
       id: 'persiana-' + Date.now(),
       titulo: '🚨 ALERTA PERSIANA ANDROID: Siniestro #98412',
@@ -371,6 +386,10 @@ export class NotificacionesComponent implements OnInit {
   }
 
   simularAlertaSiniestro() {
+    if (!this.pushService.isSubscribedBackend()) {
+      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
+      return;
+    }
     this.pushService.emitirAlerta({
       id: 'sin-' + Date.now(),
       titulo: '🚨 Nuevo Siniestro Reportado #98412',
@@ -384,6 +403,10 @@ export class NotificacionesComponent implements OnInit {
   }
 
   simularAlertaCobranza() {
+    if (!this.pushService.isSubscribedBackend()) {
+      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
+      return;
+    }
     this.pushService.emitirAlerta({
       id: 'cob-' + Date.now(),
       titulo: '💳 Alerta de Cuota Vencida ($23.322)',
@@ -397,6 +420,10 @@ export class NotificacionesComponent implements OnInit {
   }
 
   simularAlertaEmision() {
+    if (!this.pushService.isSubscribedBackend()) {
+      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
+      return;
+    }
     this.pushService.emitirAlerta({
       id: 'emi-' + Date.now(),
       titulo: '✅ Póliza Emitida #594387120',
