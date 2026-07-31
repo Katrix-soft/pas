@@ -6,8 +6,8 @@
     "start": "npx @angular/cli serve web --port 4200",
     "start:web": "npx @angular/cli serve web --port 4200",
     "start:admin": "npx @angular/cli serve admin --port 4201",
-    "build": "npx @angular/cli build web",
-    "build:prod": "npx @angular/cli build web --configuration production",
+    "build": "npx @angular/cli build web && cp apps/web/src/sw.js dist/apps/web/browser/sw.js 2>/dev/null || true",
+    "build:prod": "npx @angular/cli build web --configuration production && (cp apps/web/src/sw.js dist/apps/web/browser/sw.js 2>/dev/null || true) && (cp apps/web/src/sw.js dist/apps/web/sw.js 2>/dev/null || true)",
     "backend:dev": "uvicorn backend.app.main:app --reload --port 8000"
   },
   "dependencies": {

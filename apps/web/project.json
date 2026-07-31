@@ -14,8 +14,16 @@
         "assets": [
           "apps/web/src/favicon.ico",
           "apps/web/src/assets",
-          "apps/web/src/manifest.webmanifest",
-          "apps/web/src/sw.js"
+          {
+            "glob": "manifest.webmanifest",
+            "input": "apps/web/src",
+            "output": "/"
+          },
+          {
+            "glob": "sw.js",
+            "input": "apps/web/src",
+            "output": "/"
+          }
         ],
         "styles": [
           "apps/web/src/styles.scss"
