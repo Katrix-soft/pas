@@ -1,12 +1,205 @@
-/* Estilos globales */
-body {
+/* ==========================================================================
+   Katrix PAS Platform - Global Responsive Styles & Media Queries
+   ========================================================================== */
+
+/* 1. Global Reset & Viewport Control */
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
 }
 
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f8f9ff;
+  color: #0b1c30;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Modales abiertos en celulares */
 body.modal-open nav,
 body.modal-open nav.fixed {
   display: none !important;
+}
+
+/* 2. Responsive Typography System */
+.font-headline-lg-mobile,
+.text-headline-lg-mobile {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.5rem; /* 24px */
+  line-height: 2rem; /* 32px */
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.font-headline-lg,
+.text-headline-lg {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.875rem; /* 30px */
+  line-height: 2.375rem; /* 38px */
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.font-headline-md,
+.text-headline-md {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.375rem; /* 22px */
+  line-height: 1.875rem; /* 30px */
+  font-weight: 600;
+}
+
+.font-headline-sm-mobile,
+.text-headline-sm-mobile {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.5rem; /* 24px */
+  font-weight: 600;
+}
+
+.font-headline-sm,
+.text-headline-sm {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem; /* 28px */
+  font-weight: 600;
+}
+
+.font-metric-xl,
+.text-metric-xl {
+  font-family: 'Manrope', sans-serif;
+  font-size: 2rem; /* 32px en mobile */
+  line-height: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.font-body-lg { font-size: 1.125rem; line-height: 1.75rem; font-weight: 400; }
+.font-body-md { font-size: 0.9375rem; line-height: 1.4rem; font-weight: 400; }
+.font-body-sm { font-size: 0.8125rem; line-height: 1.2rem; font-weight: 400; }
+.font-label-md { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.05em; font-weight: 600; }
+
+/* 3. Utility Spacing & Container Classes */
+.px-container-margin,
+.p-container-margin {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.mx-container-margin {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.pb-safe {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Scrollbars customizados */
+.no-scrollbar::-webkit-scrollbar,
+.hide-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar, .hide-scrollbar, .custom-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 4. Responsive Table Wrapper & Cards */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.75rem;
+}
+
+/* Touch targets para móviles (Mínimo 44px) */
+@media (max-width: 639px) {
+  button, 
+  a.btn, 
+  input[type="button"], 
+  input[type="submit"] {
+    min-height: 44px;
+  }
+  
+  .font-metric-xl,
+  .text-metric-xl {
+    font-size: 1.75rem; /* 28px en celulares chicos */
+    line-height: 2.25rem;
+  }
+
+  .px-container-margin,
+  .p-container-margin {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+}
+
+/* 5. Breakpoint Specific Media Queries */
+
+/* Celulares (< 640px) */
+@media (max-width: 639px) {
+  .mobile-stack {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .mobile-text-center {
+    text-align: center;
+  }
+
+  .mobile-p-sm {
+    padding: 0.75rem !important;
+  }
+
+  /* Reducir paddings de contenedores principales en móviles */
+  main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Tablets (640px - 1023px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .font-headline-lg,
+  .text-headline-lg {
+    font-size: 1.625rem;
+    line-height: 2.125rem;
+  }
+  
+  .font-metric-xl,
+  .text-metric-xl {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+  }
+}
+
+/* Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+  .font-metric-xl,
+  .text-metric-xl {
+    font-size: 2.5rem; /* 40px */
+    line-height: 3rem;
+  }
 }

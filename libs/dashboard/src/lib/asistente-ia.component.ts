@@ -51,18 +51,18 @@ interface CoopCotizacion {
           </div>
 
           <!-- Stepper Progress Pills -->
-          <div class="flex items-center gap-1.5 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800/80 text-xs w-full sm:w-auto justify-center">
-            <div class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5" [ngClass]="currentStep <= 4 ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-400'">
+          <div class="flex items-center gap-1.5 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800/80 text-xs w-full sm:w-auto justify-start sm:justify-center overflow-x-auto no-scrollbar whitespace-nowrap">
+            <div class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 shrink-0" [ngClass]="currentStep <= 4 ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-400'">
               <span class="w-4 h-4 rounded-full bg-white/20 text-[10px] flex items-center justify-center">1</span>
               <span>Vehículo</span>
             </div>
-            <div class="w-3 h-[1px] bg-slate-800"></div>
-            <div class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5" [ngClass]="currentStep >= 5 && currentStep <= 6 ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-400'">
+            <div class="w-3 h-[1px] bg-slate-800 shrink-0"></div>
+            <div class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 shrink-0" [ngClass]="currentStep >= 5 && currentStep <= 6 ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-400'">
               <span class="w-4 h-4 rounded-full bg-white/20 text-[10px] flex items-center justify-center">2</span>
               <span>Detalles</span>
             </div>
-            <div class="w-3 h-[1px] bg-slate-800"></div>
-            <div class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5" [ngClass]="currentStep >= 7 ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-400'">
+            <div class="w-3 h-[1px] bg-slate-800 shrink-0"></div>
+            <div class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 shrink-0" [ngClass]="currentStep >= 7 ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/30' : 'text-slate-400'">
               <span class="w-4 h-4 rounded-full bg-white/20 text-[10px] flex items-center justify-center">3</span>
               <span>Coberturas</span>
             </div>

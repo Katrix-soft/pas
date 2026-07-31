@@ -68,13 +68,13 @@ export interface PolicyDebt {
         </div>
 
         <!-- Debt List Table with WhatsApp Action -->
-        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg shadow-sm space-y-md">
-          <div class="flex justify-between items-center pb-sm border-b border-outline-variant">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md sm:p-lg shadow-sm space-y-md">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-sm border-b border-outline-variant">
             <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">payments</span>
               Pólizas Pendientes de Cobro & Links WhatsApp
             </h3>
-            <span class="text-xs text-on-surface-variant font-bold">{{ debtsList().length }} Casos Prioritarios</span>
+            <span class="text-xs text-on-surface-variant font-bold bg-surface-container px-2.5 py-1 rounded-full">{{ debtsList().length }} Casos Prioritarios</span>
           </div>
 
           <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-xl space-y-md">
@@ -82,8 +82,40 @@ export interface PolicyDebt {
             <p class="text-sm font-bold text-outline">Cargando información de cobranzas y cupones...</p>
           </div>
 
-          <div *ngIf="!isLoading()" class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[700px]">
+          <!-- Vista de Tarjetas en Celulares Chicos (<640px) -->
+          <div *ngIf="!isLoading()" class="block sm:hidden space-y-3">
+            <div *ngFor="let item of debtsList()" class="bg-surface-container-low border border-outline-variant p-3.5 rounded-xl space-y-2.5">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-bold text-sm text-on-surface">{{ item.cliente }}</div>
+                  <div class="text-xs text-primary font-semibold">Póliza: {{ item.poliza }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-bold text-base text-error">$ {{ item.monto | number:'1.0-0' }}</div>
+                  <div class="text-[10px] text-outline uppercase font-semibold">{{ item.tipoPago }}</div>
+                </div>
+              </div>
+              <div class="text-xs text-on-surface-variant font-medium flex items-center justify-between bg-surface-container-lowest p-2 rounded-lg border border-outline-variant">
+                <span>{{ item.compania }} • {{ item.detalle }}</span>
+                <span [class]="item.diasVencido > 0 ? 'text-error' : 'text-amber-600'" class="font-bold text-[11px]">
+                  {{ item.diasVencido > 0 ? item.diasVencido + 'd vencido' : item.vencimiento }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 pt-1">
+                <button (click)="enviarWhatsApp(item)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+                  <span class="material-symbols-outlined text-base">chat</span>
+                  <span>WhatsApp</span>
+                </button>
+                <button (click)="copiarLink(item)" class="p-2 border border-primary text-primary hover:bg-primary/10 rounded-xl cursor-pointer" title="Copiar link">
+                  <span class="material-symbols-outlined text-base">content_copy</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vista de Tabla en Pantallas Medianas y Grandes (>=640px) -->
+          <div *ngIf="!isLoading()" class="hidden sm:block overflow-x-auto w-full">
+            <table class="w-full text-left border-collapse min-w-[650px]">
               <thead>
                 <tr class="bg-surface-container-low border-b border-outline-variant">
                   <th class="p-md text-xs font-bold text-on-surface-variant uppercase">Cliente / Póliza</th>
