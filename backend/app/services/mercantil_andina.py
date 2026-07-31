@@ -135,9 +135,10 @@ class MercantilAndinaClient:
                 "compania_principal": "Mercantil Andina",
                 "comision_promedio": 10.0,
                 "cartera": {
-                    "premio_mensual": 48200000,
-                    "clientes_activos": 148,
-                    "polizas_totales": 198,
+                    "premio_mensual": 18468900,
+                    "premio_fmt": "$18.5M",
+                    "clientes_activos": 219,
+                    "polizas_totales": 312,
                     "polizas_mercantil": 128,
                     "polizas_deuda": 5
                 }
