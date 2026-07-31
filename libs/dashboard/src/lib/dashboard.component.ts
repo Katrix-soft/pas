@@ -223,22 +223,21 @@ import { AuthService } from './services/auth.service';
 
     } @else {
 
-    <div class="font-body-md text-on-background min-h-screen bg-background flex flex-col">
+    <div class="font-body-md text-on-background min-h-screen bg-background flex flex-col w-full">
       <!-- Main Content Area -->
-      <main class="flex-1 flex flex-col pb-6 md:pb-lg">
+      <main class="flex-1 flex flex-col pb-24 md:pb-lg w-full overflow-x-hidden">
         <!-- TopAppBar -->
-        <header class="docked full-width top-0 sticky z-40 bg-surface dark:bg-on-background border-b border-outline-variant flex justify-between items-center px-md py-sm w-full">
-          <div class="flex items-center gap-md">
-            <h1 class="font-headline-sm-mobile text-headline-sm-mobile md:font-headline-sm md:text-headline-sm font-black text-primary">Métricas de Gestión</h1>
+        <header class="sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-4 py-3 w-full shadow-xs">
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Métricas de Gestión</h1>
           </div>
-          <div class="flex items-center gap-sm">
-            <div routerLink="/perfil" class="w-8 h-8 rounded-full border-2 border-primary-fixed overflow-hidden cursor-pointer">
+          <div class="flex items-center gap-2">
+            <div routerLink="/perfil" class="w-8 h-8 rounded-full border-2 border-primary-fixed overflow-hidden cursor-pointer shrink-0">
               <img class="w-full h-full object-cover" alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0">
             </div>
             
-            <!-- Botón de Cerrar Sesión Temporal -->
-            <button routerLink="/login" class="hidden md:flex items-center gap-xs ml-2 p-xs text-error hover:bg-error-container rounded-full transition-all cursor-pointer" title="Cerrar Sesión">
-              <span class="material-symbols-outlined">logout</span>
+            <button routerLink="/login" class="hidden md:flex items-center gap-xs ml-2 p-1.5 text-error hover:bg-error-container rounded-full transition-all cursor-pointer" title="Cerrar Sesión">
+              <span class="material-symbols-outlined text-lg">logout</span>
             </button>
           </div>
         </header>
@@ -414,254 +413,254 @@ import { AuthService } from './services/auth.service';
           </section>
         } @else {
           <!-- VISTA PAS (Productor) -->
-          <section class="p-container-margin md:p-lg space-y-lg">
-          <!-- Greeting & Producer Profile Banner -->
-          <div class="bg-gradient-to-r from-primary-fixed-dim/20 via-surface-container-lowest to-surface-container-lowest border border-outline-variant p-md lg:p-lg rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
-            <div class="flex items-center gap-md">
-              <div class="w-14 h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-bold text-xl shadow-md border border-primary-fixed">
-                {{ userFullName().charAt(0) }}
-              </div>
-              <div class="flex flex-col">
-                <div class="flex items-center gap-xs">
-                  <h2 class="font-headline-md text-headline-md text-on-surface">Hola, {{ userFullName() }}</h2>
-                  <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider">PAS Habilitado SSN</span>
-                </div>
-                <p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2 mt-0.5">
-                  <span>Matrícula: <strong>#{{ userMatricula() }}</strong></span>
-                  <span>•</span>
-                  <span>{{ userOrganizador() }}</span>
-                  <span>•</span>
-                  <span class="text-primary font-semibold">Mercantil Andina (Compañía Principal)</span>
-                </p>
-              </div>
-            </div>
+          <section class="px-4 sm:px-6 lg:px-8 py-4 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
             
-            <button routerLink="/asistente" class="w-full md:w-auto flex items-center justify-center gap-sm bg-primary text-on-primary px-lg py-md rounded-xl font-bold text-sm hover:bg-primary-container hover:shadow-lg transition-all shadow-sm cursor-pointer">
-              <span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
-              <span>Abrir Multicotizador IA</span>
-            </button>
-          </div>
-
-          <!-- Metrics Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
-            <!-- Premio Administrado -->
-            <div routerLink="/premio" class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm lg:col-span-2 flex flex-col justify-between hover:scale-[0.98] transition-transform cursor-pointer">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Premio Administrado (Mensual)</p>
-                  <h2 class="font-metric-xl text-metric-xl text-primary">{{ premioTotalFmt() }}</h2>
+            <!-- Greeting & Producer Profile Banner -->
+            <div class="bg-gradient-to-r from-indigo-500/10 via-surface-container-lowest to-surface-container-lowest border border-outline-variant p-4 sm:p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div class="flex items-start sm:items-center gap-3">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-bold text-lg sm:text-xl shadow-md border border-primary-fixed shrink-0">
+                  {{ userFullName().charAt(0) }}
                 </div>
-                <div class="flex items-center gap-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-sm py-xs rounded-full font-bold text-xs border border-emerald-500/20">
-                  <span class="material-symbols-outlined text-sm">trending_up</span>
-                  <span>+14.8%</span>
+                <div class="flex flex-col">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <h2 class="text-lg sm:text-xl font-extrabold text-on-surface">Hola, {{ userFullName() }}</h2>
+                    <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider">PAS SSN</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-on-surface-variant mt-1 font-medium">
+                    <span>Matrícula: <strong>#{{ userMatricula() }}</strong></span>
+                    <span class="hidden sm:inline">•</span>
+                    <span>{{ userOrganizador() }}</span>
+                    <span class="hidden sm:inline">•</span>
+                    <span class="text-primary font-bold">Mercantil Andina (Principal)</span>
+                  </div>
                 </div>
               </div>
-              <div class="flex justify-between items-center mt-sm text-xs text-outline">
-                <span>Cartera Total Vigente ({{ polizasCount() }} Pólizas)</span>
-                <span class="font-semibold text-primary">Ver detalle de prima →</span>
-              </div>
-            </div>
-
-            <!-- Clientes Activos -->
-            <div routerLink="/clientes" class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform cursor-pointer">
-              <div>
-                <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Clientes Activos</p>
-                <h2 class="font-metric-xl text-metric-xl text-on-surface">{{ clientesCount() }}</h2>
-              </div>
-              <div class="flex items-center justify-between mt-sm">
-                <div class="flex -space-x-2 overflow-hidden">
-                  <div class="w-6 h-6 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center border border-white">BA</div>
-                  <div class="w-6 h-6 rounded-full bg-secondary text-white text-[9px] font-bold flex items-center justify-center border border-white">PR</div>
-                  <div class="w-6 h-6 rounded-full bg-tertiary text-white text-[9px] font-bold flex items-center justify-center border border-white">AL</div>
-                  <div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-[10px] font-bold text-on-surface border border-white">+216</div>
-                </div>
-                <span class="text-xs text-outline font-semibold">98.5% retención →</span>
-              </div>
-            </div>
-
-            <!-- Pólizas con Deuda/Rechazo -->
-            <div routerLink="/cobranzas" class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-red shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform cursor-pointer">
-              <div>
-                <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Pólizas con Deuda</p>
-                <h2 class="font-metric-xl text-metric-xl text-error">5</h2>
-              </div>
-              <div class="flex items-center justify-between mt-sm">
-                <div class="flex items-center gap-xs">
-                  <span class="material-symbols-outlined text-error text-sm">payments</span>
-                  <span class="text-error font-bold text-xs uppercase">$420.000 pend.</span>
-                </div>
-                <span class="text-xs text-error font-semibold underline">Gestionar cobro →</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Solicitudes Quick Actions -->
-          <div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant shadow-sm w-full mb-md">
-            <h3 class="font-label-md text-on-surface-variant mb-md font-bold uppercase tracking-widest text-[11px]">Gestiones Rápidas del Productor</h3>
-            <div class="flex flex-col md:flex-row gap-sm w-full">
-              <button routerLink="/asistente" class="flex-1 py-sm px-md rounded-lg bg-primary text-on-primary font-label-md font-bold hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm">
-                <span class="material-symbols-outlined text-sm">add_circle</span>
-                <span>Nueva Cotización / Emisión</span>
-              </button>
-              <button routerLink="/endoso" class="flex-1 py-sm px-md rounded-lg border border-primary text-primary font-label-md font-bold hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors cursor-pointer flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-sm">edit_document</span>
-                <span>Solicitar Endoso</span>
-              </button>
-              <button routerLink="/siniestros" class="flex-1 py-sm px-md rounded-lg border border-primary text-primary font-label-md font-bold hover:bg-primary-container hover:text-on-primary-container hover:border-primary-container transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                <span class="material-symbols-outlined text-sm">report_problem</span>
-                <span>Denunciar Siniestro</span>
+              
+              <button routerLink="/asistente" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-on-primary px-5 py-3 rounded-xl font-bold text-xs sm:text-sm hover:bg-primary-container transition-all shadow-sm cursor-pointer">
+                <span class="material-symbols-outlined text-base">smart_toy</span>
+                <span>Abrir Multicotizador IA</span>
               </button>
             </div>
-          </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
-            <!-- Distribución por Ramos -->
-            <div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm flex flex-col">
-              <h3 class="font-headline-sm text-headline-sm mb-lg flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">pie_chart</span>
-                Distribución por Ramos (Mercantil & Aliadas)
-              </h3>
-              <div class="space-y-md">
-                <div>
-                  <div class="flex justify-between mb-xs">
-                    <span class="font-label-md text-label-md">Automotor (Rama 5)</span>
-                    <span class="font-body-sm text-body-sm text-primary font-bold">58% (115 pólizas)</span>
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <!-- Premio Administrado -->
+              <div routerLink="/premio" class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm col-span-1 sm:col-span-2 flex flex-col justify-between hover:scale-[0.99] transition-transform cursor-pointer">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Premio Administrado (Mensual)</p>
+                    <h2 class="text-2xl sm:text-3xl font-black text-primary">{{ premioTotalFmt() }}</h2>
                   </div>
-                  <div class="w-full bg-surface-container rounded-full h-2">
-                    <div class="bg-primary h-2 rounded-full" style="width: 58%"></div>
+                  <div class="flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full font-bold text-xs border border-emerald-500/20">
+                    <span class="material-symbols-outlined text-sm">trending_up</span>
+                    <span>+14.8%</span>
                   </div>
                 </div>
-                <div>
-                  <div class="flex justify-between mb-xs">
-                    <span class="font-label-md text-label-md">Combinado Familiar / Hogar (Rama 14)</span>
-                    <span class="font-body-sm text-body-sm text-secondary font-bold">22% (44 pólizas)</span>
-                  </div>
-                  <div class="w-full bg-surface-container rounded-full h-2">
-                    <div class="bg-secondary h-2 rounded-full" style="width: 22%"></div>
-                  </div>
+                <div class="flex justify-between items-center mt-3 pt-2 border-t border-outline-variant/40 text-xs text-outline">
+                  <span class="truncate">Cartera Vigente ({{ polizasCount() }} Pólizas)</span>
+                  <span class="font-semibold text-primary shrink-0">Ver detalle →</span>
                 </div>
+              </div>
+
+              <!-- Clientes Activos -->
+              <div routerLink="/clientes" class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm flex flex-col justify-between hover:scale-[0.99] transition-transform cursor-pointer">
                 <div>
-                  <div class="flex justify-between mb-xs">
-                    <span class="font-label-md text-label-md">Motovehículos & Movilidad (Rama 35)</span>
-                    <span class="font-body-sm text-body-sm text-tertiary font-bold">12% (24 pólizas)</span>
-                  </div>
-                  <div class="w-full bg-surface-container rounded-full h-2">
-                    <div class="bg-tertiary h-2 rounded-full" style="width: 12%"></div>
-                  </div>
+                  <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Clientes Activos</p>
+                  <h2 class="text-2xl sm:text-3xl font-black text-on-surface">{{ clientesCount() }}</h2>
                 </div>
+                <div class="flex items-center justify-between mt-3 pt-2 border-t border-outline-variant/40 text-xs">
+                  <div class="flex -space-x-2 overflow-hidden shrink-0">
+                    <div class="w-6 h-6 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center border border-white">BA</div>
+                    <div class="w-6 h-6 rounded-full bg-secondary text-white text-[9px] font-bold flex items-center justify-center border border-white">PR</div>
+                    <div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-[10px] font-bold text-on-surface border border-white">+216</div>
+                  </div>
+                  <span class="text-xs text-outline font-semibold">98.5% retención →</span>
+                </div>
+              </div>
+
+              <!-- Pólizas con Deuda -->
+              <div routerLink="/cobranzas" class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant metric-card-accent-red shadow-sm flex flex-col justify-between hover:scale-[0.99] transition-transform cursor-pointer">
                 <div>
-                  <div class="flex justify-between mb-xs">
-                    <span class="font-label-md text-label-md">Accidentes Personales / Vida (Rama 18)</span>
-                    <span class="font-body-sm text-body-sm text-on-surface-variant font-bold">8% (15 pólizas)</span>
+                  <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Pólizas con Deuda</p>
+                  <h2 class="text-2xl sm:text-3xl font-black text-error">5</h2>
+                </div>
+                <div class="flex items-center justify-between mt-3 pt-2 border-t border-outline-variant/40 text-xs">
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-error text-sm">payments</span>
+                    <span class="text-error font-bold text-xs uppercase">$420.000 pend.</span>
                   </div>
-                  <div class="w-full bg-surface-container rounded-full h-2">
-                    <div class="bg-outline h-2 rounded-full" style="width: 8%"></div>
-                  </div>
+                  <span class="text-xs text-error font-bold underline">Cobrar →</span>
                 </div>
               </div>
             </div>
 
-            <!-- Pólizas por Compañía -->
-            <div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm flex flex-col">
-              <h3 class="font-headline-sm text-headline-sm mb-lg flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">domain</span>
-                Cartera por Compañía Aseguradora
-              </h3>
-              <div class="grid grid-cols-1 gap-sm">
-                <!-- Mercantil Andina -->
-                <div [routerLink]="['/compania']" [queryParams]="{ id: 'mercantil' }" class="flex items-center justify-between p-md bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
-                  <div class="flex items-center gap-md">
-                    <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md">
-                      MA
+            <!-- Solicitudes Quick Actions -->
+            <div class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant shadow-sm w-full">
+              <h3 class="text-[11px] text-on-surface-variant mb-3 font-bold uppercase tracking-widest">Gestiones Rápidas del Productor</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
+                <button routerLink="/asistente" class="w-full py-2.5 px-3 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary-container transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm">
+                  <span class="material-symbols-outlined text-base">add_circle</span>
+                  <span>Nueva Cotización / Emisión</span>
+                </button>
+                <button routerLink="/endoso" class="w-full py-2.5 px-3 rounded-xl border border-primary text-primary font-bold text-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                  <span class="material-symbols-outlined text-base">edit_document</span>
+                  <span>Solicitar Endoso</span>
+                </button>
+                <button routerLink="/siniestros" class="w-full py-2.5 px-3 rounded-xl border border-primary text-primary font-bold text-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                  <span class="material-symbols-outlined text-base">report_problem</span>
+                  <span>Denunciar Siniestro</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Breakdown: Ramos & Compañías -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Distribución por Ramos -->
+              <div class="bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col">
+                <h3 class="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary">pie_chart</span>
+                  Distribución por Ramos (Mercantil & Aliadas)
+                </h3>
+                <div class="space-y-3.5">
+                  <div>
+                    <div class="flex justify-between mb-1 text-xs sm:text-sm">
+                      <span class="font-bold text-on-surface">Automotor (Rama 5)</span>
+                      <span class="text-primary font-bold">58% (115 pólizas)</span>
                     </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <p class="font-bold text-sm text-on-surface">Mercantil Andina</p>
-                        <span class="text-[9px] bg-indigo-500 text-white px-2 py-0.5 rounded-full font-extrabold uppercase">Principal</span>
+                    <div class="w-full bg-surface-container rounded-full h-2">
+                      <div class="bg-primary h-2 rounded-full" style="width: 58%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1 text-xs sm:text-sm">
+                      <span class="font-bold text-on-surface">Combinado Familiar / Hogar (Rama 14)</span>
+                      <span class="text-secondary font-bold">22% (44 pólizas)</span>
+                    </div>
+                    <div class="w-full bg-surface-container rounded-full h-2">
+                      <div class="bg-secondary h-2 rounded-full" style="width: 22%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1 text-xs sm:text-sm">
+                      <span class="font-bold text-on-surface">Motovehículos (Rama 35)</span>
+                      <span class="text-tertiary font-bold">12% (24 pólizas)</span>
+                    </div>
+                    <div class="w-full bg-surface-container rounded-full h-2">
+                      <div class="bg-tertiary h-2 rounded-full" style="width: 12%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1 text-xs sm:text-sm">
+                      <span class="font-bold text-on-surface">Accidentes Personales / Vida (Rama 18)</span>
+                      <span class="text-on-surface-variant font-bold">8% (15 pólizas)</span>
+                    </div>
+                    <div class="w-full bg-surface-container rounded-full h-2">
+                      <div class="bg-outline h-2 rounded-full" style="width: 8%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pólizas por Compañía -->
+              <div class="bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col">
+                <h3 class="text-base sm:text-lg font-bold mb-4 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary">domain</span>
+                  Cartera por Compañía Aseguradora
+                </h3>
+                <div class="grid grid-cols-1 gap-2.5">
+                  <!-- Mercantil Andina -->
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'mercantil' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md shrink-0">
+                        MA
                       </div>
-                      <p class="text-xs text-on-surface-variant">128 pólizas vigentes (65% cartera)</p>
-                    </div>
-                  </div>
-                  <span class="material-symbols-outlined text-indigo-500">chevron_right</span>
-                </div>
-
-                <!-- San Cristóbal -->
-                <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancristobal' }" class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
-                  <div class="flex items-center gap-md">
-                    <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-sm">
-                      SC
-                    </div>
-                    <div>
-                      <p class="font-bold text-sm text-on-surface">San Cristóbal Seguros</p>
-                      <p class="text-xs text-on-surface-variant">42 pólizas vigentes (21% cartera)</p>
-                    </div>
-                  </div>
-                  <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
-                </div>
-
-                <!-- Sancor Seguros -->
-                <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancor' }" class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
-                  <div class="flex items-center gap-md">
-                    <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-sm">
-                      SS
-                    </div>
-                    <div>
-                      <p class="font-bold text-sm text-on-surface">Sancor Seguros</p>
-                      <p class="text-xs text-on-surface-variant">28 pólizas vigentes (14% cartera)</p>
-                    </div>
-                  </div>
-                  <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
-                </div>
-
-                <!-- Cooperación Seguros -->
-                <div [routerLink]="['/compania']" [queryParams]="{ id: 'cooperacion' }" class="flex items-center justify-between p-md bg-amber-500/10 rounded-xl border border-amber-500/30 cursor-pointer hover:bg-amber-500/20 transition-all">
-                  <div class="flex items-center gap-md">
-                    <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md">
-                      CS
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <p class="font-bold text-sm text-on-surface">Cooperación Seguros</p>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <p class="font-bold text-sm text-on-surface truncate">Mercantil Andina</p>
+                          <span class="text-[9px] bg-indigo-500 text-white px-2 py-0.5 rounded-full font-extrabold uppercase">Principal</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant truncate">128 pólizas vigentes (65% cartera)</p>
                       </div>
-                      <p class="text-xs text-on-surface-variant">Cotización & Emisión disponible</p>
                     </div>
+                    <span class="material-symbols-outlined text-indigo-500 shrink-0">chevron_right</span>
                   </div>
-                  <span class="material-symbols-outlined text-amber-500">chevron_right</span>
+
+                  <!-- San Cristóbal -->
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancristobal' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
+                        SC
+                      </div>
+                      <div class="min-w-0">
+                        <p class="font-bold text-sm text-on-surface truncate">San Cristóbal Seguros</p>
+                        <p class="text-xs text-on-surface-variant truncate">42 pólizas vigentes (21% cartera)</p>
+                      </div>
+                    </div>
+                    <span class="material-symbols-outlined text-on-surface-variant shrink-0">chevron_right</span>
+                  </div>
+
+                  <!-- Sancor Seguros -->
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancor' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
+                        SS
+                      </div>
+                      <div class="min-w-0">
+                        <p class="font-bold text-sm text-on-surface truncate">Sancor Seguros</p>
+                        <p class="text-xs text-on-surface-variant truncate">28 pólizas vigentes (14% cartera)</p>
+                      </div>
+                    </div>
+                    <span class="material-symbols-outlined text-on-surface-variant shrink-0">chevron_right</span>
+                  </div>
+
+                  <!-- Cooperación Seguros -->
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'cooperacion' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/30 cursor-pointer hover:bg-amber-500/20 transition-all">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md shrink-0">
+                        CS
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <p class="font-bold text-sm text-on-surface truncate">Cooperación Seguros</p>
+                        </div>
+                        <p class="text-xs text-on-surface-variant truncate">Cotización & Emisión disponible</p>
+                      </div>
+                    </div>
+                    <span class="material-symbols-outlined text-amber-500 shrink-0">chevron_right</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Bento Section: Activity & Vencimientos Mercantil -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
-            <div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-sm flex flex-col lg:col-span-3">
-              <div class="flex justify-between items-center mb-md">
-                <h3 class="font-headline-sm text-headline-sm flex items-center gap-2">
+            <!-- Bento Section: Activity & Vencimientos Mercantil -->
+            <div class="bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col w-full">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <h3 class="text-base sm:text-lg font-bold flex items-center gap-2">
                   <span class="material-symbols-outlined text-amber-500">event_upcoming</span>
                   Próximas Renovaciones de Cartera
                 </h3>
-                <span class="text-xs font-bold text-primary">Ver todas (18 renovaciones este mes)</span>
+                <span class="text-xs font-bold text-primary">Ver todas (18 este mes)</span>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-sm">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 @for (r of renovaciones(); track r.poliza_numero) {
-                  <div [routerLink]="['/clientes/detalle']" [queryParams]="{ nombre: r.cliente, id: r.cliente_id }" class="p-md bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between cursor-pointer hover:bg-surface-container hover:shadow-sm transition-all">
-                    <div class="flex items-center gap-md">
-                      <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border"
+                  <div [routerLink]="['/clientes/detalle']" [queryParams]="{ nombre: r.cliente, id: r.cliente_id }" class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:bg-surface-container hover:shadow-sm transition-all">
+                    <div class="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+                      <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border shrink-0"
                            [ngClass]="{
                              'bg-amber-500/10 text-amber-600 border-amber-500/20': r.dias_restantes <= 5,
                              'bg-slate-500/10 text-slate-600 border-slate-500/20': r.dias_restantes > 5
                            }">
-                        <span class="text-xs">{{ r.dias_restantes }}</span>
-                        <span class="text-[9px] uppercase">días</span>
+                        <span class="text-xs font-black">{{ r.dias_restantes }}</span>
+                        <span class="text-[8px] uppercase">días</span>
                       </div>
-                      <div>
-                        <p class="font-bold text-sm text-on-surface">Póliza {{ r.aseguradora }} #{{ r.poliza_numero }}</p>
-                        <p class="text-xs text-on-surface-variant">{{ r.bien }} • Cliente: <strong>{{ r.cliente }}</strong></p>
+                      <div class="min-w-0 flex-1">
+                        <p class="font-bold text-xs sm:text-sm text-on-surface truncate">Póliza {{ r.aseguradora }} #{{ r.poliza_numero }}</p>
+                        <p class="text-xs text-on-surface-variant truncate">{{ r.bien }} • Cliente: <strong>{{ r.cliente }}</strong></p>
                       </div>
                     </div>
-                    <div class="text-right">
-                      <span class="text-sm font-bold text-primary block">{{ r.premio_fmt }}</span>
+                    <div class="flex sm:flex-col justify-between sm:justify-center items-center sm:items-end w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-outline-variant/40 shrink-0">
+                      <span class="text-sm font-extrabold text-primary block">{{ r.premio_fmt }}</span>
                       <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                             [ngClass]="{
                               'text-emerald-600 bg-emerald-500/10 border border-emerald-500/20': r.estado === 'Renovación Lista',
@@ -672,8 +671,7 @@ import { AuthService } from './services/auth.service';
                 }
               </div>
             </div>
-          </div>
-        </section>
+          </section>
         }
 
         <!-- Global Footer Info (Admin & PAS) -->
