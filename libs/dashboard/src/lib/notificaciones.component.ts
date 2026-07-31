@@ -28,127 +28,48 @@ export interface AlertaNotificacion {
           <button routerLink="/dashboard" class="p-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-70 cursor-pointer">
             <span class="material-symbols-outlined text-primary text-xl">arrow_back</span>
           </button>
-          <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Centro de Alertas Push & Notificaciones</h1>
+          <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Centro de Notificaciones & Alertas en Tiempo Real</h1>
         </div>
-        <span class="bg-emerald-500/10 text-emerald-600 text-xs font-black px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-wider flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          PUSH POP ACTIVO
-        </span>
+
+        <div class="flex items-center gap-2">
+          <span *ngIf="pushService.isSubscribedBackend()" class="bg-emerald-500/10 text-emerald-600 text-xs font-black px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            PUSH ACTIVO
+          </span>
+          <span *ngIf="!pushService.isSubscribedBackend()" (click)="solicitarPermisoSilencioso()" class="bg-amber-500/10 text-amber-600 text-xs font-black px-3 py-1 rounded-full border border-amber-500/20 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer hover:bg-amber-500/20 transition-all">
+            <span class="material-symbols-outlined text-sm">notifications_active</span>
+            ACTIVAR ALERTAS
+          </span>
+        </div>
       </header>
 
       <!-- Main Content -->
       <main class="flex-grow px-4 sm:px-6 py-4 max-w-4xl mx-auto w-full space-y-6">
         
-        <!-- Push Notifications Mobile Status & Permission Card -->
-        <section class="bg-gradient-to-r from-[#0b141a] via-[#111b21] to-[#0b141a] text-white p-5 rounded-2xl border border-[#25d366]/40 shadow-2xl space-y-4">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="flex items-start gap-3.5">
-              <div class="w-12 h-12 rounded-2xl bg-[#25d366]/20 text-[#25d366] border border-[#25d366]/30 flex items-center justify-center shrink-0 shadow-md">
-                <span class="material-symbols-outlined text-2xl">chat</span>
-              </div>
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h2 class="font-black text-base text-white">Alertas Push Emergentes en Celular (Android / iPhone)</h2>
-                  
-                  <span *ngIf="pushService.isSubscribedBackend()" class="bg-[#25d366]/20 text-[#25d366] text-[10px] font-black px-2 py-0.5 rounded uppercase border border-[#25d366]/30 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#25d366]"></span>
-                    SUSCRITO EN BACKEND (200 OK)
-                  </span>
-
-                  <span *ngIf="!pushService.isSubscribedBackend()" class="bg-amber-500/20 text-amber-300 text-[10px] font-black px-2 py-0.5 rounded uppercase border border-amber-500/30">
-                    PENDIENTE DE ACTIVAR
-                  </span>
-                </div>
-                <p class="text-xs text-white/80 mt-1 leading-relaxed">
-                  Recibí avisos en tiempo real emergentes tipo ventana WhatsApp (Push Pop) en la pantalla de tu celular para siniestros, impagos e inspecciones.
-                </p>
-              </div>
+        <!-- Status Header Card -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">notifications</span>
             </div>
-
-            <button
-              (click)="solicitarPermisoPush()"
-              [disabled]="pushService.isSubscribing()"
-              class="w-full sm:w-auto px-4 py-3 bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50">
-              <span class="material-symbols-outlined text-lg">notifications_active</span>
-              <span *ngIf="pushService.isSubscribing()">Procesando suscripción VAPID...</span>
-              <span *ngIf="!pushService.isSubscribing()">
-                {{ pushService.isSubscribedBackend() ? '✅ Suscripción Activa en Backend' : 'Activar Notificaciones Push' }}
-              </span>
-            </button>
-          </div>
-
-          <!-- Android PWA Installation & Battery Optimization Checklist -->
-          <div class="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-3.5 space-y-2 text-xs">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-emerald-400 text-lg">install_mobile</span>
-              <h3 class="font-extrabold text-white text-xs">Recomendación PWA Instalada (Modo Standalone) & Batería:</h3>
-            </div>
-            <ul class="space-y-1.5 text-white/80 text-[11px] list-disc pl-4 leading-relaxed">
-              <li><strong>Instalar PWA en Android:</strong> Tocá <strong>⋮ (Menú de Chrome)</strong> → <strong>"Instalar aplicación"</strong> o <strong>"Agregar a pantalla principal"</strong>. Las PWA instaladas en modo ejecutable tienen prioridad nativa total en la persiana de Android.</li>
-              <li><strong>Optimización de Batería:</strong> En celulares Samsung/Xiaomi, andá a <em>Ajustes → Aplicaciones → Chrome / JC PAS → Batería → Seleccioná <strong>"Sin restricciones"</strong></em> para evitar que el sistema duerma las notificaciones en segundo plano.</li>
-            </ul>
-          </div>
-
-          <!-- iPhone iOS Specific Instructions Banner -->
-          <div *ngIf="isIosDevice()" class="bg-indigo-950/80 border border-indigo-500/40 rounded-xl p-3.5 text-xs text-indigo-100 flex items-start gap-3">
-            <span class="material-symbols-outlined text-indigo-400 text-xl shrink-0 mt-0.5">apple</span>
-            <div class="space-y-1">
-              <p class="font-bold text-white">📱 ¿Cómo activar notificaciones Push en tu iPhone (iOS)?</p>
-              <p class="text-indigo-200/90 leading-relaxed">
-                En iPhone (iOS 16.4+), Apple requiere agregar la app a tu pantalla de inicio:
-                <br>1. Tocá el botón <strong>Compartir <span class="material-symbols-outlined text-xs inline">ios_share</span></strong> de Safari.
-                <br>2. Elegí <strong>"Agregar a pantalla de inicio"</strong>.
-                <br>3. Abrí JC PAS desde tu pantalla de inicio y presioná <strong>"Activar Notificaciones Push"</strong>.
+            <div>
+              <h2 class="font-extrabold text-sm sm:text-base text-on-surface">Canal Oficial de Alertas para el Productor PAS</h2>
+              <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                Recibirás avisos automáticos con sonido y notificación flotante para inspecciones aprobadas, siniestros reportados y cuotas impagas.
               </p>
             </div>
           </div>
 
-          <!-- PROBAR PERSIANA ANDROID (CON RETRASO DE 4 SEGS PARA MINIMIZAR) -->
-          <div class="bg-white/5 border border-white/10 rounded-xl p-3.5 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-extrabold text-[#25d366] uppercase tracking-wider flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-base">phonelink_ring</span>
-                <span>Probar Notificación en Persiana de Android (App Minimizada)</span>
-              </span>
-            </div>
-            <p class="text-[11px] text-white/70 leading-relaxed">
-              Android silencia las notificaciones de la persiana mientras la app está abierta en pantalla. Presioná el botón de abajo y <strong>minimizá Chrome o bloqueá la pantalla</strong> para ver la notificación en la persiana desplegable del teléfono.
-            </p>
-            <button
-              (click)="probarPersianaAndroidMinimizada()"
-              [disabled]="pushService.countdownSecs() > 0 || !pushService.isSubscribedBackend()"
-              class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40">
-              <span class="material-symbols-outlined text-base">send</span>
-              <span *ngIf="pushService.countdownSecs() === 0">🚨 Probar Push en Persiana Android (Minimizar App ahora)</span>
-              <span *ngIf="pushService.countdownSecs() > 0">⏰ ¡MINIMIZÁ LA APP AHORA! Disparando en {{ pushService.countdownSecs() }}s...</span>
-            </button>
-          </div>
-
-          <!-- Simulation Quick Buttons (WhatsApp Push Style) -->
-          <div class="pt-3 border-t border-white/10 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] text-white/60 font-bold uppercase tracking-wider">Simular Notificación Push Emergente VAPID (Google / Apple):</span>
-              <span *ngIf="!pushService.isSubscribedBackend()" class="text-[10px] text-amber-400 font-bold">⚠️ Requiere activar suscripción primero</span>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button (click)="simularAlertaSiniestro()" [disabled]="!pushService.isSubscribedBackend()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95 disabled:opacity-40">
-                <span>🚨 Probar Push: Siniestro #98412</span>
-              </button>
-              <button (click)="simularAlertaCobranza()" [disabled]="!pushService.isSubscribedBackend()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95 disabled:opacity-40">
-                <span>💳 Probar Push: Cuota Vencida</span>
-              </button>
-              <button (click)="simularAlertaEmision()" [disabled]="!pushService.isSubscribedBackend()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95 disabled:opacity-40">
-                <span>✅ Probar Push: Póliza Emitida</span>
-              </button>
-            </div>
-          </div>
+          <button *ngIf="!pushService.isSubscribedBackend()" (click)="solicitarPermisoSilencioso()" class="px-4 py-2.5 bg-primary text-white font-bold text-xs rounded-xl shadow-xs hover:bg-primary-container transition-all cursor-pointer shrink-0">
+            Habilitar Alertas Automáticas
+          </button>
         </section>
 
         <!-- Live Feed Section with Filter Chips -->
         <section class="space-y-3">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <h2 class="text-xs font-bold text-outline uppercase tracking-wider flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-primary text-base">notifications_active</span>
+              <span class="material-symbols-outlined text-primary text-base">history</span>
               <span>Historial de Alertas de Cartera ({{ unreadCount() }} No leídas)</span>
             </h2>
 
@@ -361,79 +282,16 @@ export class NotificacionesComponent implements OnInit {
     if (typeof window !== 'undefined') {
       const ua = window.navigator.userAgent || '';
       this.isIosDevice.set(/iPhone|iPad|iPod/.test(ua));
+
+      // Activar automáticamente la suscripción silenciosa en segundo plano
+      if ('Notification' in window && Notification.permission === 'granted') {
+        this.pushService.solicitarPermisoYSuscribir();
+      }
     }
   }
 
-  solicitarPermisoPush() {
+  solicitarPermisoSilencioso() {
     this.pushService.solicitarPermisoYSuscribir();
-  }
-
-  probarPersianaAndroidMinimizada() {
-    if (!this.pushService.isSubscribedBackend()) {
-      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
-      return;
-    }
-    this.pushService.probarPersianaAndroidConCuentaRegresiva({
-      id: 'persiana-' + Date.now(),
-      titulo: '🚨 ALERTA PERSIANA ANDROID: Siniestro #98412',
-      mensaje: 'Mercantil Andina autorizó la liquidación del siniestro en Taller Cuyo SRL.',
-      tipo: 'siniestro',
-      icon: 'report_problem',
-      remitente: '🚨 PERSIANA ANDROID OK',
-      link: '/siniestros',
-      hora: 'Ahora'
-    });
-  }
-
-  simularAlertaSiniestro() {
-    if (!this.pushService.isSubscribedBackend()) {
-      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
-      return;
-    }
-    this.pushService.emitirAlerta({
-      id: 'sin-' + Date.now(),
-      titulo: '🚨 Nuevo Siniestro Reportado #98412',
-      mensaje: 'Cliente Juan Pérez reportó choque en Mendoza. Taller asignado: Cuyo SRL.',
-      tipo: 'siniestro',
-      icon: 'report_problem',
-      remitente: '🚨 SINIESTROS MERCANTIL',
-      link: '/siniestros',
-      hora: 'Ahora'
-    });
-  }
-
-  simularAlertaCobranza() {
-    if (!this.pushService.isSubscribedBackend()) {
-      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
-      return;
-    }
-    this.pushService.emitirAlerta({
-      id: 'cob-' + Date.now(),
-      titulo: '💳 Alerta de Cuota Vencida ($23.322)',
-      mensaje: 'El cliente Mario Bustos tiene cuota impaga de Honda Twister.',
-      tipo: 'cobranzas',
-      icon: 'payments',
-      remitente: '💳 COBRANZAS IMPAGAS',
-      link: '/cobranzas',
-      hora: 'Ahora'
-    });
-  }
-
-  simularAlertaEmision() {
-    if (!this.pushService.isSubscribedBackend()) {
-      alert('⚠️ Primero debés activar las notificaciones Push presionando "Activar Notificaciones Push" y guardar la suscripción en el backend.');
-      return;
-    }
-    this.pushService.emitirAlerta({
-      id: 'emi-' + Date.now(),
-      titulo: '✅ Póliza Emitida #594387120',
-      mensaje: 'Mercantil Andina emitió la póliza Auto Chevrolet Spin.',
-      tipo: 'cartera',
-      icon: 'check_circle',
-      remitente: '✅ EMISIÓN MERCANTIL',
-      link: '/clientes',
-      hora: 'Ahora'
-    });
   }
 
   marcarLeida(id: string) {
