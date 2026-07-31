@@ -20,77 +20,95 @@ export interface PushPopAlert {
 
 export const activePushToast = signal<PushPopAlert | null>(null);
 
-// Función infalible para enviar Notificaciones a la barra del Sistema Operativo Android/iOS
+// Función infalible multi-dispositivo para enviar Notificaciones a la persiana/pantalla de Android e iPhone (iOS)
 export async function enviarNotificacionSistemaAndroid(alerta: PushPopAlert) {
   if (typeof window === 'undefined' || !('Notification' in window)) return;
 
-  let permission = Notification.permission;
-  if (permission === 'default') {
-    try {
-      permission = await Notification.requestPermission();
-    } catch (e) {}
-  }
-
-  if (permission !== 'granted') return;
-
-  const options: any = {
-    body: alerta.mensaje,
-    icon: '/assets/icons/icon-192x192.png',
-    badge: '/assets/icons/icon-192x192.png',
-    tag: alerta.id || ('jc-pas-' + Date.now()),
-    renotify: true,
-    requireInteraction: true,
-    vibrate: [300, 100, 300, 100, 300],
-    data: { url: alerta.link || '/dashboard' }
-  };
-
-  // En Android Chrome, la notificación DEBE enviarse vía Service Worker Registration para figurar en la persiana de Android
-  if ('serviceWorker' in navigator) {
-    try {
-      let reg = await navigator.serviceWorker.getRegistration();
-      if (!reg) {
-        reg = await navigator.serviceWorker.register('/sw.js');
-      }
-      if (reg) {
-        await reg.showNotification(alerta.titulo, options);
-        return;
-      }
-    } catch (e) {
-      console.warn('Fallback SW Android Push:', e);
-    }
-  }
-
-  // Fallback para navegadores de escritorio
   try {
-    new Notification(alerta.titulo, options);
-  } catch (e) {}
+    let permission = Notification.permission;
+    
+    // Compatibilidad dual Promises/Callbacks para iOS Safari y Android Chrome
+    if (permission === 'default') {
+      permission = await new Promise((resolve) => {
+        try {
+          const res = Notification.requestPermission((p) => resolve(p));
+          if (res && typeof (res as any).then === 'function') {
+            (res as any).then(resolve);
+          }
+        } catch (e) {
+          resolve('denied');
+        }
+      });
+    }
+
+    if (permission !== 'granted') return;
+
+    const options: any = {
+      body: alerta.mensaje,
+      icon: '/assets/icons/icon-192x192.png',
+      badge: '/assets/icons/icon-192x192.png',
+      tag: alerta.id || ('jc-pas-' + Date.now()),
+      renotify: true,
+      requireInteraction: true,
+      vibrate: [300, 100, 300, 100, 300],
+      data: { url: alerta.link || '/dashboard' }
+    };
+
+    // En Android & iOS 16.4+, el Service Worker envía la notificación nativa a la persiana del SO
+    if ('serviceWorker' in navigator) {
+      try {
+        let reg = await navigator.serviceWorker.getRegistration();
+        if (!reg) {
+          reg = await navigator.serviceWorker.register('/sw.js');
+        }
+        if (reg && reg.showNotification) {
+          await reg.showNotification(alerta.titulo, options);
+          return;
+        }
+      } catch (e) {
+        console.warn('SW Push Exception:', e);
+      }
+    }
+
+    // Fallback de notificación de sistema estándar
+    try {
+      new Notification(alerta.titulo, options);
+    } catch (e) {}
+
+  } catch (err) {
+    console.warn('Error al disparar notificación Push del SO:', err);
+  }
 }
 
 export function emitirAlertaPushPop(alerta: PushPopAlert) {
+  // 1. Mostrar Banner emergente estilo WhatsApp en pantalla
   activePushToast.set(alerta);
 
-  // 1. Sonido Web Audio Synth (Tono estilo notificación WhatsApp / Celular)
+  // 2. Sonido Web Audio Synth (Tono estilo notificación WhatsApp / Celular)
   try {
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
-    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
-    gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.35);
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      const audioCtx = new AudioContextClass();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
   } catch (e) {}
 
-  // 2. Vibración en celulares
+  // 3. Vibración en celulares
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try { navigator.vibrate([150, 70, 150, 70, 200]); } catch (e) {}
   }
 
-  // 3. Notificación Push a la barra del sistema Android/iOS
+  // 4. Disparar a la persiana del Sistema Operativo (Android / iOS)
   enviarNotificacionSistemaAndroid(alerta);
 
   // Auto descartar después de 6.5 segundos del toast flotante

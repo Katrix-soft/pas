@@ -326,26 +326,35 @@ export class NotificacionesComponent implements OnInit {
 
   solicitarPermisoPush() {
     if (typeof window === 'undefined' || !('Notification' in window)) {
-      alert('Tu navegador o dispositivo no soporta la API de Notificaciones Push.');
+      alert('Tu navegador no soporta la API de Notificaciones Push nativa del sistema.');
       return;
     }
 
-    Notification.requestPermission().then(permission => {
+    const processPermission = (permission: string) => {
       this.pushPermissionStatus.set(permission);
       if (permission === 'granted') {
         emitirAlertaPushPop({
           id: 'push-granted-' + Date.now(),
           titulo: '🔔 Notificaciones Push Activadas',
-          mensaje: '¡Excelente! Ahora recibirás alertas emergentes tipo WhatsApp en tu celular (iOS/Android).',
+          mensaje: '¡Excelente! Notificaciones emergentes activadas en tu dispositivo.',
           tipo: 'cartera',
           icon: 'notifications_active',
           remitente: 'JC PAS PUSH ACTIVADO',
           hora: 'Ahora'
         });
       } else if (permission === 'denied') {
-        alert('Las notificaciones Push fueron bloqueadas en los ajustes de tu navegador o iPhone.');
+        alert('Las notificaciones Push están bloqueadas en los ajustes de tu navegador.');
       }
-    });
+    };
+
+    try {
+      const res = Notification.requestPermission(processPermission);
+      if (res && typeof (res as any).then === 'function') {
+        (res as any).then(processPermission);
+      }
+    } catch (e) {
+      console.warn('Error al solicitar permiso Push:', e);
+    }
   }
 
   simularAlertaSiniestro() {
