@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { emitirAlertaPushPop } from './layout.component';
+import { PushNotificationService } from './services/push-notification.service';
 
 export interface AlertaNotificacion {
   id: string;
@@ -50,7 +50,7 @@ export interface AlertaNotificacion {
                 <div class="flex items-center gap-2">
                   <h2 class="font-black text-base text-white">Alertas Push Emergentes en Celular (Android / iPhone)</h2>
                   <span class="bg-[#25d366]/20 text-[#25d366] text-[10px] font-black px-2 py-0.5 rounded uppercase border border-[#25d366]/30">
-                    {{ pushPermissionStatus() === 'granted' ? 'HABILITADO' : 'PERMISO REQUERIDO' }}
+                    {{ pushService.pushPermissionStatus() === 'granted' ? 'HABILITADO' : 'PERMISO REQUERIDO' }}
                   </span>
                 </div>
                 <p class="text-xs text-white/80 mt-1 leading-relaxed">
@@ -63,7 +63,7 @@ export interface AlertaNotificacion {
               (click)="solicitarPermisoPush()"
               class="w-full sm:w-auto px-4 py-3 bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0">
               <span class="material-symbols-outlined text-lg">notifications_active</span>
-              <span>{{ pushPermissionStatus() === 'granted' ? 'Alertas Push Activas en SO' : 'Activar Notificaciones Push' }}</span>
+              <span>{{ pushService.pushPermissionStatus() === 'granted' ? 'Alertas Push Activas en SO' : 'Activar Notificaciones Push' }}</span>
             </button>
           </div>
 
@@ -87,13 +87,13 @@ export interface AlertaNotificacion {
               <span class="text-[11px] text-white/60 font-bold uppercase tracking-wider">Simular Notificación Push Emergente tipo WhatsApp:</span>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button (click)="simularAlertaSiniestro()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-white/10 active:scale-95">
+              <button (click)="simularAlertaSiniestro()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95">
                 <span>🚨 Probar Push: Siniestro #98412</span>
               </button>
-              <button (click)="simularAlertaCobranza()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-white/10 active:scale-95">
+              <button (click)="simularAlertaCobranza()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95">
                 <span>💳 Probar Push: Cuota Vencida</span>
               </button>
-              <button (click)="simularAlertaEmision()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-white/10 active:scale-95">
+              <button (click)="simularAlertaEmision()" class="px-3.5 py-2 bg-[#25d366]/20 hover:bg-[#25d366]/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#25d366]/40 active:scale-95">
                 <span>✅ Probar Push: Póliza Emitida</span>
               </button>
             </div>
@@ -259,9 +259,8 @@ export interface AlertaNotificacion {
   `]
 })
 export class NotificacionesComponent implements OnInit {
-  private http = inject(HttpClient);
+  pushService = inject(PushNotificationService);
 
-  pushPermissionStatus = signal<string>('default');
   filtroCategoria = signal<string>('todas');
   isIosDevice = signal<boolean>(false);
 
@@ -316,49 +315,17 @@ export class NotificacionesComponent implements OnInit {
 
   ngOnInit() {
     if (typeof window !== 'undefined') {
-      if ('Notification' in window) {
-        this.pushPermissionStatus.set(Notification.permission);
-      }
       const ua = window.navigator.userAgent || '';
       this.isIosDevice.set(/iPhone|iPad|iPod/.test(ua));
     }
   }
 
   solicitarPermisoPush() {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      alert('Tu navegador no soporta la API de Notificaciones Push nativa del sistema.');
-      return;
-    }
-
-    const processPermission = (permission: string) => {
-      this.pushPermissionStatus.set(permission);
-      if (permission === 'granted') {
-        emitirAlertaPushPop({
-          id: 'push-granted-' + Date.now(),
-          titulo: '🔔 Notificaciones Push Activadas',
-          mensaje: '¡Excelente! Notificaciones emergentes activadas en tu dispositivo.',
-          tipo: 'cartera',
-          icon: 'notifications_active',
-          remitente: 'JC PAS PUSH ACTIVADO',
-          hora: 'Ahora'
-        });
-      } else if (permission === 'denied') {
-        alert('Las notificaciones Push están bloqueadas en los ajustes de tu navegador.');
-      }
-    };
-
-    try {
-      const res = Notification.requestPermission(processPermission);
-      if (res && typeof (res as any).then === 'function') {
-        (res as any).then(processPermission);
-      }
-    } catch (e) {
-      console.warn('Error al solicitar permiso Push:', e);
-    }
+    this.pushService.solicitarPermiso();
   }
 
   simularAlertaSiniestro() {
-    emitirAlertaPushPop({
+    this.pushService.emitirAlerta({
       id: 'sin-' + Date.now(),
       titulo: '🚨 Nuevo Siniestro Reportado #98412',
       mensaje: 'Cliente Juan Pérez reportó choque en Mendoza. Taller asignado: Cuyo SRL.',
@@ -371,7 +338,7 @@ export class NotificacionesComponent implements OnInit {
   }
 
   simularAlertaCobranza() {
-    emitirAlertaPushPop({
+    this.pushService.emitirAlerta({
       id: 'cob-' + Date.now(),
       titulo: '💳 Alerta de Cuota Vencida ($23.322)',
       mensaje: 'El cliente Mario Bustos tiene cuota impaga de Honda Twister.',
@@ -384,7 +351,7 @@ export class NotificacionesComponent implements OnInit {
   }
 
   simularAlertaEmision() {
-    emitirAlertaPushPop({
+    this.pushService.emitirAlerta({
       id: 'emi-' + Date.now(),
       titulo: '✅ Póliza Emitida #594387120',
       mensaje: 'Mercantil Andina emitió la póliza Auto Chevrolet Spin.',

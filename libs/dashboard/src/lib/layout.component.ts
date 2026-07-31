@@ -3,121 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { BreadcrumbsComponent } from './breadcrumbs.component';
+import { PushNotificationService } from './services/push-notification.service';
 
 export type Role = 'admin' | 'pas' | string;
 export const isPdfModalOpen = signal(false);
-
-export interface PushPopAlert {
-  id: string;
-  titulo: string;
-  mensaje: string;
-  tipo: 'siniestro' | 'cobranzas' | 'cartera';
-  link?: string;
-  icon: string;
-  hora: string;
-  remitente?: string;
-}
-
-export const activePushToast = signal<PushPopAlert | null>(null);
-
-// Función infalible multi-dispositivo para enviar Notificaciones a la persiana/pantalla de Android e iPhone (iOS)
-export async function enviarNotificacionSistemaAndroid(alerta: PushPopAlert) {
-  if (typeof window === 'undefined' || !('Notification' in window)) return;
-
-  try {
-    let permission = Notification.permission;
-    
-    // Compatibilidad dual Promises/Callbacks para iOS Safari y Android Chrome
-    if (permission === 'default') {
-      permission = await new Promise((resolve) => {
-        try {
-          const res = Notification.requestPermission((p) => resolve(p));
-          if (res && typeof (res as any).then === 'function') {
-            (res as any).then(resolve);
-          }
-        } catch (e) {
-          resolve('denied');
-        }
-      });
-    }
-
-    if (permission !== 'granted') return;
-
-    const options: any = {
-      body: alerta.mensaje,
-      icon: '/assets/icons/icon-192x192.png',
-      badge: '/assets/icons/icon-192x192.png',
-      tag: alerta.id || ('jc-pas-' + Date.now()),
-      renotify: true,
-      requireInteraction: true,
-      vibrate: [300, 100, 300, 100, 300],
-      data: { url: alerta.link || '/dashboard' }
-    };
-
-    // En Android & iOS 16.4+, el Service Worker envía la notificación nativa a la persiana del SO
-    if ('serviceWorker' in navigator) {
-      try {
-        let reg = await navigator.serviceWorker.getRegistration();
-        if (!reg) {
-          reg = await navigator.serviceWorker.register('/sw.js');
-        }
-        if (reg && reg.showNotification) {
-          await reg.showNotification(alerta.titulo, options);
-          return;
-        }
-      } catch (e) {
-        console.warn('SW Push Exception:', e);
-      }
-    }
-
-    // Fallback de notificación de sistema estándar
-    try {
-      new Notification(alerta.titulo, options);
-    } catch (e) {}
-
-  } catch (err) {
-    console.warn('Error al disparar notificación Push del SO:', err);
-  }
-}
-
-export function emitirAlertaPushPop(alerta: PushPopAlert) {
-  // 1. Mostrar Banner emergente estilo WhatsApp en pantalla
-  activePushToast.set(alerta);
-
-  // 2. Sonido Web Audio Synth (Tono estilo notificación WhatsApp / Celular)
-  try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    if (AudioContextClass) {
-      const audioCtx = new AudioContextClass();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
-      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.35);
-    }
-  } catch (e) {}
-
-  // 3. Vibración en celulares
-  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-    try { navigator.vibrate([150, 70, 150, 70, 200]); } catch (e) {}
-  }
-
-  // 4. Disparar a la persiana del Sistema Operativo (Android / iOS)
-  enviarNotificacionSistemaAndroid(alerta);
-
-  // Auto descartar después de 6.5 segundos del toast flotante
-  setTimeout(() => {
-    if (activePushToast()?.id === alerta.id) {
-      activePushToast.set(null);
-    }
-  }, 6500);
-}
 
 @Component({
   selector: 'lib-layout',
@@ -127,36 +16,36 @@ export function emitirAlertaPushPop(alerta: PushPopAlert) {
     <div class="flex h-screen w-full bg-background overflow-hidden relative">
       
       <!-- BANNER EMERGENTE PUSH-POP ESTILO WHATSAPP (TOP MOBILE & DESKTOP) -->
-      <div *ngIf="activePushToast()" class="fixed top-2 left-2 right-2 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10">
+      <div *ngIf="pushService.activeToast()" class="fixed top-2 left-2 right-2 sm:left-auto sm:right-6 sm:max-w-md z-[999999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10">
         
         <!-- App Icon Avatar -->
         <div class="w-11 h-11 rounded-2xl bg-[#25d366]/20 text-[#25d366] border border-[#25d366]/40 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-          <span class="material-symbols-outlined text-2xl">{{ activePushToast()?.icon || 'chat' }}</span>
+          <span class="material-symbols-outlined text-2xl">{{ pushService.activeToast()?.icon || 'chat' }}</span>
         </div>
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-2">
             <span class="text-[10px] font-black text-[#25d366] uppercase tracking-wider bg-[#25d366]/10 px-2 py-0.5 rounded border border-[#25d366]/20">
-              {{ activePushToast()?.remitente || 'JC PAS ALERTA PUSH' }}
+              {{ pushService.activeToast()?.remitente || 'JC PAS ALERTA PUSH' }}
             </span>
-            <span class="text-[10px] text-white/50 font-semibold">{{ activePushToast()?.hora }}</span>
+            <span class="text-[10px] text-white/50 font-semibold">{{ pushService.activeToast()?.hora }}</span>
           </div>
 
-          <h4 class="font-extrabold text-xs sm:text-sm text-white mt-1 leading-snug">{{ activePushToast()?.titulo }}</h4>
-          <p class="text-xs text-white/80 mt-0.5 leading-relaxed truncate-2-lines">{{ activePushToast()?.mensaje }}</p>
+          <h4 class="font-extrabold text-xs sm:text-sm text-white mt-1 leading-snug">{{ pushService.activeToast()?.titulo }}</h4>
+          <p class="text-xs text-white/80 mt-0.5 leading-relaxed truncate-2-lines">{{ pushService.activeToast()?.mensaje }}</p>
           
           <div class="mt-2.5 flex items-center gap-2">
-            <a *ngIf="activePushToast()?.link" [routerLink]="activePushToast()?.link" (click)="descartarPushToast()" class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 flex items-center gap-1">
+            <a *ngIf="pushService.activeToast()?.link" [routerLink]="pushService.activeToast()?.link" (click)="pushService.descartarToast()" class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 flex items-center gap-1">
               <span>Abrir en PAS</span>
               <span class="material-symbols-outlined text-sm">open_in_new</span>
             </a>
-            <button (click)="descartarPushToast()" class="text-xs text-white/70 hover:text-white font-semibold px-2 py-1 cursor-pointer">
+            <button (click)="pushService.descartarToast()" class="text-xs text-white/70 hover:text-white font-semibold px-2 py-1 cursor-pointer">
               Descartar
             </button>
           </div>
         </div>
 
-        <button (click)="descartarPushToast()" class="text-white/40 hover:text-white p-1 rounded-lg shrink-0 cursor-pointer">
+        <button (click)="pushService.descartarToast()" class="text-white/40 hover:text-white p-1 rounded-lg shrink-0 cursor-pointer">
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
       </div>
@@ -347,7 +236,7 @@ export function emitirAlertaPushPop(alerta: PushPopAlert) {
 })
 export class LayoutComponent {
   isPdfModalOpen = isPdfModalOpen;
-  activePushToast = activePushToast;
+  pushService = inject(PushNotificationService);
   isExpanded = signal(false);
   authService = inject(AuthService);
   router = inject(Router);
@@ -360,10 +249,6 @@ export class LayoutComponent {
   userMatricula = computed(() => this.authService.currentUser()?.matricula || '86992');
   userOrganizador = computed(() => this.authService.currentUser()?.organizador || 'JCORG Broker de Seguros');
   userName = computed<string>(() => this.userFullName().split(' ')[0]);
-
-  descartarPushToast() {
-    activePushToast.set(null);
-  }
 
   toggleSidebar() {
     this.isExpanded.set(!this.isExpanded());
