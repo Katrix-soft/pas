@@ -138,7 +138,7 @@
       }
     }
   </script>
-<style>*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;scroll-behavior:smooth}body{margin:0;width:100%;min-height:100vh;min-height:100dvh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background-color:#f8f9ff;color:#0b1c30;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;-webkit-tap-highlight-color:transparent}</style><link rel="stylesheet" href="styles-VH5BHTA5.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles-VH5BHTA5.css"></noscript></head>
+<style>*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;scroll-behavior:smooth}body{margin:0;width:100%;min-height:100vh;min-height:100dvh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background-color:#f8f9ff;color:#0b1c30;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;-webkit-tap-highlight-color:transparent}body{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important}@media print{html,body,app-root{display:none!important;visibility:hidden!important;opacity:0!important}}#secure-screen-overlay{position:fixed;inset:0;background:#030712;z-index:9999999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .15s ease-in-out;pointer-events:none;opacity:0;font-family:Manrope,sans-serif;text-align:center;padding:1.5rem}</style><link rel="stylesheet" href="styles-WT55JVVV.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles-WT55JVVV.css"></noscript></head>
 <body class="min-h-screen">
   <app-root>
     <div style="position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0a0f24; z-index: 9999; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
@@ -153,5 +153,93 @@
       </style>
     </div>
   </app-root>
+
+  <!-- OVERLAY DE APAGÓN DE PANTALLA TIPO NETFLIX/BANCOS -->
+  <div id="secure-screen-overlay">
+    <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: #ef4444;">security</span>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 8px;">VISTA PROTEGIDA CON ENCRIPTACIÓN</h2>
+    <p style="font-size: 13px; color: #94a3b8; max-width: 360px; line-height: 1.5;">Por políticas de seguridad y protección de datos de la cartera PAS, la pantalla se oculta automáticamente al cambiar de aplicación o intentar tomar capturas.</p>
+  </div>
+
+  <!-- SCRIPT ESCUDO ANTI-SCREENSHOT & BLUR -->
+  <script>
+    (function() {
+      // 1. Bloqueo de Clic Derecho (Menú contextual)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
+      // 2. Bloqueo de Atajos de Teclado (PrintScreen, Ctrl+P, Ctrl+S, F12, DevTools)
+      document.addEventListener('keydown', function(e) {
+        // PrintScreen
+        if (e.key === 'PrintScreen' || e.keyCode === 44) {
+          triggerBlackout(1500);
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('');
+          }
+          e.preventDefault();
+          return false;
+        }
+
+        // Ctrl+P / Cmd+P (Imprimir)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+          triggerBlackout(2000);
+          e.preventDefault();
+          return false;
+        }
+
+        // Ctrl+S / Cmd+S (Guardar HTML)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          return false;
+        }
+
+        // F12 o Ctrl+Shift+I / Cmd+Alt+I (Inspect element)
+        if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c'))) {
+          triggerBlackout(2000);
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // 3. Efecto Apagón Netflix / Bancos al Perder el Foco (Blur / Window Switch / Snipping Tool)
+      var blackoutTimer = null;
+      function showBlackout() {
+        document.body.classList.add('screen-blackout');
+      }
+
+      function hideBlackout() {
+        document.body.classList.remove('screen-blackout');
+      }
+
+      function triggerBlackout(duration) {
+        showBlackout();
+        if (blackoutTimer) clearTimeout(blackoutTimer);
+        blackoutTimer = setTimeout(function() {
+          if (document.hasFocus()) {
+            hideBlackout();
+          }
+        }, duration || 1500);
+      }
+
+      window.addEventListener('blur', function() {
+        showBlackout();
+      });
+
+      window.addEventListener('focus', function() {
+        hideBlackout();
+      });
+
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          showBlackout();
+        } else {
+          hideBlackout();
+        }
+      });
+    })();
+  </script>
 <link rel="modulepreload" href="chunk-3GLCSMTL.js"><link rel="modulepreload" href="chunk-3GPHQFV2.js"><link rel="modulepreload" href="chunk-OCVH3SAA.js"><link rel="modulepreload" href="chunk-WKP6BJPW.js"><script src="main-A6YPGTYW.js" type="module"></script></body>
 </html>

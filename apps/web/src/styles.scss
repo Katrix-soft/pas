@@ -195,11 +195,54 @@ body.modal-open nav.fixed {
   }
 }
 
-/* Desktop (>= 1024px) */
-@media (min-width: 1024px) {
-  .font-metric-xl,
-  .text-metric-xl {
-    font-size: 2.5rem; /* 40px */
-    line-height: 3rem;
+/* 6. Anti-Screenshot & Screen Protection Shield (Netflix / Banking Grade) */
+
+/* Bloquear selección arbitraria de texto */
+body {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Permitir selección únicamente en inputs y textareas para tipeo */
+input, textarea {
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+  user-select: auto !important;
+}
+
+/* Ocultar pantalla 100% en impresión o exportación a PDF */
+@media print {
+  html, body, app-root {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 }
+
+/* Overlay de Apagón de Pantalla (Screen Blackout Overlay) */
+#secure-screen-overlay {
+  position: fixed;
+  inset: 0;
+  background: #030712;
+  z-index: 9999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: opacity 0.15s ease-in-out;
+  pointer-events: none;
+  opacity: 0;
+  font-family: 'Manrope', sans-serif;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+body.screen-blackout #secure-screen-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+

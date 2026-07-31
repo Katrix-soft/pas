@@ -153,5 +153,93 @@
       </style>
     </div>
   </app-root>
+
+  <!-- OVERLAY DE APAGÓN DE PANTALLA TIPO NETFLIX/BANCOS -->
+  <div id="secure-screen-overlay">
+    <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: #ef4444;">security</span>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 8px;">VISTA PROTEGIDA CON ENCRIPTACIÓN</h2>
+    <p style="font-size: 13px; color: #94a3b8; max-width: 360px; line-height: 1.5;">Por políticas de seguridad y protección de datos de la cartera PAS, la pantalla se oculta automáticamente al cambiar de aplicación o intentar tomar capturas.</p>
+  </div>
+
+  <!-- SCRIPT ESCUDO ANTI-SCREENSHOT & BLUR -->
+  <script>
+    (function() {
+      // 1. Bloqueo de Clic Derecho (Menú contextual)
+      document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+
+      // 2. Bloqueo de Atajos de Teclado (PrintScreen, Ctrl+P, Ctrl+S, F12, DevTools)
+      document.addEventListener('keydown', function(e) {
+        // PrintScreen
+        if (e.key === 'PrintScreen' || e.keyCode === 44) {
+          triggerBlackout(1500);
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('');
+          }
+          e.preventDefault();
+          return false;
+        }
+
+        // Ctrl+P / Cmd+P (Imprimir)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+          triggerBlackout(2000);
+          e.preventDefault();
+          return false;
+        }
+
+        // Ctrl+S / Cmd+S (Guardar HTML)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          return false;
+        }
+
+        // F12 o Ctrl+Shift+I / Cmd+Alt+I (Inspect element)
+        if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c'))) {
+          triggerBlackout(2000);
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      // 3. Efecto Apagón Netflix / Bancos al Perder el Foco (Blur / Window Switch / Snipping Tool)
+      var blackoutTimer = null;
+      function showBlackout() {
+        document.body.classList.add('screen-blackout');
+      }
+
+      function hideBlackout() {
+        document.body.classList.remove('screen-blackout');
+      }
+
+      function triggerBlackout(duration) {
+        showBlackout();
+        if (blackoutTimer) clearTimeout(blackoutTimer);
+        blackoutTimer = setTimeout(function() {
+          if (document.hasFocus()) {
+            hideBlackout();
+          }
+        }, duration || 1500);
+      }
+
+      window.addEventListener('blur', function() {
+        showBlackout();
+      });
+
+      window.addEventListener('focus', function() {
+        hideBlackout();
+      });
+
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          showBlackout();
+        } else {
+          hideBlackout();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
