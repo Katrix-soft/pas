@@ -7,13 +7,101 @@ import { BreadcrumbsComponent } from './breadcrumbs.component';
 export type Role = 'admin' | 'pas' | string;
 export const isPdfModalOpen = signal(false);
 
+export interface PushPopAlert {
+  id: string;
+  titulo: string;
+  mensaje: string;
+  tipo: 'siniestro' | 'cobranza' | 'cartera';
+  link?: string;
+  icon: string;
+  hora: string;
+}
+
+// Global Signal for triggering push pop toasts anywhere in the app
+export const activePushToast = signal<PushPopAlert | null>(null);
+
+export function emitirAlertaPushPop(alerta: PushPopAlert) {
+  activePushToast.set(alerta);
+
+  // 1. Sonido Web Audio API (Chime de notificación)
+  try {
+    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  } catch (e) {
+    // Audio context not allowed or muted
+  }
+
+  // 2. Vibración en celulares
+  if ('vibrate' in navigator) {
+    try { navigator.vibrate([120, 80, 120]); } catch (e) {}
+  }
+
+  // 3. Notificación Push nativa del navegador / teléfono si tiene permiso
+  if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(alerta.titulo, {
+        body: alerta.mensaje,
+        icon: '/assets/icons/icon-192x192.png',
+        badge: '/assets/icons/icon-192x192.png',
+        tag: alerta.id
+      });
+    } catch (e) {}
+  }
+
+  // Auto descartar después de 6 segundos
+  setTimeout(() => {
+    if (activePushToast()?.id === alerta.id) {
+      activePushToast.set(null);
+    }
+  }, 6500);
+}
+
 @Component({
   selector: 'lib-layout',
   standalone: true,
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, BreadcrumbsComponent],
   template: `
-    <div class="flex h-screen w-full bg-background overflow-hidden">
+    <div class="flex h-screen w-full bg-background overflow-hidden relative">
       
+      <!-- FLOATING TOP PUSH-POP TOAST BANNER (ALERTAS TIPO CELULAR TABS/DESK) -->
+      <div *ngIf="activePushToast()" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[9999] bg-[#0a0f24]/95 text-white border border-emerald-500/40 p-4 rounded-2xl shadow-2xl backdrop-blur-md animate-in slide-in-from-top-6 duration-300 flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
+          <span class="material-symbols-outlined text-xl">{{ activePushToast()?.icon || 'notifications_active' }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-black text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              ALERTA PUSH
+            </span>
+            <span class="text-[10px] text-white/50">{{ activePushToast()?.hora }}</span>
+          </div>
+          <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">{{ activePushToast()?.titulo }}</h4>
+          <p class="text-xs text-white/80 mt-0.5 leading-snug">{{ activePushToast()?.mensaje }}</p>
+          
+          <div class="mt-2.5 flex items-center gap-2">
+            <a *ngIf="activePushToast()?.link" [routerLink]="activePushToast()?.link" (click)="descartarPushToast()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-sm">
+              Ver Detalle
+            </a>
+            <button (click)="descartarPushToast()" class="text-xs text-white/60 hover:text-white font-semibold px-2 py-1">
+              Descartar
+            </button>
+          </div>
+        </div>
+        <button (click)="descartarPushToast()" class="text-white/40 hover:text-white p-1 rounded-lg">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
       <!-- Unified Mobile Bottom Nav -->
       @if (!authService.isModalActive()) {
         <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-1 py-2 bg-[#1c2e43] border-t border-white/10 z-50 pb-safe shadow-2xl">
@@ -194,19 +282,13 @@ export const isPdfModalOpen = signal(false);
     </div>
   `,
   styles: [`
-    /* Ocultar scrollbar para Chrome, Safari y Opera */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    /* Ocultar scrollbar para IE, Edge y Firefox */
-    .no-scrollbar {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   `]
 })
 export class LayoutComponent {
   isPdfModalOpen = isPdfModalOpen;
+  activePushToast = activePushToast;
   isExpanded = signal(false);
   authService = inject(AuthService);
   router = inject(Router);
@@ -219,12 +301,9 @@ export class LayoutComponent {
   userMatricula = computed(() => this.authService.currentUser()?.matricula || '86992');
   userOrganizador = computed(() => this.authService.currentUser()?.organizador || 'JCORG Broker de Seguros');
   userName = computed<string>(() => this.userFullName().split(' ')[0]);
-  
-  constructor() {
-  }
 
-  isModalOpen(): boolean {
-    return typeof document !== 'undefined' && document.body.classList.contains('modal-open');
+  descartarPushToast() {
+    activePushToast.set(null);
   }
 
   toggleSidebar() {

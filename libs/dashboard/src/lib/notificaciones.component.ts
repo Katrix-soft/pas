@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { emitirAlertaPushPop } from './layout.component';
 
 export interface AlertaNotificacion {
   id: string;
@@ -33,6 +34,46 @@ export interface AlertaNotificacion {
       <!-- Main Content -->
       <main class="flex-grow px-4 sm:px-6 py-4 max-w-4xl mx-auto w-full space-y-6">
         
+        <!-- Push Notifications Mobile Status Banner -->
+        <section class="bg-gradient-to-r from-[#0a0f24] via-[#1c2e43] to-[#0a0f24] text-white p-5 rounded-2xl border border-emerald-500/30 shadow-xl space-y-3">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-2xl">mobile_friendly</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="font-black text-base text-white">Alertas Push Emergentes en el Teléfono</h2>
+                  <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded uppercase border border-emerald-500/30">
+                    {{ pushPermissionStatus() === 'granted' ? 'ACTIVO' : 'DISPONIBLE' }}
+                  </span>
+                </div>
+                <p class="text-xs text-white/80 mt-1 leading-relaxed">
+                  Recibí avisos instantáneos tipo ventana emergente (Pop-up) en la pantalla de tu celular cuando ocurran inspecciones de siniestros, cuotas impagas o renovaciones.
+                </p>
+              </div>
+            </div>
+
+            <button
+              (click)="solicitarPermisoPush()"
+              class="w-full sm:w-auto px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0">
+              <span class="material-symbols-outlined text-lg">notifications_active</span>
+              <span>{{ pushPermissionStatus() === 'granted' ? 'Notificaciones Push Activas' : 'Activar Notificaciones Push' }}</span>
+            </button>
+          </div>
+
+          <!-- Simulation Quick Buttons -->
+          <div class="pt-3 border-t border-white/10 flex flex-wrap gap-2 items-center">
+            <span class="text-[11px] text-white/60 font-bold uppercase tracking-wider">Probar Alertas Pop-up:</span>
+            <button (click)="simularAlertaSiniestro()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+              <span>🚨 Probar Siniestro Push</span>
+            </button>
+            <button (click)="simularAlertaCobranza()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+              <span>💳 Probar Cuota Vencida Push</span>
+            </button>
+          </div>
+        </section>
+
         <!-- Live Alerts Feed from API -->
         <section class="space-y-3">
           <div class="flex items-center justify-between">
@@ -166,7 +207,7 @@ export interface AlertaNotificacion {
 export class NotificacionesComponent implements OnInit {
   private http = inject(HttpClient);
 
-  alertList = signal<AlertaNotificacion[]>([]);
+  pushPermissionStatus = signal<string>('default');
 
   prefEmitidas = true;
   prefRenovaciones = true;
@@ -175,49 +216,97 @@ export class NotificacionesComponent implements OnInit {
   prefInspeccion = true;
   prefLiquidacion = true;
 
+  alertList = signal<AlertaNotificacion[]>([
+    {
+      id: 'a1',
+      titulo: '🚨 Inspección Aprobada: Siniestro #98412',
+      subtitulo: 'Mercantil Andina autorizó la reparación en Taller Cuyo SRL (Chevrolet Spin).',
+      tipo: 'warning',
+      fecha: 'Hace 10 minutos',
+      leido: false,
+      link: '/siniestros'
+    },
+    {
+      id: 'a2',
+      titulo: '💳 Cuota Impaga: Mario Bustos',
+      subtitulo: 'Cuota 07/2026 vencida ($23.322). Link de cuponera generado.',
+      tipo: 'error',
+      fecha: 'Hace 45 minutos',
+      leido: false,
+      link: '/cobranzas'
+    },
+    {
+      id: 'a3',
+      titulo: '✅ Póliza Emitida Exitosamente',
+      subtitulo: 'Endoso #492815 asignado a Toyota Hilux de Roberto Gómez.',
+      tipo: 'success',
+      fecha: 'Hoy 09:15 hs',
+      leido: true
+    }
+  ]);
+
   ngOnInit() {
-    this.cargarAlertas();
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      this.pushPermissionStatus.set(Notification.permission);
+    }
   }
 
-  cargarAlertas() {
-    this.http.get<any>('/api/v1/quotations/mercantil/siniestros').subscribe({
-      next: (res) => {
-        const datos = res?.datos || [];
-        const alertasSiniestros: AlertaNotificacion[] = datos.map((s: any) => ({
-          id: s.numero_siniestro,
-          titulo: `Siniestro #${s.numero_siniestro} - ${s.estado}`,
-          subtitulo: `${s.cliente} • ${s.tipo_siniestro} (${s.compania})`,
-          tipo: s.estado === 'En Inspección' ? 'warning' : s.estado === 'Liquidado' ? 'success' : 'info',
-          fecha: `Denunciado el ${s.fecha_denuncia}`,
-          leido: false,
-          link: '/siniestros'
-        }));
+  solicitarPermisoPush() {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      alert('Tu navegador o dispositivo no soporta la API de Notificaciones Push.');
+      return;
+    }
 
-        const alertaDeuda: AlertaNotificacion = {
-          id: 'deuda-1',
-          titulo: 'Alerta de Cobranzas: 5 Pólizas con Deuda',
-          subtitulo: 'Se registran $420.000 ARS pendientes de cobro.',
-          tipo: 'error',
-          fecha: 'Hoy 09:30 hs',
-          leido: false,
-          link: '/cobranzas'
-        };
+    Notification.requestPermission().then(permission => {
+      this.pushPermissionStatus.set(permission);
+      if (permission === 'granted') {
+        emitirAlertaPushPop({
+          id: 'push-granted-' + Date.now(),
+          titulo: '🔔 Notificaciones Push Activadas',
+          mensaje: '¡Excelente! Ahora recibirás alertas en tiempo real en la pantalla de tu celular.',
+          tipo: 'cartera',
+          icon: 'notifications_active',
+          hora: 'Ahora'
+        });
+      } else if (permission === 'denied') {
+        alert('Las notificaciones Push fueron bloqueadas en los ajustes de tu navegador.');
+      }
+    });
+  }
 
-        this.alertList.set([alertaDeuda, ...alertasSiniestros]);
-      },
-      error: () => {}
+  simularAlertaSiniestro() {
+    emitirAlertaPushPop({
+      id: 'sin-' + Date.now(),
+      titulo: '🚨 Nuevo Siniestro Reportado #98412',
+      mensaje: 'Cliente Juan Pérez reportó choque en Mendoza. Taller asignado: Cuyo SRL.',
+      tipo: 'siniestro',
+      icon: 'report_problem',
+      link: '/siniestros',
+      hora: 'Ahora'
+    });
+  }
+
+  simularAlertaCobranza() {
+    emitirAlertaPushPop({
+      id: 'cob-' + Date.now(),
+      titulo: '💳 Alerta de Cuota Vencida ($23.322)',
+      mensaje: 'El cliente Mario Bustos tiene cuota impaga de Honda Twister.',
+      tipo: 'cobranza',
+      icon: 'payments',
+      link: '/cobranzas',
+      hora: 'Ahora'
     });
   }
 
   saveChanges(event: Event) {
     const btn = event.target as HTMLElement;
-    const originalText = btn.innerText;
-    btn.innerText = '¡Preferencias Guardadas!';
+    const orig = btn.innerText;
+    btn.innerText = '¡Preferencias de Notificación Guardadas!';
     btn.classList.add('bg-emerald-600');
     btn.classList.remove('bg-primary');
-    
+
     setTimeout(() => {
-      btn.innerText = originalText;
+      btn.innerText = orig;
       btn.classList.remove('bg-emerald-600');
       btn.classList.add('bg-primary');
     }, 2000);
