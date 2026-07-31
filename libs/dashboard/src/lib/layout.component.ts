@@ -11,54 +11,65 @@ export interface PushPopAlert {
   id: string;
   titulo: string;
   mensaje: string;
-  tipo: 'siniestro' | 'cobranza' | 'cartera';
+  tipo: 'siniestro' | 'cobranzas' | 'cartera';
   link?: string;
   icon: string;
   hora: string;
+  remitente?: string;
 }
 
-// Global Signal for triggering push pop toasts anywhere in the app
 export const activePushToast = signal<PushPopAlert | null>(null);
 
 export function emitirAlertaPushPop(alerta: PushPopAlert) {
   activePushToast.set(alerta);
 
-  // 1. Sonido Web Audio API (Chime de notificación)
+  // 1. Sonido Web Audio Synth (Tono estilo notificación WhatsApp / Celular)
   try {
     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+    gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
-  } catch (e) {
-    // Audio context not allowed or muted
-  }
+    osc.stop(audioCtx.currentTime + 0.35);
+  } catch (e) {}
 
   // 2. Vibración en celulares
-  if ('vibrate' in navigator) {
-    try { navigator.vibrate([120, 80, 120]); } catch (e) {}
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try { navigator.vibrate([150, 70, 150, 70, 200]); } catch (e) {}
   }
 
-  // 3. Notificación Push nativa del navegador / teléfono si tiene permiso
+  // 3. Notificación Push nativa del SO / Teléfono vía Service Worker o API Nativa
   if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
     try {
-      new Notification(alerta.titulo, {
-        body: alerta.mensaje,
-        icon: '/assets/icons/icon-192x192.png',
-        badge: '/assets/icons/icon-192x192.png',
-        tag: alerta.id
-      });
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(function(reg) {
+          reg.showNotification(alerta.titulo, {
+            body: alerta.mensaje,
+            icon: '/assets/icons/icon-192x192.png',
+            badge: '/assets/icons/icon-192x192.png',
+            tag: alerta.id,
+            renotify: true,
+            vibrate: [200, 100, 200],
+            data: { url: alerta.link || '/dashboard' }
+          } as any);
+        });
+      } else {
+        new Notification(alerta.titulo, {
+          body: alerta.mensaje,
+          icon: '/assets/icons/icon-192x192.png',
+          tag: alerta.id
+        } as any);
+      }
     } catch (e) {}
   }
 
-  // Auto descartar después de 6 segundos
+  // Auto descartar después de 6.5 segundos
   setTimeout(() => {
     if (activePushToast()?.id === alerta.id) {
       activePushToast.set(null);
@@ -73,31 +84,37 @@ export function emitirAlertaPushPop(alerta: PushPopAlert) {
   template: `
     <div class="flex h-screen w-full bg-background overflow-hidden relative">
       
-      <!-- FLOATING TOP PUSH-POP TOAST BANNER (ALERTAS TIPO CELULAR TABS/DESK) -->
-      <div *ngIf="activePushToast()" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[9999] bg-[#0a0f24]/95 text-white border border-emerald-500/40 p-4 rounded-2xl shadow-2xl backdrop-blur-md animate-in slide-in-from-top-6 duration-300 flex items-start gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
-          <span class="material-symbols-outlined text-xl">{{ activePushToast()?.icon || 'notifications_active' }}</span>
+      <!-- BANNER EMERGENTE PUSH-POP ESTILO WHATSAPP (TOP MOBILE & DESKTOP) -->
+      <div *ngIf="activePushToast()" class="fixed top-2 left-2 right-2 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10">
+        
+        <!-- App Icon Avatar -->
+        <div class="w-11 h-11 rounded-2xl bg-[#25d366]/20 text-[#25d366] border border-[#25d366]/40 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+          <span class="material-symbols-outlined text-2xl">{{ activePushToast()?.icon || 'chat' }}</span>
         </div>
+
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-2">
-            <span class="text-[10px] font-black text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-              ALERTA PUSH
+            <span class="text-[10px] font-black text-[#25d366] uppercase tracking-wider bg-[#25d366]/10 px-2 py-0.5 rounded border border-[#25d366]/20">
+              {{ activePushToast()?.remitente || 'JC PAS ALERTA PUSH' }}
             </span>
-            <span class="text-[10px] text-white/50">{{ activePushToast()?.hora }}</span>
+            <span class="text-[10px] text-white/50 font-semibold">{{ activePushToast()?.hora }}</span>
           </div>
-          <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">{{ activePushToast()?.titulo }}</h4>
-          <p class="text-xs text-white/80 mt-0.5 leading-snug">{{ activePushToast()?.mensaje }}</p>
+
+          <h4 class="font-extrabold text-xs sm:text-sm text-white mt-1 leading-snug">{{ activePushToast()?.titulo }}</h4>
+          <p class="text-xs text-white/80 mt-0.5 leading-relaxed truncate-2-lines">{{ activePushToast()?.mensaje }}</p>
           
           <div class="mt-2.5 flex items-center gap-2">
-            <a *ngIf="activePushToast()?.link" [routerLink]="activePushToast()?.link" (click)="descartarPushToast()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded-lg text-xs transition-all shadow-sm">
-              Ver Detalle
+            <a *ngIf="activePushToast()?.link" [routerLink]="activePushToast()?.link" (click)="descartarPushToast()" class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 flex items-center gap-1">
+              <span>Abrir en PAS</span>
+              <span class="material-symbols-outlined text-sm">open_in_new</span>
             </a>
-            <button (click)="descartarPushToast()" class="text-xs text-white/60 hover:text-white font-semibold px-2 py-1">
+            <button (click)="descartarPushToast()" class="text-xs text-white/70 hover:text-white font-semibold px-2 py-1 cursor-pointer">
               Descartar
             </button>
           </div>
         </div>
-        <button (click)="descartarPushToast()" class="text-white/40 hover:text-white p-1 rounded-lg">
+
+        <button (click)="descartarPushToast()" class="text-white/40 hover:text-white p-1 rounded-lg shrink-0 cursor-pointer">
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
       </div>

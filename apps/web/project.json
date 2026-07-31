@@ -13,7 +13,9 @@
         "tsConfig": "apps/web/tsconfig.app.json",
         "assets": [
           "apps/web/src/favicon.ico",
-          "apps/web/src/assets"
+          "apps/web/src/assets",
+          "apps/web/src/manifest.webmanifest",
+          "apps/web/src/sw.js"
         ],
         "styles": [
           "apps/web/src/styles.scss"
