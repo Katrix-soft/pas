@@ -28,7 +28,7 @@ export interface AlertaNotificacion {
           <button routerLink="/dashboard" class="p-2 rounded-full hover:bg-surface-container-high transition-colors active:opacity-70 cursor-pointer">
             <span class="material-symbols-outlined text-primary text-xl">arrow_back</span>
           </button>
-          <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Centro de Notificaciones & Alertas en Tiempo Real</h1>
+          <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Centro de Alertas Push & Notificaciones</h1>
         </div>
 
         <div class="flex items-center gap-2">
@@ -36,9 +36,9 @@ export interface AlertaNotificacion {
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             PUSH ACTIVO
           </span>
-          <span *ngIf="!pushService.isSubscribedBackend()" (click)="solicitarPermisoSilencioso()" class="bg-amber-500/10 text-amber-600 text-xs font-black px-3 py-1 rounded-full border border-amber-500/20 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer hover:bg-amber-500/20 transition-all">
+          <span *ngIf="!pushService.isSubscribedBackend()" (click)="activarNotificaciones()" class="bg-amber-500/10 text-amber-600 text-xs font-black px-3 py-1 rounded-full border border-amber-500/20 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer hover:bg-amber-500/20 transition-all">
             <span class="material-symbols-outlined text-sm">notifications_active</span>
-            ACTIVAR ALERTAS
+            ACTIVAR PUSH
           </span>
         </div>
       </header>
@@ -46,23 +46,47 @@ export interface AlertaNotificacion {
       <!-- Main Content -->
       <main class="flex-grow px-4 sm:px-6 py-4 max-w-4xl mx-auto w-full space-y-6">
         
-        <!-- Status Header Card -->
-        <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-3.5">
-            <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-2xl">notifications</span>
+        <!-- Activation & Status Card -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-2xl">notifications_active</span>
+              </div>
+              <div>
+                <h2 class="font-extrabold text-sm sm:text-base text-on-surface">Notificaciones Push Emergentes en Celular</h2>
+                <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                  Avisos automáticos en tiempo real con sonido ("ruidito"), vibración y ventana emergente para siniestros, cuotas impagas e inspecciones.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 class="font-extrabold text-sm sm:text-base text-on-surface">Canal Oficial de Alertas para el Productor PAS</h2>
-              <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                Recibirás avisos automáticos con sonido y notificación flotante para inspecciones aprobadas, siniestros reportados y cuotas impagas.
-              </p>
-            </div>
+
+            <button
+              (click)="activarNotificaciones()"
+              [disabled]="pushService.isSubscribing()"
+              class="w-full sm:w-auto px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50">
+              <span class="material-symbols-outlined text-lg">phonelink_ring</span>
+              <span>{{ pushService.isSubscribedBackend() ? '✅ Alertas Activas en Celular' : '🔔 Activar Notificaciones en Celular' }}</span>
+            </button>
           </div>
 
-          <button *ngIf="!pushService.isSubscribedBackend()" (click)="solicitarPermisoSilencioso()" class="px-4 py-2.5 bg-primary text-white font-bold text-xs rounded-xl shadow-xs hover:bg-primary-container transition-all cursor-pointer shrink-0">
-            Habilitar Alertas Automáticas
-          </button>
+          <!-- Quick Test Chime Buttons -->
+          <div class="pt-3 border-t border-outline-variant/60 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-outline uppercase tracking-wider">Probar Notificación con Sonido ("ruidito") & Persiana:</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button (click)="simularAlertaSiniestro()" class="px-3.5 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-primary/20 active:scale-95">
+                <span>🚨 Probar: Siniestro #98412</span>
+              </button>
+              <button (click)="simularAlertaCobranza()" class="px-3.5 py-2 bg-error/10 hover:bg-error/20 text-error rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-error/20 active:scale-95">
+                <span>💳 Probar: Cuota Vencida</span>
+              </button>
+              <button (click)="simularAlertaEmision()" class="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-emerald-500/20 active:scale-95">
+                <span>✅ Probar: Póliza Emitida</span>
+              </button>
+            </div>
+          </div>
         </section>
 
         <!-- Live Feed Section with Filter Chips -->
@@ -282,16 +306,53 @@ export class NotificacionesComponent implements OnInit {
     if (typeof window !== 'undefined') {
       const ua = window.navigator.userAgent || '';
       this.isIosDevice.set(/iPhone|iPad|iPod/.test(ua));
-
-      // Activar automáticamente la suscripción silenciosa en segundo plano
-      if ('Notification' in window && Notification.permission === 'granted') {
-        this.pushService.solicitarPermisoYSuscribir();
-      }
+      
+      // Intentar suscripción automática al abrir la vista
+      this.pushService.solicitarPermisoYSuscribir();
     }
   }
 
-  solicitarPermisoSilencioso() {
+  activarNotificaciones() {
     this.pushService.solicitarPermisoYSuscribir();
+  }
+
+  simularAlertaSiniestro() {
+    this.pushService.emitirAlerta({
+      id: 'sin-' + Date.now(),
+      titulo: '🚨 Nuevo Siniestro Reportado #98412',
+      mensaje: 'Cliente Juan Pérez reportó choque en Mendoza. Taller asignado: Cuyo SRL.',
+      tipo: 'siniestro',
+      icon: 'report_problem',
+      remitente: '🚨 SINIESTROS MERCANTIL',
+      link: '/siniestros',
+      hora: 'Ahora'
+    });
+  }
+
+  simularAlertaCobranza() {
+    this.pushService.emitirAlerta({
+      id: 'cob-' + Date.now(),
+      titulo: '💳 Alerta de Cuota Vencida ($23.322)',
+      mensaje: 'El cliente Mario Bustos tiene cuota impaga de Honda Twister.',
+      tipo: 'cobranzas',
+      icon: 'payments',
+      remitente: '💳 COBRANZAS IMPAGAS',
+      link: '/cobranzas',
+      hora: 'Ahora'
+    });
+  }
+
+  simularAlertaEmision() {
+    this.pushService.emitirAlerta({
+      id: 'emi-' + Date.now(),
+      titulo: '✅ Póliza Emitida #594387120',
+      mensaje: 'Mercantil Andina emitió la póliza Auto Chevrolet Spin.',
+      tipo: 'cartera',
+      icon: 'check_circle',
+      remitente: '✅ EMISIÓN MERCANTIL',
+      link: '/clientes',
+      hora: 'Ahora'
+    });
   }
 
   marcarLeida(id: string) {

@@ -221,7 +221,8 @@ export class PushNotificationService {
 
     // 2. Si no hay suscripción guardada en el backend, no llamar a send-notification
     if (!this.isSubscribedBackend()) {
-      console.warn('⚠️ No se llama a send-notification porque no existe suscripción VAPID activa guardada en backend.');
+      console.warn('⚠️ No hay suscripción backend confirmada, disparando Service Worker local...');
+      this.dispararLocalServiceWorker(alerta, delayMs);
       return;
     }
 
