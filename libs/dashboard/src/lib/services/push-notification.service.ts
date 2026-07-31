@@ -1,5 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 export interface PushPopAlert {
   id: string;
@@ -13,6 +14,7 @@ export interface PushPopAlert {
 }
 
 function urlBase64ToUint8Array(base64String: string) {
+  if (!base64String) return new Uint8Array(0);
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
@@ -47,15 +49,18 @@ export class PushNotificationService {
     }
   }
 
-  fetchVapidPublicKey() {
-    this.http.get<{ public_key: string }>('/api/v1/push/vapid-public-key').subscribe({
-      next: (res) => {
-        if (res && res.public_key) {
-          this.vapidPublicKey = res.public_key;
-        }
-      },
-      error: () => {}
-    });
+  async fetchVapidPublicKey(): Promise<string> {
+    if (this.vapidPublicKey) return this.vapidPublicKey;
+    try {
+      const res = await firstValueFrom(this.http.get<{ public_key: string }>('/api/v1/push/vapid-public-key'));
+      if (res && res.public_key) {
+        this.vapidPublicKey = res.public_key;
+        console.log('🔑 Key VAPID Pública cargada desde backend:', this.vapidPublicKey);
+      }
+    } catch (err) {
+      console.warn('⚠️ No se pudo obtener la llave VAPID del backend:', err);
+    }
+    return this.vapidPublicKey;
   }
 
   descartarToast() {
@@ -87,7 +92,7 @@ export class PushNotificationService {
     this.pushPermissionStatus.set(permission);
 
     if (permission === 'granted') {
-      // Suscribir el dispositivo en el servidor de Push (Google FCM / Apple APNs) con llaves VAPID
+      console.log('✅ Permiso de notificaciones otorgado por el usuario. Iniciando suscripción VAPID...');
       await this.suscribirDispositivoBackend();
 
       this.emitirAlerta({
@@ -110,36 +115,57 @@ export class PushNotificationService {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
     try {
+      // 1. Garantizar obtención de clave VAPID pública
+      const publicKey = await this.fetchVapidPublicKey();
+      if (!publicKey) {
+        console.error('❌ Error: No se dispone de la VAPID_PUBLIC_KEY para suscribir.');
+        return;
+      }
+
+      // 2. Obtener o registrar Service Worker
       let reg = await navigator.serviceWorker.getRegistration();
       if (!reg) {
         reg = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.ready;
       }
 
       if (reg && reg.pushManager) {
-        const applicationServerKey = urlBase64ToUint8Array(this.vapidPublicKey);
-        const subscription = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: applicationServerKey
-        });
+        // 3. Verificar si ya existe suscripción previa o crear nueva
+        let subscription = await reg.pushManager.getSubscription();
+        if (!subscription) {
+          const applicationServerKey = urlBase64ToUint8Array(publicKey);
+          subscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+          });
+        }
 
         const subJson = subscription.toJSON();
-        
-        // Enviar suscripción VAPID a FastAPI DB
-        this.http.post('/api/v1/push/subscribe', {
+        console.log('📲 Obtenida PushSubscription del navegador:', subJson);
+
+        const payload = {
           endpoint: subJson.endpoint,
-          keys: subJson.keys
-        }).subscribe({
-          next: () => {
+          keys: {
+            p256dh: subJson.keys?.['p256dh'] || '',
+            auth: subJson.keys?.['auth'] || ''
+          }
+        };
+
+        console.log('🚀 Enviando POST /api/v1/push/subscribe con el objeto:', payload);
+
+        // 4. Enviar suscripción VAPID al backend FastAPI
+        this.http.post('/api/v1/push/subscribe', payload).subscribe({
+          next: (res: any) => {
             this.isSubscribedBackend.set(true);
-            console.log('✅ Suscripción VAPID guardada en backend FastAPI!');
+            console.log('✅ Suscripción VAPID guardada con éxito en el backend FastAPI! Respuesta:', res);
           },
           error: (err) => {
-            console.warn('Error guardando suscripción en backend:', err);
+            console.error('❌ Error guardando suscripción VAPID en backend:', err);
           }
         });
       }
     } catch (err) {
-      console.warn('Error al suscribir VAPID a Google/Apple Push Service:', err);
+      console.error('❌ Error durante el proceso de suscripción Push VAPID:', err);
     }
   }
 
@@ -173,7 +199,6 @@ export class PushNotificationService {
 
     // 4. Disparar notificaciones VAPID vía Backend FastAPI a Google FCM / Apple Push
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      // Disparar vía Backend API VAPID Push (que lo manda al Push Service real de Google/Apple)
       this.http.post('/api/v1/push/send-notification', {
         titulo: alerta.titulo,
         mensaje: alerta.mensaje,
@@ -181,10 +206,9 @@ export class PushNotificationService {
         link: alerta.link || '/dashboard'
       }).subscribe({
         next: (res: any) => {
-          console.log('✅ Push VAPID enviado desde backend:', res);
+          console.log('✅ Push VAPID enviado desde backend FastAPI a Google/Apple:', res);
         },
         error: () => {
-          // Fallback a Service Worker local postMessage
           this.dispararLocalServiceWorker(alerta, delayMs);
         }
       });
