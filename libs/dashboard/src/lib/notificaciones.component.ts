@@ -48,13 +48,13 @@ export interface AlertaNotificacion {
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="font-black text-base text-white">Alertas Push Emergentes en Celular</h2>
+                  <h2 class="font-black text-base text-white">Alertas Push Emergentes en Celular (Android / iPhone)</h2>
                   <span class="bg-[#25d366]/20 text-[#25d366] text-[10px] font-black px-2 py-0.5 rounded uppercase border border-[#25d366]/30">
                     {{ pushPermissionStatus() === 'granted' ? 'HABILITADO' : 'PERMISO REQUERIDO' }}
                   </span>
                 </div>
                 <p class="text-xs text-white/80 mt-1 leading-relaxed">
-                  Recibí avisos en tiempo real emergentes tipo ventana WhatsApp (Push Pop) en la pantalla de tu teléfono celular para siniestros, impagos e inspecciones.
+                  Recibí avisos en tiempo real emergentes tipo ventana WhatsApp (Push Pop) en la pantalla de tu celular para siniestros, impagos e inspecciones.
                 </p>
               </div>
             </div>
@@ -65,6 +65,20 @@ export interface AlertaNotificacion {
               <span class="material-symbols-outlined text-lg">notifications_active</span>
               <span>{{ pushPermissionStatus() === 'granted' ? 'Alertas Push Activas en SO' : 'Activar Notificaciones Push' }}</span>
             </button>
+          </div>
+
+          <!-- iPhone iOS Specific Instructions Banner -->
+          <div *ngIf="isIosDevice()" class="bg-indigo-950/80 border border-indigo-500/40 rounded-xl p-3.5 text-xs text-indigo-100 flex items-start gap-3">
+            <span class="material-symbols-outlined text-indigo-400 text-xl shrink-0 mt-0.5">apple</span>
+            <div class="space-y-1">
+              <p class="font-bold text-white">📱 ¿Cómo activar notificaciones Push en tu iPhone (iOS)?</p>
+              <p class="text-indigo-200/90 leading-relaxed">
+                En iPhone (iOS 16.4+), Apple requiere agregar la app a tu pantalla de inicio:
+                <br>1. Tocá el botón <strong>Compartir <span class="material-symbols-outlined text-xs inline">ios_share</span></strong> de Safari.
+                <br>2. Elegí <strong>"Agregar a pantalla de inicio"</strong>.
+                <br>3. Abrí JC PAS desde tu pantalla de inicio y presioná <strong>"Activar Notificaciones Push"</strong>.
+              </p>
+            </div>
           </div>
 
           <!-- Simulation Quick Buttons (WhatsApp Push Style) -->
@@ -249,6 +263,7 @@ export class NotificacionesComponent implements OnInit {
 
   pushPermissionStatus = signal<string>('default');
   filtroCategoria = signal<string>('todas');
+  isIosDevice = signal<boolean>(false);
 
   prefEmitidas = true;
   prefRenovaciones = true;
@@ -300,8 +315,12 @@ export class NotificacionesComponent implements OnInit {
   });
 
   ngOnInit() {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      this.pushPermissionStatus.set(Notification.permission);
+    if (typeof window !== 'undefined') {
+      if ('Notification' in window) {
+        this.pushPermissionStatus.set(Notification.permission);
+      }
+      const ua = window.navigator.userAgent || '';
+      this.isIosDevice.set(/iPhone|iPad|iPod/.test(ua));
     }
   }
 
@@ -317,14 +336,14 @@ export class NotificacionesComponent implements OnInit {
         emitirAlertaPushPop({
           id: 'push-granted-' + Date.now(),
           titulo: '🔔 Notificaciones Push Activadas',
-          mensaje: '¡Excelente! Ahora recibirás alertas emergentes tipo WhatsApp en tu teléfono.',
+          mensaje: '¡Excelente! Ahora recibirás alertas emergentes tipo WhatsApp en tu celular (iOS/Android).',
           tipo: 'cartera',
           icon: 'notifications_active',
           remitente: 'JC PAS PUSH ACTIVADO',
           hora: 'Ahora'
         });
       } else if (permission === 'denied') {
-        alert('Las notificaciones Push fueron bloqueadas en los ajustes de tu navegador.');
+        alert('Las notificaciones Push fueron bloqueadas en los ajustes de tu navegador o iPhone.');
       }
     });
   }
