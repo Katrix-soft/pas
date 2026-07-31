@@ -131,7 +131,7 @@ export class ForgotPasswordComponent {
       this.isLoading.set(true);
       this.errorMsg.set(null);
       
-      this.http.post('http://localhost:8000/api/v1/auth/forgot-password', this.recoveryForm.value)
+      this.http.post('/api/v1/auth/forgot-password', this.recoveryForm.value)
         .subscribe({
           next: () => {
             this.isLoading.set(false);

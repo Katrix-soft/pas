@@ -47,12 +47,12 @@ import { AuthService } from '@broker/dashboard';
               {{ errorMsg() }}
             </div>
 
-            <!-- Email Field -->
+            <!-- Email / User Field -->
             <div class="space-y-2">
-              <label class="text-sm font-bold text-on-surface-variant ml-1">Correo Electrónico</label>
+              <label class="text-sm font-bold text-on-surface-variant ml-1">Usuario o Correo Electrónico</label>
               <div class="relative group">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline-variant group-focus-within:text-primary transition-colors z-10 pointer-events-none">mail</span>
-                <input type="email" formControlName="email" class="w-full bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl pl-12 py-3.5 pr-4 text-on-surface font-medium focus:border-primary focus:bg-white outline-none transition-all hover:border-outline-variant shadow-sm" placeholder="usuario@katrix.com" />
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline-variant group-focus-within:text-primary transition-colors z-10 pointer-events-none">person</span>
+                <input type="text" formControlName="email" class="w-full bg-surface-container-lowest border-2 border-outline-variant/50 rounded-xl pl-12 py-3.5 pr-4 text-on-surface font-medium focus:border-primary focus:bg-white outline-none transition-all hover:border-outline-variant shadow-sm" placeholder="pas o usuario@katrix.com" />
               </div>
             </div>
 
@@ -131,7 +131,7 @@ export class LoginComponent {
     }
 
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required]],
       password: ['', Validators.required],
       rememberMe: [false]
     });

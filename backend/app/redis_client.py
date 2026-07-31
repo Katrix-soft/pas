@@ -18,7 +18,9 @@ def get_redis_client() -> Optional[aioredis.Redis]:
                 REDIS_URL, 
                 encoding="utf-8", 
                 decode_responses=True,
-                socket_timeout=5.0
+                socket_timeout=5.0,
+                max_connections=10,
+                retry_on_timeout=True
             )
         except Exception as e:
             logger.error(f"Error initializing Redis client: {e}")

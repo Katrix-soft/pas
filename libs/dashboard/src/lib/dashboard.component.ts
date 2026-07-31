@@ -1,12 +1,13 @@
 import { Component, signal, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'lib-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, HttpClientModule],
   template: `
     @if (isLoading()) {
 
@@ -448,7 +449,7 @@ import { AuthService } from './services/auth.service';
               <div class="flex justify-between items-start">
                 <div>
                   <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Premio Administrado (Mensual)</p>
-                  <h2 class="font-metric-xl text-metric-xl text-primary">$48.2M</h2>
+                  <h2 class="font-metric-xl text-metric-xl text-primary">{{ premioTotalFmt() }}</h2>
                 </div>
                 <div class="flex items-center gap-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-sm py-xs rounded-full font-bold text-xs border border-emerald-500/20">
                   <span class="material-symbols-outlined text-sm">trending_up</span>
@@ -456,7 +457,7 @@ import { AuthService } from './services/auth.service';
                 </div>
               </div>
               <div class="flex justify-between items-center mt-sm text-xs text-outline">
-                <span>Cartera Total Vigente (198 Pólizas)</span>
+                <span>Cartera Total Vigente ({{ polizasCount() }} Pólizas)</span>
                 <span class="font-semibold text-primary">Ver detalle de prima →</span>
               </div>
             </div>
@@ -465,14 +466,14 @@ import { AuthService } from './services/auth.service';
             <div routerLink="/clientes" class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm flex flex-col justify-between hover:scale-[0.98] transition-transform cursor-pointer">
               <div>
                 <p class="font-label-md text-label-md text-on-surface-variant mb-xs">Clientes Activos</p>
-                <h2 class="font-metric-xl text-metric-xl text-on-surface">148</h2>
+                <h2 class="font-metric-xl text-metric-xl text-on-surface">{{ clientesCount() }}</h2>
               </div>
               <div class="flex items-center justify-between mt-sm">
                 <div class="flex -space-x-2 overflow-hidden">
-                  <div class="w-6 h-6 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center border border-white">SP</div>
-                  <div class="w-6 h-6 rounded-full bg-secondary text-white text-[9px] font-bold flex items-center justify-center border border-white">PJ</div>
-                  <div class="w-6 h-6 rounded-full bg-tertiary text-white text-[9px] font-bold flex items-center justify-center border border-white">FL</div>
-                  <div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-[10px] font-bold text-on-surface border border-white">+145</div>
+                  <div class="w-6 h-6 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center border border-white">BA</div>
+                  <div class="w-6 h-6 rounded-full bg-secondary text-white text-[9px] font-bold flex items-center justify-center border border-white">PR</div>
+                  <div class="w-6 h-6 rounded-full bg-tertiary text-white text-[9px] font-bold flex items-center justify-center border border-white">AL</div>
+                  <div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-[10px] font-bold text-on-surface border border-white">+216</div>
                 </div>
                 <span class="text-xs text-outline font-semibold">98.5% retención →</span>
               </div>
@@ -568,7 +569,7 @@ import { AuthService } from './services/auth.service';
               </h3>
               <div class="grid grid-cols-1 gap-sm">
                 <!-- Mercantil Andina -->
-                <div routerLink="/compania" class="flex items-center justify-between p-md bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
+                <div [routerLink]="['/compania']" [queryParams]="{ id: 'mercantil' }" class="flex items-center justify-between p-md bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
                   <div class="flex items-center gap-md">
                     <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md">
                       MA
@@ -585,7 +586,7 @@ import { AuthService } from './services/auth.service';
                 </div>
 
                 <!-- San Cristóbal -->
-                <div routerLink="/compania" class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+                <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancristobal' }" class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
                   <div class="flex items-center gap-md">
                     <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-sm">
                       SC
@@ -599,7 +600,7 @@ import { AuthService } from './services/auth.service';
                 </div>
 
                 <!-- Sancor Seguros -->
-                <div routerLink="/compania" class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+                <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancor' }" class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
                   <div class="flex items-center gap-md">
                     <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-sm">
                       SS
@@ -610,6 +611,22 @@ import { AuthService } from './services/auth.service';
                     </div>
                   </div>
                   <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+                </div>
+
+                <!-- Cooperación Seguros -->
+                <div [routerLink]="['/compania']" [queryParams]="{ id: 'cooperacion' }" class="flex items-center justify-between p-md bg-amber-500/10 rounded-xl border border-amber-500/30 cursor-pointer hover:bg-amber-500/20 transition-all">
+                  <div class="flex items-center gap-md">
+                    <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md">
+                      CS
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <p class="font-bold text-sm text-on-surface">Cooperación Seguros</p>
+                      </div>
+                      <p class="text-xs text-on-surface-variant">Cotización & Emisión disponible</p>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined text-amber-500">chevron_right</span>
                 </div>
               </div>
             </div>
@@ -627,77 +644,32 @@ import { AuthService } from './services/auth.service';
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-sm">
-                <!-- Renewal Item 1 -->
-                <div class="p-md bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between">
-                  <div class="flex items-center gap-md">
-                    <div class="bg-amber-500/10 text-amber-600 dark:text-amber-400 w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border border-amber-500/20">
-                      <span class="text-xs">3</span>
-                      <span class="text-[9px] uppercase">días</span>
+                @for (r of renovaciones(); track r.poliza_numero) {
+                  <div [routerLink]="['/clientes/detalle']" [queryParams]="{ nombre: r.cliente, id: r.cliente_id }" class="p-md bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between cursor-pointer hover:bg-surface-container hover:shadow-sm transition-all">
+                    <div class="flex items-center gap-md">
+                      <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border"
+                           [ngClass]="{
+                             'bg-amber-500/10 text-amber-600 border-amber-500/20': r.dias_restantes <= 5,
+                             'bg-slate-500/10 text-slate-600 border-slate-500/20': r.dias_restantes > 5
+                           }">
+                        <span class="text-xs">{{ r.dias_restantes }}</span>
+                        <span class="text-[9px] uppercase">días</span>
+                      </div>
+                      <div>
+                        <p class="font-bold text-sm text-on-surface">Póliza {{ r.aseguradora }} #{{ r.poliza_numero }}</p>
+                        <p class="text-xs text-on-surface-variant">{{ r.bien }} • Cliente: <strong>{{ r.cliente }}</strong></p>
+                      </div>
                     </div>
-                    <div>
-                      <p class="font-bold text-sm text-on-surface">Póliza Mercantil #594387129</p>
-                      <p class="text-xs text-on-surface-variant">CHEVROLET SPIN 1.8 • Cliente: <strong>Schaffer Augusto Pablo</strong></p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-sm font-bold text-primary block">$89.300</span>
-                    <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">Renovación Lista</span>
-                  </div>
-                </div>
-
-                <!-- Renewal Item 2 -->
-                <div class="p-md bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between">
-                  <div class="flex items-center gap-md">
-                    <div class="bg-amber-500/10 text-amber-600 dark:text-amber-400 w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border border-amber-500/20">
-                      <span class="text-xs">5</span>
-                      <span class="text-[9px] uppercase">días</span>
-                    </div>
-                    <div>
-                      <p class="font-bold text-sm text-on-surface">Póliza Mercantil #148059592</p>
-                      <p class="text-xs text-on-surface-variant">HONDA CBX 250 • Cliente: <strong>Pérez Juan</strong></p>
+                    <div class="text-right">
+                      <span class="text-sm font-bold text-primary block">{{ r.premio_fmt }}</span>
+                      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            [ngClass]="{
+                              'text-emerald-600 bg-emerald-500/10 border border-emerald-500/20': r.estado === 'Renovación Lista',
+                              'text-amber-600 bg-amber-500/10 border border-amber-500/20': r.estado !== 'Renovación Lista'
+                            }">{{ r.estado }}</span>
                     </div>
                   </div>
-                  <div class="text-right">
-                    <span class="text-sm font-bold text-primary block">$23.322</span>
-                    <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">Renovación Lista</span>
-                  </div>
-                </div>
-
-                <!-- Renewal Item 3 -->
-                <div class="p-md bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between">
-                  <div class="flex items-center gap-md">
-                    <div class="bg-slate-500/10 text-slate-600 dark:text-slate-400 w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border border-slate-500/20">
-                      <span class="text-xs">8</span>
-                      <span class="text-[9px] uppercase">días</span>
-                    </div>
-                    <div>
-                      <p class="font-bold text-sm text-on-surface">Póliza Mercantil #180041638</p>
-                      <p class="text-xs text-on-surface-variant">RENAULT DUSTER 1.6 • Cliente: <strong>Fernández Lucía</strong></p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-sm font-bold text-primary block">$64.200</span>
-                    <span class="text-[10px] text-slate-500 font-semibold">Pendiente Inspección</span>
-                  </div>
-                </div>
-
-                <!-- Renewal Item 4 -->
-                <div class="p-md bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between">
-                  <div class="flex items-center gap-md">
-                    <div class="bg-slate-500/10 text-slate-600 dark:text-slate-400 w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border border-slate-500/20">
-                      <span class="text-xs">12</span>
-                      <span class="text-[9px] uppercase">días</span>
-                    </div>
-                    <div>
-                      <p class="font-bold text-sm text-on-surface">Póliza Mercantil #46522374</p>
-                      <p class="text-xs text-on-surface-variant">FORD RANGER 3.2 • Cliente: <strong>Gómez Marcos</strong></p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-sm font-bold text-primary block">$118.500</span>
-                    <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">Renovación Lista</span>
-                  </div>
-                </div>
+                }
               </div>
             </div>
           </div>
@@ -771,6 +743,54 @@ export class DashboardComponent implements OnInit {
   isRetrying = signal(false);
 
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
+
+  premioTotalFmt = signal('$18.5M');
+  clientesCount = signal(219);
+  polizasCount = signal(312);
+  renovaciones = signal<any[]>([
+    {
+      dias_restantes: 3,
+      poliza_numero: "5-894210-242193",
+      aseguradora: "Mercantil Andina",
+      bien: "PEUGEOT 208 1.6 FELINE HDI",
+      cliente: "BAHAMONDE JOSE ANTONIO",
+      cliente_id: 242193,
+      premio_fmt: "$64.500",
+      estado: "Renovación Lista"
+    },
+    {
+      dias_restantes: 5,
+      poliza_numero: "20027144800",
+      aseguradora: "Cooperación Seguros",
+      bien: "COMBINADO FAMILIAR HOGAR",
+      cliente: "PEREZ CLAUDIA ROSANA",
+      cliente_id: 2008962,
+      premio_fmt: "$28.900",
+      estado: "Renovación Lista"
+    },
+    {
+      dias_restantes: 8,
+      poliza_numero: "5-894210-2008962",
+      aseguradora: "Mercantil Andina",
+      bien: "TOYOTA COROLLA 2.0 SEG",
+      cliente: "PEREZ CLAUDIA ROSANA",
+      cliente_id: 2008962,
+      premio_fmt: "$64.500",
+      estado: "Pendiente Inspección"
+    },
+    {
+      dias_restantes: 12,
+      poliza_numero: "5-302194-950723",
+      aseguradora: "Mercantil Andina",
+      bien: "TOYOTA HILUX 2.8 SRX 4X4",
+      cliente: "PEREZ DANIEL HORACIO",
+      cliente_id: 950723,
+      premio_fmt: "$118.500",
+      estado: "Renovación Lista"
+    }
+  ]);
+
   role = computed(() => this.authService.currentUser()?.role || 'admin');
   userFullName = computed(() => {
     const name = this.authService.currentUser()?.name;
@@ -786,6 +806,21 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.initialLoadSequence();
+    this.cargarMetricasCartera();
+  }
+
+  cargarMetricasCartera() {
+    this.http.get<any>('/api/v1/quotations/mercantil/portfolio/metrics').subscribe({
+      next: (m) => {
+        if (m) {
+          if (m.premio_administrado_fmt) this.premioTotalFmt.set(m.premio_administrado_fmt);
+          if (m.clientes_activos) this.clientesCount.set(m.clientes_activos);
+          if (m.polizas_vigentes) this.polizasCount.set(m.polizas_vigentes);
+          if (m.renovaciones && m.renovaciones.length > 0) this.renovaciones.set(m.renovaciones);
+        }
+      },
+      error: () => {}
+    });
   }
 
   initialLoadSequence() {

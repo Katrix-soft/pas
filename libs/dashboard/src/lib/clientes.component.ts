@@ -41,21 +41,29 @@ export interface ClienteMercantil {
         <!-- Search and Filter Section -->
         <section class="pb-lg space-y-md">
           <!-- Search Input -->
-          <div class="relative group">
-            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
+          <div class="flex flex-col sm:block relative group">
+            <span class="material-symbols-outlined absolute left-md top-4 sm:top-1/2 -translate-y-1/2 text-outline">search</span>
             <input 
               [(ngModel)]="searchTerm" 
               (keyup.enter)="buscarMercantil()"
-              class="w-full pl-[48px] pr-[120px] py-md bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:outline-none transition-all font-body-md text-on-surface shadow-sm" 
+              class="w-full pl-[48px] pr-4 sm:pr-[190px] py-md bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:outline-none transition-all font-body-md text-on-surface shadow-sm" 
               placeholder="Buscar por Nombre, DNI, CUIL o Localidad..." 
               type="text">
             
-            <button 
-              (click)="buscarMercantil()" 
-              [disabled]="isLoading()"
-              class="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-on-primary px-md py-sm rounded-lg font-bold text-xs hover:bg-primary-container transition-all cursor-pointer">
-              {{ isLoading() ? 'Buscando...' : 'Buscar' }}
-            </button>
+            <div class="flex sm:absolute sm:right-2 sm:top-1/2 sm:-translate-y-1/2 items-center justify-end gap-1 mt-2 sm:mt-0">
+              <button 
+                *ngIf="searchTerm"
+                (click)="limpiarBusqueda()"
+                class="px-sm py-sm text-xs font-bold text-outline hover:text-on-surface hover:bg-surface-container transition-all rounded-lg cursor-pointer">
+                ✕ Limpiar
+              </button>
+              <button 
+                (click)="buscarMercantil()" 
+                [disabled]="isLoading()"
+                class="bg-primary text-on-primary px-md py-sm rounded-lg font-bold text-xs hover:bg-primary-container transition-all cursor-pointer">
+                {{ isLoading() ? 'Buscando...' : 'Buscar' }}
+              </button>
+            </div>
           </div>
 
           <!-- Alphabet A-Z Bar -->
@@ -246,7 +254,10 @@ export class ClientesComponent implements OnInit {
       }
     });
 
-    this.clientesList.set(Array.from(groupedMap.values()));
+    const sortedList = Array.from(groupedMap.values()).sort((a, b) => 
+      a.nombre.trim().localeCompare(b.nombre.trim())
+    );
+    this.clientesList.set(sortedList);
   }
 
   getRamoBadgeClass(ramo: string): string {
@@ -257,11 +268,24 @@ export class ClientesComponent implements OnInit {
   }
 
   selectLetter(letter: string) {
+    if (letter === '') {
+      this.searchTerm = '';
+      this.selectedLetter.set('');
+      this.buscarMercantil();
+      return;
+    }
     if (this.selectedLetter() === letter) {
       this.selectedLetter.set('');
     } else {
       this.selectedLetter.set(letter);
     }
+  }
+
+  limpiarBusqueda() {
+    this.searchTerm = '';
+    this.selectedLetter.set('');
+    this.activeFilter.set('Todos');
+    this.buscarMercantil();
   }
 
   selectFilter(filter: string) {
@@ -284,16 +308,17 @@ export class ClientesComponent implements OnInit {
     }
 
     if (l) {
-      list = list.filter(c => {
-        const nameUpper = c.nombre.trim().toUpperCase();
-        const words = nameUpper.split(/\s+/);
-        return words.some(w => w.startsWith(l)) || nameUpper.startsWith(l);
-      });
+      // Filtrar estrictamente por la letra inicial del APELLIDO
+      list = list.filter(c => c.nombre.trim().toUpperCase().startsWith(l));
     }
 
-    if (f === 'Todos') return list;
+    // Asegurar orden alfabético estricto por APELLIDO
+    list.sort((a, b) => a.nombre.trim().localeCompare(b.nombre.trim()));
+
+    if (f === 'Clientes Activos') return list.filter(c => !c.estado || c.estado === 'ACTIVO');
     if (f === 'Persona Física') return list.filter(c => c.persona === 'FISICA');
     if (f === 'Persona Jurídica') return list.filter(c => c.persona === 'JURIDICA');
+    if (f === 'Todos') return list;
     return list.filter(c => c.localidad.toLowerCase().includes(f.toLowerCase()));
   }
 
@@ -316,7 +341,18 @@ export class ClientesComponent implements OnInit {
       { id: 2008962, nombre: 'PEREZ CLAUDIA ROSANA', persona: 'FISICA', direccion: 'Aristobulo Del Valle 2645', localidad: 'LAS HERAS', telefono: '02616737416', ramos: ['Automotor (Rama 5)', 'Combinado Familiar (Rama 14)'], cantidadPolizas: 2 },
       { id: 950723, nombre: 'PEREZ DANIEL HORACIO', persona: 'JURIDICA', direccion: 'LAS CAÑAS 1833', localidad: 'CORONEL DORREGO', telefono: '0261154543444', ramos: ['Combinado Familiar (Rama 14)'], cantidadPolizas: 1 },
       { id: 2911142, nombre: 'PEREZ DIAZ MIGUEL ALFREDO', persona: 'FISICA', direccion: '20 De Junio 198', localidad: 'GODOY CRUZ', telefono: '02615922526', ramos: ['Motovehículos (Rama 35)'], cantidadPolizas: 1 },
-      { id: 1952279, nombre: 'PEREZ SABATER FEDERICO DAMIAN', persona: 'FISICA', direccion: 'ECHEVERRÍA 1093', localidad: 'CABA-PALERMO', telefono: '01140464654', ramos: ['Accidentes Personales'], cantidadPolizas: 1 }
+      { id: 1952279, nombre: 'PEREZ SABATER FEDERICO DAMIAN', persona: 'FISICA', direccion: 'ECHEVERRÍA 1093', localidad: 'CABA-PALERMO', telefono: '01140464654', ramos: ['Accidentes Personales (Rama 18)'], cantidadPolizas: 1 },
+      { id: 427967, nombre: 'BRAVO FEDERICO ALEJANDRO', persona: 'FISICA', direccion: 'CARRILLO 3161', localidad: 'MENDOZA', telefono: '02612186181', ramos: ['Automotor (Rama 5)'], cantidadPolizas: 1 },
+      { id: 1939888, nombre: 'CALDERON GONZALO JOSE', persona: 'FISICA', direccion: 'LUZURIAGA 210 DEPTO 5', localidad: 'MENDOZA', telefono: '02613375499', ramos: ['Combinado Familiar (Rama 14)'], cantidadPolizas: 1 },
+      { id: 2536668, nombre: 'CARDENAS ROBERTO FABIO', persona: 'FISICA', direccion: 'FALUCHO 131', localidad: 'MAIPU', telefono: '0261546843', ramos: ['Automotor (Rama 5)'], cantidadPolizas: 1 },
+      { id: 1051283, nombre: 'CASTILLO BLANCA A DEL', persona: 'FISICA', direccion: 'BARRIO SOLAR DE CUYO MZ D C26', localidad: 'LUJAN DE CUYO', telefono: '02615560516', ramos: ['Combinado Familiar (Rama 14)'], cantidadPolizas: 1 },
+      { id: 2747581, nombre: 'CIFUENTES GIRARDELLO ANTONELLA ESTEFANIA', persona: 'FISICA', direccion: 'LEANDRO ALEM 1258', localidad: 'MAIPU', telefono: '02614977566', ramos: ['Motovehículos (Rama 35)'], cantidadPolizas: 1 },
+      { id: 622061, nombre: 'CLUB MENDOZA DE REGATAS', persona: 'JURIDICA', direccion: 'AVDA LAS PALMERAS S/N', localidad: 'MENDOZA', telefono: '02614288192', ramos: ['Accidentes Personales (Rama 18)'], cantidadPolizas: 3 },
+      { id: 120921, nombre: 'ALURRALDE MATIAS IGNACIO', persona: 'FISICA', direccion: 'BELTRAN 236 PISO 5', localidad: 'GODOY CRUZ', telefono: '02614543582', ramos: ['Automotor (Rama 5)'], cantidadPolizas: 1 },
+      { id: 242193, nombre: 'BAHAMONDE JOSE ANTONIO', persona: 'FISICA', direccion: 'SAN MARTÍN 5936 CERRO ALTO', localidad: 'CHACRAS DE CORIA', telefono: '0261156513700', ramos: ['Combinado Familiar (Rama 14)'], cantidadPolizas: 2 },
+      { id: 3473591, nombre: 'BAIGORRIA BUSTOS GISELA LOURDES', persona: 'FISICA', direccion: 'RIVADAVIA 278', localidad: 'TUPUNGATO', telefono: '02622505535', ramos: ['Automotor (Rama 5)'], cantidadPolizas: 1 },
+      { id: 2103458, nombre: 'CASTRO GERMAN NICOLAS', persona: 'FISICA', direccion: 'PADRE VAZQUEZ 374', localidad: 'MAIPU', telefono: '02615870326', ramos: ['Motovehículos (Rama 35)'], cantidadPolizas: 1 },
+      { id: 1747728, nombre: 'MORALES GABRIEL FACUNDO', persona: 'FISICA', direccion: 'ROQUE SAENZ PEÑA 1911', localidad: 'LAS HERAS', telefono: '02614203278', ramos: ['Automotor (Rama 5)'], cantidadPolizas: 1 }
     ];
   }
 }

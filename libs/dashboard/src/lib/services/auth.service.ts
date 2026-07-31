@@ -55,6 +55,7 @@ export class AuthService {
 
   currentUser = signal<User | null>(this.getInitialUser());
   tenantLogo = signal<string | null>(localStorage.getItem('tenantLogo'));
+  isModalActive = signal<boolean>(false);
 
   constructor(private http: HttpClient) {}
 

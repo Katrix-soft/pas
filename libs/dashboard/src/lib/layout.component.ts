@@ -5,6 +5,7 @@ import { AuthService } from './services/auth.service';
 import { BreadcrumbsComponent } from './breadcrumbs.component';
 
 export type Role = 'admin' | 'pas' | string;
+export const isPdfModalOpen = signal(false);
 
 @Component({
   selector: 'lib-layout',
@@ -13,6 +14,29 @@ export type Role = 'admin' | 'pas' | string;
   template: `
     <div class="flex h-screen w-full bg-background overflow-hidden">
       
+      <!-- Unified Mobile Bottom Nav -->
+      @if (!authService.isModalActive()) {
+        <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-2 py-2 bg-[#1c2e43] border-t border-white/10 z-10 pb-safe">
+          <a routerLink="/dashboard" routerLinkActive="text-[#10b981]" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="text-[10px] mt-1 font-medium">Panel</span>
+          </a>
+          <a routerLink="/cobranzas" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
+            <span class="material-symbols-outlined">payments</span>
+            <span class="text-[10px] mt-1 font-medium">Cobros</span>
+          </a>
+          <a routerLink="/clientes" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-[10px] mt-1 font-medium">Clientes</span>
+          </a>
+          <a *ngIf="role() === 'admin'" routerLink="/ticketera/kanban" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px] relative">
+            <span class="material-symbols-outlined">view_kanban</span>
+            <span class="text-[10px] mt-1 font-medium">Mesa</span>
+            <span class="absolute top-1 right-3 w-2 h-2 bg-[#2563eb] rounded-full border border-[#1c2e43]"></span>
+          </a>
+        </nav>
+      }
+
       <!-- Unified Desktop Sidebar (Collapsible) -->
       <aside 
         class="hidden md:flex flex-col h-full bg-[#1c2e43] text-white flex-shrink-0 z-50 transition-all duration-300 ease-in-out relative border-r border-white/5"
@@ -151,7 +175,7 @@ export type Role = 'admin' | 'pas' | string;
       </aside>
 
       <!-- Main Content Container -->
-      <div class="flex-1 h-full overflow-y-auto relative bg-background pb-20 md:pb-0 custom-scrollbar">
+      <div class="flex-1 h-full overflow-y-auto relative z-20 bg-background pb-20 md:pb-0 custom-scrollbar">
         <!-- Global Breadcrumbs Wrapper -->
         <div class="w-full px-container-margin md:px-xl pt-sm pb-0 relative z-10">
           <lib-breadcrumbs></lib-breadcrumbs>
@@ -159,32 +183,12 @@ export type Role = 'admin' | 'pas' | string;
         <router-outlet></router-outlet>
       </div>
 
-      <!-- Unified Mobile Bottom Nav -->
-      <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-2 py-2 bg-[#1c2e43] border-t border-white/10 z-[100] pb-safe">
-        <a routerLink="/dashboard" routerLinkActive="text-[#10b981]" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
-          <span class="material-symbols-outlined">grid_view</span>
-          <span class="text-[10px] mt-1 font-medium">Panel</span>
-        </a>
-        <a routerLink="/cobranzas" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
-          <span class="material-symbols-outlined">payments</span>
-          <span class="text-[10px] mt-1 font-medium">Cobros</span>
-        </a>
-        <a routerLink="/clientes" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px]">
-          <span class="material-symbols-outlined">group</span>
-          <span class="text-[10px] mt-1 font-medium">Clientes</span>
-        </a>
-        <a *ngIf="role() === 'admin'" routerLink="/ticketera/kanban" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/60 p-2 rounded-xl transition-all cursor-pointer min-w-[64px] relative">
-          <span class="material-symbols-outlined">view_kanban</span>
-          <span class="text-[10px] mt-1 font-medium">Mesa</span>
-          <span class="absolute top-1 right-3 w-2 h-2 bg-[#2563eb] rounded-full border border-[#1c2e43]"></span>
-        </a>
-      </nav>
-
     </div>
   `,
   styles: [``]
 })
 export class LayoutComponent {
+  isPdfModalOpen = isPdfModalOpen;
   isExpanded = signal(false);
   authService = inject(AuthService);
   router = inject(Router);
@@ -199,6 +203,10 @@ export class LayoutComponent {
   userName = computed<string>(() => this.userFullName().split(' ')[0]);
   
   constructor() {
+  }
+
+  isModalOpen(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('modal-open');
   }
 
   toggleSidebar() {

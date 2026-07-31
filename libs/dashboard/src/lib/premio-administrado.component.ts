@@ -31,11 +31,11 @@ import { RouterLink } from '@angular/router';
             <span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'wght' 200;">account_balance_wallet</span>
           </div>
           <div class="relative z-10 flex flex-col items-center text-center py-4">
-            <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Cartera Total Vigente</p>
-            <h2 class="font-metric-xl text-metric-xl text-primary mb-xs">$13.5M</h2>
+            <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Cartera Total Vigente (312 Pólizas)</p>
+            <h2 class="font-metric-xl text-metric-xl text-primary mb-xs">$18.5M</h2>
             <div class="flex items-center gap-1 px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full">
               <span class="material-symbols-outlined text-[18px]">trending_up</span>
-              <span class="font-label-md text-label-md">+4.2% este mes</span>
+              <span class="font-label-md text-label-md">+14.8% este mes</span>
             </div>
           </div>
         </section>
@@ -43,44 +43,60 @@ import { RouterLink } from '@angular/router';
         <!-- Chart Section: Monthly Evolution -->
         <section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm">
           <div class="flex justify-between items-center mb-lg">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface">Evolución Mensual</h3>
-            <span class="font-label-md text-label-md text-primary font-bold">Últimos 6 Meses</span>
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Evolución Mensual del Premio</h3>
+              <p class="text-xs text-on-surface-variant mt-0.5">Incremento sostenido de prima administrada en los últimos 6 meses</p>
+            </div>
+            <span class="font-label-md text-label-md text-primary font-bold bg-primary/10 px-3 py-1 rounded-full border border-primary/20">Semestre I - 2026</span>
           </div>
-          <div class="h-48 flex items-end justify-between gap-2 pt-4 relative">
+          <div class="h-56 flex items-end justify-between gap-3 pt-8 pb-2 relative px-4">
             <!-- Grid Lines -->
-            <div class="absolute inset-x-0 top-4 border-t border-surface-container-high"></div>
-            <div class="absolute inset-x-0 top-1/2 border-t border-surface-container-high"></div>
-            <!-- Bars -->
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-              <div class="chart-bar w-full max-w-[40px] bg-primary-fixed rounded-t-lg transition-all group-hover:bg-primary-container" style="--target-height: 40%; height: 40%;"></div>
-              <span class="font-label-md text-label-md text-on-surface-variant">Ene</span>
+            <div class="absolute inset-x-0 top-12 border-t border-dashed border-outline-variant/50"></div>
+            <div class="absolute inset-x-0 top-28 border-t border-dashed border-outline-variant/50"></div>
+            <div class="absolute inset-x-0 top-44 border-t border-dashed border-outline-variant/50"></div>
+
+            <!-- Ene -->
+            <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+              <span class="text-[10px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">$12.4M</span>
+              <div class="w-full max-w-[48px] bg-blue-300 dark:bg-blue-900/60 rounded-t-lg transition-all group-hover:bg-primary" style="height: 48%;"></div>
+              <span class="font-label-md text-xs font-semibold text-on-surface-variant">Ene</span>
             </div>
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-              <div class="chart-bar w-full max-w-[40px] bg-primary-fixed rounded-t-lg transition-all group-hover:bg-primary-container" style="--target-height: 55%; height: 55%;"></div>
-              <span class="font-label-md text-label-md text-on-surface-variant">Feb</span>
+            <!-- Feb -->
+            <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+              <span class="text-[10px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">$13.8M</span>
+              <div class="w-full max-w-[48px] bg-blue-400 dark:bg-blue-800/80 rounded-t-lg transition-all group-hover:bg-primary" style="height: 58%;"></div>
+              <span class="font-label-md text-xs font-semibold text-on-surface-variant">Feb</span>
             </div>
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-              <div class="chart-bar w-full max-w-[40px] bg-primary-fixed rounded-t-lg transition-all group-hover:bg-primary-container" style="--target-height: 70%; height: 70%;"></div>
-              <span class="font-label-md text-label-md text-on-surface-variant">Mar</span>
+            <!-- Mar -->
+            <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+              <span class="text-[10px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">$15.2M</span>
+              <div class="w-full max-w-[48px] bg-blue-500 dark:bg-blue-700 rounded-t-lg transition-all group-hover:bg-primary" style="height: 70%;"></div>
+              <span class="font-label-md text-xs font-semibold text-on-surface-variant">Mar</span>
             </div>
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-              <div class="chart-bar w-full max-w-[40px] bg-primary-fixed rounded-t-lg transition-all group-hover:bg-primary-container" style="--target-height: 65%; height: 65%;"></div>
-              <span class="font-label-md text-label-md text-on-surface-variant">Abr</span>
+            <!-- Abr -->
+            <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+              <span class="text-[10px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">$14.9M</span>
+              <div class="w-full max-w-[48px] bg-blue-400 dark:bg-blue-800/80 rounded-t-lg transition-all group-hover:bg-primary" style="height: 65%;"></div>
+              <span class="font-label-md text-xs font-semibold text-on-surface-variant">Abr</span>
             </div>
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-              <div class="chart-bar w-full max-w-[40px] bg-primary-fixed rounded-t-lg transition-all group-hover:bg-primary-container" style="--target-height: 85%; height: 85%;"></div>
-              <span class="font-label-md text-label-md text-on-surface-variant">May</span>
+            <!-- May -->
+            <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+              <span class="text-[10px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">$16.8M</span>
+              <div class="w-full max-w-[48px] bg-blue-600 dark:bg-blue-600 rounded-t-lg transition-all group-hover:bg-primary" style="height: 84%;"></div>
+              <span class="font-label-md text-xs font-semibold text-on-surface-variant">May</span>
             </div>
-            <div class="flex-1 flex flex-col items-center gap-2 group">
-              <div class="chart-bar w-full max-w-[40px] bg-primary-container rounded-t-lg transition-all" style="--target-height: 100%; height: 100%;"></div>
-              <span class="font-label-md text-label-md text-primary font-bold">Jun</span>
+            <!-- Jun (Actual) -->
+            <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+              <span class="text-[11px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded shadow-xs">$18.5M</span>
+              <div class="w-full max-w-[48px] bg-primary rounded-t-lg transition-all shadow-md group-hover:bg-indigo-700" style="height: 100%;"></div>
+              <span class="font-label-md text-xs font-black text-primary">Jun</span>
             </div>
           </div>
         </section>
 
         <!-- Breakdown Section: Distribution by Branch -->
         <section class="space-y-md">
-          <h3 class="font-headline-sm text-headline-sm text-on-surface px-1">Distribución por Ramo</h3>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface px-1 font-bold">Distribución por Ramo</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
             <!-- Auto -->
             <div class="bg-surface-container-lowest border-l-4 border-primary rounded-xl border border-outline-variant p-md flex justify-between items-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
@@ -89,12 +105,12 @@ import { RouterLink } from '@angular/router';
                   <span class="material-symbols-outlined text-primary">directions_car</span>
                 </div>
                 <div>
-                  <p class="font-body-md font-bold text-on-surface">Automotor</p>
-                  <p class="font-label-md text-on-surface-variant">54.8% del total</p>
+                  <p class="font-body-md font-bold text-on-surface">Automotor (Rama 5)</p>
+                  <p class="font-label-md text-on-surface-variant">62.0% (178 pólizas)</p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-headline-sm font-extrabold text-on-surface">$7.4M</p>
+                <p class="font-headline-sm font-extrabold text-on-surface">$11.48M</p>
               </div>
             </div>
             <!-- Hogar -->
@@ -104,42 +120,42 @@ import { RouterLink } from '@angular/router';
                   <span class="material-symbols-outlined text-secondary">home</span>
                 </div>
                 <div>
-                  <p class="font-body-md font-bold text-on-surface">Hogar</p>
-                  <p class="font-label-md text-on-surface-variant">24.4% del total</p>
+                  <p class="font-body-md font-bold text-on-surface">Combinado Familiar (Rama 14)</p>
+                  <p class="font-label-md text-on-surface-variant">22.0% (68 pólizas)</p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-headline-sm font-extrabold text-on-surface">$3.3M</p>
+                <p class="font-headline-sm font-extrabold text-on-surface">$4.06M</p>
               </div>
             </div>
-            <!-- Vida -->
+            <!-- Motos -->
             <div class="bg-surface-container-lowest border-l-4 border-tertiary rounded-xl border border-outline-variant p-md flex justify-between items-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
               <div class="flex items-center gap-md">
                 <div class="w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center">
-                  <span class="material-symbols-outlined text-tertiary">favorite</span>
+                  <span class="material-symbols-outlined text-tertiary">two_wheeler</span>
                 </div>
                 <div>
-                  <p class="font-body-md font-bold text-on-surface">Vida</p>
-                  <p class="font-label-md text-on-surface-variant">14.8% del total</p>
+                  <p class="font-body-md font-bold text-on-surface">Motovehículos & Movilidad (Rama 35)</p>
+                  <p class="font-label-md text-on-surface-variant">10.0% (42 pólizas)</p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-headline-sm font-extrabold text-on-surface">$2.0M</p>
+                <p class="font-headline-sm font-extrabold text-on-surface">$1.89M</p>
               </div>
             </div>
-            <!-- Otros -->
+            <!-- AP / Vida -->
             <div class="bg-surface-container-lowest border-l-4 border-outline rounded-xl border border-outline-variant p-md flex justify-between items-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
               <div class="flex items-center gap-md">
                 <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
-                  <span class="material-symbols-outlined text-outline">more_horiz</span>
+                  <span class="material-symbols-outlined text-outline">favorite</span>
                 </div>
                 <div>
-                  <p class="font-body-md font-bold text-on-surface">Otros</p>
-                  <p class="font-label-md text-on-surface-variant">6.0% del total</p>
+                  <p class="font-body-md font-bold text-on-surface">Accidentes Personales / Vida (Rama 18)</p>
+                  <p class="font-label-md text-on-surface-variant">6.0% (24 pólizas)</p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="font-headline-sm font-extrabold text-on-surface">$0.8M</p>
+                <p class="font-headline-sm font-extrabold text-on-surface">$1.03M</p>
               </div>
             </div>
           </div>
@@ -148,50 +164,50 @@ import { RouterLink } from '@angular/router';
         <!-- Recent Movements Section -->
         <section class="space-y-md">
           <div class="flex justify-between items-center px-1">
-            <h3 class="font-headline-sm text-headline-sm text-on-surface">Movimientos Recientes</h3>
+            <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Movimientos Recientes de Cartera</h3>
             <button class="font-label-md text-primary font-bold hover:underline cursor-pointer">Ver todo</button>
           </div>
           <div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
             <!-- Movement 1 -->
             <div class="flex items-center p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
-              <div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB10euZ-YETDnw_wOWxgpzlSNUvQOIhHo1ZZz4m-_6vVAqB5n7TolHp5aWnaXFVyxe5voFWT3yBE8rbLkyojMqqW9zsd006Mz9CTmlIG00eFP7Uhu4lns8Fiwyw8zilPKxi11JK-RvIHoTitj7AoVDkbdllL4qlHBQgf52obJdx1HH-U4iMBd7EJKc1gMiuE0Fs_CileTDMDdW3EdGA_eK84q3Osg_7i2nJUf-tjPHdc1SCgEt68YZqgQ"/>
+              <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
+                BA
               </div>
               <div class="ml-md flex-1">
-                <p class="font-body-md font-bold text-on-surface">Emisión: Carlos Méndez</p>
-                <p class="font-body-sm text-on-surface-variant">Ramo: Automotor • Hoy, 10:24 AM</p>
+                <p class="font-body-md font-bold text-on-surface">BAHAMONDE JOSE ANTONIO</p>
+                <p class="font-body-sm text-on-surface-variant text-xs">Póliza Mercantil Andina #5-894210-242193 • Automotor (Peugeot 208)</p>
               </div>
               <div class="text-right">
-                <p class="font-body-md font-bold text-secondary">+$145,200</p>
-                <span class="inline-block px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Éxito</span>
+                <p class="font-body-md font-bold text-primary">+$64.500</p>
+                <span class="inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase border border-emerald-500/20">Vigente</span>
               </div>
             </div>
             <!-- Movement 2 -->
             <div class="flex items-center p-md border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
-              <div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc0syjNsDTZPaX3lQCvIJWmcHLRD9py663qajqHSfmWKo-AxHVdelR57Hj55h31aA0__ALwmX1tNdVmfEo34xv7FUaAtVD26D-89Kd_h15Wav3qnHTkrlkGXbcuk20viWs2ER3BMyPAKCkosTxqTBQyMEBuMK9GEMjRVVngNF-_1cJRn3wvz9yRY7OADYjiyasvd1Xv0207wNnuqz4Qw_3lG7CI-PHRCruqA-6-uM6AU1Vc3PghkoSYw"/>
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-sm border border-amber-500/20">
+                PR
               </div>
               <div class="ml-md flex-1">
-                <p class="font-body-md font-bold text-on-surface">Renovación: Lucía Torres</p>
-                <p class="font-body-sm text-on-surface-variant">Ramo: Hogar • Ayer, 4:45 PM</p>
+                <p class="font-body-md font-bold text-on-surface">PEREZ CLAUDIA ROSANA</p>
+                <p class="font-body-sm text-on-surface-variant text-xs">Póliza Cooperación Seguros #20027144800 • Combinado Familiar (Hogar)</p>
               </div>
               <div class="text-right">
-                <p class="font-body-md font-bold text-secondary">+$89,000</p>
-                <span class="inline-block px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Éxito</span>
+                <p class="font-body-md font-bold text-amber-600">+$28.900</p>
+                <span class="inline-block px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 text-[10px] font-bold uppercase border border-amber-500/20">Vigente</span>
               </div>
             </div>
             <!-- Movement 3 -->
             <div class="flex items-center p-md hover:bg-surface-container-low transition-colors cursor-pointer">
-              <div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp60agTCk6Z3i538xxs8A_KsyqvkRSqmF2j69J0zFehX1feTIBi3_yfa3ZcAuvbEXIbmcxF3zExQ_VtA2r_O4m7bT1w4FYg7t1CQVbzmpSUVyZRiE9l7EJc2tp-jKp0QQqOQEtiiVew40s3mcyLi-Dr21T9J_3HS6ATcNX-Vi7SOzXI4l7F1Ex5uGtR51lDV8BPyn-rYltc2-2ICSTp_uxcdXYAMGF4rACOTrtASJcu2IQBmDCyNjGOQ"/>
+              <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
+                PR
               </div>
               <div class="ml-md flex-1">
-                <p class="font-body-md font-bold text-on-surface">Emisión: Roberto Gómez</p>
-                <p class="font-body-sm text-on-surface-variant">Ramo: Vida • 12 Jun, 9:15 AM</p>
+                <p class="font-body-md font-bold text-on-surface">PEREZ DANIEL HORACIO</p>
+                <p class="font-body-sm text-on-surface-variant text-xs">Póliza Mercantil Andina #5-302194-950723 • Automotor (Toyota Hilux)</p>
               </div>
               <div class="text-right">
-                <p class="font-body-md font-bold text-secondary">+$210,000</p>
-                <span class="inline-block px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Éxito</span>
+                <p class="font-body-md font-bold text-primary">+$64.500</p>
+                <span class="inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase border border-emerald-500/20">Vigente</span>
               </div>
             </div>
           </div>

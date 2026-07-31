@@ -5,3 +5,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+body.modal-open nav,
+body.modal-open nav.fixed {
+  display: none !important;
+}

@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 
 export interface CompanyData {
   id: string;
@@ -40,7 +40,7 @@ export interface CompanyData {
         <!-- Company Selector Switcher -->
         <div class="flex items-center bg-surface-container rounded-xl p-1 border border-outline-variant gap-1">
           <button 
-            *for="let c of companies" 
+            *ngFor="let c of companies" 
             (click)="selectCompany(c.id)"
             [class.bg-primary]="selectedCompany().id === c.id"
             [class.text-on-primary]="selectedCompany().id === c.id"
@@ -275,8 +275,37 @@ export class CompaniaDetalleComponent {
         { cliente: 'María Belén Ortega', poliza: '#0092-882190', detalle: 'VOLKSWAGEN GOL TREND', monto: '$45.800', estado: 'Vence en 2 días', color: 'bg-amber-500/10 text-amber-600' },
         { cliente: 'Carlos D\'Amico', poliza: '#0092-110022', detalle: 'PEUGEOT 208 1.6', monto: '$58.200', estado: 'Vence en 18 días', color: 'bg-emerald-500/10 text-emerald-600' }
       ]
+    },
+    {
+      id: 'cooperacion',
+      name: 'Cooperación Seguros',
+      badge: 'Aliada Estratégica',
+      tagline: 'Seguros de Automotor y Accidentes Personales con cotización unificada.',
+      polizasTotales: 15,
+      porcentajeCartera: '8% de cartera',
+      primaMensual: '$3.8M / mes',
+      retencion: '95.0%',
+      siniestralidad: '32%',
+      nuevosNegocios: 4,
+      telefonoContacto: '0800-222-2673',
+      emailContacto: 'productores@cooperacionseguros.com.ar',
+      ramos: [
+        { nombre: 'Automotor (Vehículos)', polizas: 12, porcentaje: 80, colorClass: 'bg-amber-500' },
+        { nombre: 'Accidentes Personales (AP)', polizas: 3, porcentaje: 20, colorClass: 'bg-amber-300' }
+      ],
+      renovaciones: []
     }
   ];
+
+  private route = inject(ActivatedRoute);
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['id']) {
+        this.selectCompany(params['id']);
+      }
+    });
+  }
 
   get companies() {
     return this.companiesList;

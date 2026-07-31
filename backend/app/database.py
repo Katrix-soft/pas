@@ -16,7 +16,17 @@ if DATABASE_URL.startswith("postgres://"):
 if "?sslmode=disable" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("?sslmode=disable", "")
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+sql_echo = os.getenv("SQL_ECHO", "false").lower() == "true"
+
+engine = create_async_engine(
+    DATABASE_URL, 
+    echo=sql_echo,
+    pool_size=5,
+    max_overflow=5,
+    pool_timeout=30,
+    pool_recycle=1800,
+    pool_pre_ping=True
+)
 
 AsyncSessionLocal = sessionmaker(
     bind=engine, 
