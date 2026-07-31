@@ -7,7 +7,7 @@ self.addEventListener('activate', function(event) {
   event.waitUntil(self.clients.claim());
 });
 
-// Escuchar notificaciones Push remotas desde el servidor
+// Escuchar notificaciones Push remotas desde el servidor VAPID
 self.addEventListener('push', function(event) {
   let data = { title: 'JC Broker PAS', body: 'Nueva notificación de la cartera.', link: '/dashboard' };
   try {
@@ -21,17 +21,17 @@ self.addEventListener('push', function(event) {
   }
 
   const options = {
-    body: data.body,
+    body: data.body || data.mensaje || 'Nueva notificación de la cartera.',
     icon: '/assets/icons/icon-192x192.png',
     badge: '/assets/icons/icon-192x192.png',
     vibrate: [300, 100, 300, 100, 300],
-    tag: 'jc-pas-push-' + Date.now(),
+    tag: data.id || ('jc-pas-push-' + Date.now()),
     renotify: true,
     requireInteraction: true,
-    data: { url: data.link || '/dashboard' }
+    data: { url: data.link || data.url || '/dashboard' }
   };
 
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  event.waitUntil(self.registration.showNotification(data.title || data.titulo || 'JC Broker PAS', options));
 });
 
 // Escuchar mensajes locales postMessage desde la aplicación web
@@ -39,6 +39,12 @@ self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options, delayMs } = event.data;
     
+    // Asegurar rutas absolutas para icon y badge
+    if (options) {
+      options.icon = options.icon || '/assets/icons/icon-192x192.png';
+      options.badge = options.badge || '/assets/icons/icon-192x192.png';
+    }
+
     if (delayMs && delayMs > 0) {
       setTimeout(() => {
         self.registration.showNotification(title, options);
