@@ -67,15 +67,9 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
         </div>
 
         <!-- Footer Compliance/Support -->
-        <footer class="mt-xl text-center relative z-10">
-          <p class="font-label-md text-label-md text-outline uppercase tracking-widest">
-            Seguros Elite • ID: 4492
-          </p>
-          <div class="mt-md flex gap-md justify-center">
-            <button class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors">Ayuda</button>
-            <span class="text-outline-variant">•</span>
-            <button class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors">Privacidad</button>
-          </div>
+        <footer class="mt-8 py-4 text-center border-t border-outline-variant/40 space-y-1 relative z-10 w-full">
+          <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
+          <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Powered by <strong class="text-primary">Katrix</strong></p>
         </footer>
 
         <!-- Success Message Overlay -->

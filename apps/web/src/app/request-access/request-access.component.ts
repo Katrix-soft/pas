@@ -135,10 +135,9 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 
           </div>
 
-          <footer class="mt-16 text-center opacity-60">
-            <p class="font-label-md text-xs text-on-surface-variant">
-              © 2026 Powered by Katrix.
-            </p>
+          <footer class="mt-12 py-4 text-center border-t border-outline-variant/40 space-y-1">
+            <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
+            <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Powered by <strong class="text-primary">Katrix</strong></p>
           </footer>
         </div>
       </div>
