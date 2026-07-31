@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 export interface PushPopAlert {
   id: string;
@@ -11,14 +12,30 @@ export interface PushPopAlert {
   remitente?: string;
 }
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class PushNotificationService {
+  private http = inject(HttpClient);
+
   activeToast = signal<PushPopAlert | null>(null);
   pushPermissionStatus = signal<string>('default');
   isHttps = signal<boolean>(true);
+  isSubscribedBackend = signal<boolean>(false);
   countdownSecs = signal<number>(0);
+
+  vapidPublicKey = 'BEhHZHgXL2UXdezMYIswGk8YX2B6-j_vhnL1snwIdedlRH2S-oEZ5uMaFz1gGpNa6kADwXTBiYWMMx4Isv3sOuA';
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -26,7 +43,19 @@ export class PushNotificationService {
       if ('Notification' in window) {
         this.pushPermissionStatus.set(Notification.permission);
       }
+      this.fetchVapidPublicKey();
     }
+  }
+
+  fetchVapidPublicKey() {
+    this.http.get<{ public_key: string }>('/api/v1/push/vapid-public-key').subscribe({
+      next: (res) => {
+        if (res && res.public_key) {
+          this.vapidPublicKey = res.public_key;
+        }
+      },
+      error: () => {}
+    });
   }
 
   descartarToast() {
@@ -37,10 +66,6 @@ export class PushNotificationService {
     if (typeof window === 'undefined' || !('Notification' in window)) {
       alert('Tu navegador o dispositivo no soporta la API de Notificaciones Push.');
       return 'unsupported';
-    }
-
-    if (!this.isHttps()) {
-      alert('⚠️ NOTA SOBRE PERSIANA ANDROID/iOS:\n\nPara notificaciones nativas en la persiana de tu celular con la pantalla apagada o app minimizada, los navegadores (Chrome/Safari) exigen conexión cifrada HTTPS en el servidor.\n\nMientras tanto, recibirás todas las alertas emergentes estilo WhatsApp dentro de la app.');
     }
 
     let permission = Notification.permission;
@@ -62,13 +87,16 @@ export class PushNotificationService {
     this.pushPermissionStatus.set(permission);
 
     if (permission === 'granted') {
+      // Suscribir el dispositivo en el servidor de Push (Google FCM / Apple APNs) con llaves VAPID
+      await this.suscribirDispositivoBackend();
+
       this.emitirAlerta({
         id: 'push-granted-' + Date.now(),
-        titulo: '🔔 Notificaciones Push Activadas',
-        mensaje: '¡Excelente! Notificaciones emergentes activadas en tu dispositivo.',
+        titulo: '🔔 Suscripción Push VAPID Activa',
+        mensaje: 'Dispositivo vinculado al servidor de Push. Recibirás notificaciones nativas en la persiana de Android/iOS.',
         tipo: 'cartera',
         icon: 'notifications_active',
-        remitente: 'JC PAS PUSH ACTIVADO',
+        remitente: 'JC PAS PUSH REAL',
         hora: 'Ahora'
       });
     } else if (permission === 'denied') {
@@ -78,11 +106,48 @@ export class PushNotificationService {
     return permission;
   }
 
+  async suscribirDispositivoBackend() {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+
+    try {
+      let reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) {
+        reg = await navigator.serviceWorker.register('/sw.js');
+      }
+
+      if (reg && reg.pushManager) {
+        const applicationServerKey = urlBase64ToUint8Array(this.vapidPublicKey);
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey
+        });
+
+        const subJson = subscription.toJSON();
+        
+        // Enviar suscripción VAPID a FastAPI DB
+        this.http.post('/api/v1/push/subscribe', {
+          endpoint: subJson.endpoint,
+          keys: subJson.keys
+        }).subscribe({
+          next: () => {
+            this.isSubscribedBackend.set(true);
+            console.log('✅ Suscripción VAPID guardada en backend FastAPI!');
+          },
+          error: (err) => {
+            console.warn('Error guardando suscripción en backend:', err);
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Error al suscribir VAPID a Google/Apple Push Service:', err);
+    }
+  }
+
   async emitirAlerta(alerta: PushPopAlert, delayMs: number = 0) {
     // 1. Activar Toast emergente en pantalla (Signal)
     this.activeToast.set(alerta);
 
-    // 2. Reproducir tono Web Audio API
+    // 2. Tono Web Audio API
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
@@ -101,46 +166,28 @@ export class PushNotificationService {
       }
     } catch (e) {}
 
-    // 3. Vibrar celular si soporta
+    // 3. Vibrar celular
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try { navigator.vibrate([200, 100, 200, 100, 250]); } catch (e) {}
     }
 
-    // 4. Enviar mensaje al Service Worker para forzar notificación en persiana del SO (Android/iOS)
+    // 4. Disparar notificaciones VAPID vía Backend FastAPI a Google FCM / Apple Push
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      const options: any = {
-        body: alerta.mensaje,
-        icon: '/assets/icons/icon-192x192.png',
-        badge: '/assets/icons/icon-192x192.png',
-        tag: alerta.id || ('jc-pas-' + Date.now()),
-        renotify: true,
-        requireInteraction: true,
-        vibrate: [300, 100, 300, 100, 300],
-        data: { url: alerta.link || '/dashboard' }
-      };
-
-      if ('serviceWorker' in navigator) {
-        try {
-          const reg = await navigator.serviceWorker.getRegistration();
-          if (reg && reg.active) {
-            // PostMessage al Service Worker para forzar la notificación en persiana Android
-            reg.active.postMessage({
-              type: 'SHOW_NOTIFICATION',
-              title: alerta.titulo,
-              options: options,
-              delayMs: delayMs
-            });
-          } else if (reg && reg.showNotification) {
-            if (delayMs > 0) {
-              setTimeout(() => reg.showNotification(alerta.titulo, options), delayMs);
-            } else {
-              reg.showNotification(alerta.titulo, options);
-            }
-          }
-        } catch (e) {
-          console.warn('SW PostMessage Error:', e);
+      // Disparar vía Backend API VAPID Push (que lo manda al Push Service real de Google/Apple)
+      this.http.post('/api/v1/push/send-notification', {
+        titulo: alerta.titulo,
+        mensaje: alerta.mensaje,
+        tipo: alerta.tipo,
+        link: alerta.link || '/dashboard'
+      }).subscribe({
+        next: (res: any) => {
+          console.log('✅ Push VAPID enviado desde backend:', res);
+        },
+        error: () => {
+          // Fallback a Service Worker local postMessage
+          this.dispararLocalServiceWorker(alerta, delayMs);
         }
-      }
+      });
     }
 
     // 5. Auto ocultar el banner flotante después de 6.5 segundos
@@ -149,6 +196,33 @@ export class PushNotificationService {
         this.activeToast.set(null);
       }
     }, 6500);
+  }
+
+  private async dispararLocalServiceWorker(alerta: PushPopAlert, delayMs: number = 0) {
+    if ('serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        const options = {
+          body: alerta.mensaje,
+          icon: '/assets/icons/icon-192x192.png',
+          badge: '/assets/icons/icon-192x192.png',
+          tag: alerta.id || ('jc-pas-' + Date.now()),
+          renotify: true,
+          requireInteraction: true,
+          vibrate: [300, 100, 300, 100, 300],
+          data: { url: alerta.link || '/dashboard' }
+        };
+
+        if (reg && reg.active) {
+          reg.active.postMessage({
+            type: 'SHOW_NOTIFICATION',
+            title: alerta.titulo,
+            options: options,
+            delayMs: delayMs
+          });
+        }
+      } catch (e) {}
+    }
   }
 
   probarPersianaAndroidConCuentaRegresiva(alerta: PushPopAlert) {
@@ -164,7 +238,6 @@ export class PushNotificationService {
       }
     }, 1000);
 
-    // Disparar a la persiana a los 3.5 segundos
     this.emitirAlerta(alerta, 3500);
   }
 }

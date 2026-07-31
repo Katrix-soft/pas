@@ -24,7 +24,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db, engine, Base, AsyncSessionLocal
-from app.models import User, PasProfile, Client, Policy, Quotation, Ticket
+from app.models import User, PasProfile, Client, Policy, Quotation, Ticket, PushSubscriptionModel
 from app.redis_client import check_redis_health, get_cache, set_cache
 from app.auth_utils import hash_password, verify_password, sanitize_input, generate_secure_token, verify_secure_token
 
@@ -1131,3 +1131,114 @@ async def cooperacion_obtener_pdf(
         return pdf_bytes
     except CooperacionSegurosError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+
+# ------------------------------------------------------------
+# WEB PUSH VAPID NOTIFICATION ENDPOINTS
+# ------------------------------------------------------------
+from pywebpush import webpush, WebPushException
+
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY", "BEhHZHgXL2UXdezMYIswGk8YX2B6-j_vhnL1snwIdedlRH2S-oEZ5uMaFz1gGpNa6kADwXTBiYWMMx4Isv3sOuA")
+VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "sG0y-nwi67EQblB3HeLxP8G1433KLVifrxtoPMbu4Qk")
+VAPID_CLAIMS_EMAIL = os.getenv("VAPID_CLAIMS_EMAIL", "mailto:soporte@katrix.com.ar")
+
+class PushSubscriptionSchema(BaseModel):
+    endpoint: str
+    keys: dict
+    user_id: Optional[str] = None
+
+class SendPushNotificationSchema(BaseModel):
+    titulo: str
+    mensaje: str
+    tipo: Optional[str] = "siniestro"
+    link: Optional[str] = "/dashboard"
+    endpoint: Optional[str] = None
+
+@app.get("/api/v1/push/vapid-public-key")
+async def get_vapid_public_key():
+    return {"public_key": VAPID_PUBLIC_KEY}
+
+@app.post("/api/v1/push/subscribe")
+async def subscribe_push(data: PushSubscriptionSchema, db: AsyncSession = Depends(get_db)):
+    try:
+        p256dh = data.keys.get("p256dh", "")
+        auth = data.keys.get("auth", "")
+        
+        stmt = select(PushSubscriptionModel).where(PushSubscriptionModel.endpoint == data.endpoint)
+        res = await db.execute(stmt)
+        existing = res.scalars().first()
+
+        if not existing:
+            sub = PushSubscriptionModel(
+                endpoint=data.endpoint,
+                p256dh=p256dh,
+                auth=auth,
+                user_id=data.user_id
+            )
+            db.add(sub)
+            await db.commit()
+            return {"status": "subscribed", "id": sub.id}
+        else:
+            existing.p256dh = p256dh
+            existing.auth = auth
+            await db.commit()
+            return {"status": "updated", "id": existing.id}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error guardando suscripción push: {str(e)}")
+
+@app.post("/api/v1/push/send-notification")
+async def send_web_push_notification(data: SendPushNotificationSchema, db: AsyncSession = Depends(get_db)):
+    try:
+        payload = json.dumps({
+            "title": data.titulo,
+            "body": data.mensaje,
+            "link": data.link or "/dashboard",
+            "tipo": data.tipo or "siniestro",
+            "timestamp": time.time()
+        })
+
+        vapid_claims = {
+            "sub": VAPID_CLAIMS_EMAIL
+        }
+
+        stmt = select(PushSubscriptionModel)
+        if data.endpoint:
+            stmt = stmt.where(PushSubscriptionModel.endpoint == data.endpoint)
+        
+        res = await db.execute(stmt)
+        subscriptions = res.scalars().all()
+
+        sent_count = 0
+        failed_count = 0
+
+        for sub in subscriptions:
+            try:
+                subscription_info = {
+                    "endpoint": sub.endpoint,
+                    "keys": {
+                        "p256dh": sub.p256dh,
+                        "auth": sub.auth
+                    }
+                }
+                webpush(
+                    subscription_info=subscription_info,
+                    data=payload,
+                    vapid_private_key=VAPID_PRIVATE_KEY,
+                    vapid_claims=vapid_claims
+                )
+                sent_count += 1
+            except WebPushException as ex:
+                failed_count += 1
+                if ex.response is not None and ex.response.status_code in [404, 410]:
+                    await db.delete(sub)
+                    await db.commit()
+
+        return {
+            "status": "success",
+            "sent": sent_count,
+            "failed": failed_count,
+            "total_subscriptions": len(subscriptions)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error enviando push VAPID: {str(e)}")

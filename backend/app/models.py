@@ -103,3 +103,16 @@ class Ticket(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     pas = relationship("User", back_populates="tickets")
+
+
+class PushSubscriptionModel(Base):
+    __tablename__ = "push_subscriptions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), nullable=True, index=True)
+    endpoint = Column(Text, nullable=False, unique=True)
+    p256dh = Column(Text, nullable=False)
+    auth = Column(Text, nullable=False)
+    user_agent = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
