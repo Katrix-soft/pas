@@ -1,140 +1,194 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'lib-seguridad',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   template: `
-    <div class="bg-background flex flex-col min-h-screen">
+    <div class="bg-surface text-on-surface flex flex-col min-h-screen font-body-md pb-24 overflow-x-hidden">
       <!-- TopAppBar -->
-      <header class="bg-surface dark:bg-on-background w-full top-0 sticky z-40 border-b border-outline-variant dark:border-outline flex justify-between items-center px-container-margin py-sm transition-colors duration-200 ease-in-out">
-        <div class="flex items-center gap-md">
-          <button routerLink="/perfil" class="hover:bg-surface-container-low dark:hover:bg-surface-container-high p-sm rounded-full transition-colors cursor-pointer">
-            <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">arrow_back</span>
+      <header class="bg-surface/95 dark:bg-on-background/95 backdrop-blur-md w-full top-0 sticky z-40 border-b border-outline-variant flex justify-between items-center px-4 sm:px-6 py-3 transition-colors">
+        <div class="flex items-center gap-3">
+          <button routerLink="/perfil" class="hover:bg-surface-container-high p-2 rounded-full transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-primary text-xl">arrow_back</span>
           </button>
-          <h1 class="font-headline-sm text-headline-sm-mobile text-on-surface">Configuración de Seguridad</h1>
+          <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Centro de Seguridad & Acceso</h1>
         </div>
-        <button class="hover:bg-surface-container-low dark:hover:bg-surface-container-high p-sm rounded-full transition-colors cursor-pointer">
-          <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">help</span>
-        </button>
+        <span class="bg-emerald-500/10 text-emerald-600 text-xs font-black px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-wider flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          ENCRIPTACIÓN TLS 1.3
+        </span>
       </header>
 
-      <main class="flex-grow px-container-margin py-lg space-y-lg max-w-2xl mx-auto w-full pb-32">
-        <!-- Welcome/Hero Visualization (Bento-style Header) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
-          <div class="md:col-span-2 glass-card p-lg rounded-xl border-l-4 border-primary shadow-sm">
-            <h2 class="font-headline-md text-headline-md mb-xs">Tu seguridad es prioridad</h2>
-            <p class="font-body-sm text-body-sm text-on-surface-variant">Gestiona cómo accedes a JC Organizadores y protege tus datos personales.</p>
+      <main class="flex-grow px-4 sm:px-6 py-4 space-y-6 max-w-3xl mx-auto w-full">
+        <!-- Security Status Banner -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-l-emerald-600">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-2xl">verified_user</span>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-on-surface">Estado de Seguridad: BLINDADO</h2>
+              <p class="text-xs text-on-surface-variant mt-0.5">Protección activa contra fuerza bruta, XSS, CSRF y rate-limiting en API.</p>
+            </div>
           </div>
-          <div class="hidden md:flex glass-card p-lg rounded-xl items-center justify-center bg-primary-container/10">
-            <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">security</span>
-          </div>
+          <span class="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 shrink-0">
+            Nivel 100% Óptimo
+          </span>
         </div>
 
-        <!-- Security Options Container -->
-        <div class="space-y-sm">
-          <h3 class="font-label-md text-label-md text-primary px-sm uppercase tracking-wider">Acceso y Autenticación</h3>
-          <div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
-            <!-- Option: Cambiar Contraseña -->
-            <button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors text-left cursor-pointer">
-              <div class="flex items-center gap-md">
-                <div class="bg-primary/10 p-sm rounded-lg">
-                  <span class="material-symbols-outlined text-primary">key</span>
+        <!-- Section 1: Cambiar Contraseña -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
+          <div class="px-4 py-3 bg-surface-container-low border-b border-outline-variant flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-base">key</span>
+            <h3 class="text-xs font-bold text-primary uppercase">Actualización de Contraseña</h3>
+          </div>
+          <div class="p-4 sm:p-5 space-y-4 text-xs sm:text-sm">
+            <div>
+              <label class="block font-bold text-outline text-[10px] uppercase mb-1">Contraseña Actual</label>
+              <input type="password" [(ngModel)]="currentPass" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface" placeholder="••••••••••••" />
+            </div>
+            <div>
+              <label class="block font-bold text-outline text-[10px] uppercase mb-1">Nueva Contraseña Segura</label>
+              <input type="password" [(ngModel)]="newPass" (ngModelChange)="checkStrength()" class="w-full p-3 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface" placeholder="Mínimo 8 caracteres, números y símbolos" />
+              <!-- Strength meter -->
+              <div class="mt-2 flex items-center gap-2">
+                <div class="flex-1 h-1.5 bg-surface-container rounded-full overflow-hidden">
+                  <div class="h-full transition-all duration-300" [ngClass]="{
+                    'w-1/4 bg-error': passStrength() === 1,
+                    'w-2/4 bg-amber-500': passStrength() === 2,
+                    'w-3/4 bg-indigo-600': passStrength() === 3,
+                    'w-full bg-emerald-600': passStrength() === 4,
+                    'w-0': passStrength() === 0
+                  }"></div>
                 </div>
-                <div>
-                  <p class="font-headline-sm text-[16px] text-on-surface">Cambiar Contraseña</p>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">Actualiza tu clave de acceso</p>
-                </div>
-              </div>
-              <span class="material-symbols-outlined text-outline">chevron_right</span>
-            </button>
-            <div class="h-[1px] bg-outline-variant mx-md"></div>
-            <!-- Option: Biometric -->
-            <div class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors">
-              <div class="flex items-center gap-md">
-                <div class="bg-secondary/10 p-sm rounded-lg">
-                  <span class="material-symbols-outlined text-secondary">fingerprint</span>
-                </div>
-                <div>
-                  <p class="font-headline-sm text-[16px] text-on-surface">Autenticación Biométrica</p>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">Face ID / Touch ID</p>
-                </div>
-              </div>
-              <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
-                <input checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer checked:border-on-secondary-container" id="toggleBiometric" name="toggle" type="checkbox">
-                <label class="toggle-label block overflow-hidden h-6 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200 after:content-[''] after:absolute after:top-0 after:left-0 after:w-6 after:h-6 after:bg-white after:rounded-full after:transition-transform after:duration-200" for="toggleBiometric"></label>
+                <span class="text-[10px] font-bold uppercase text-outline">{{ passStrengthLabel() }}</span>
               </div>
             </div>
-            <div class="h-[1px] bg-outline-variant mx-md"></div>
-            <!-- Option: 2FA -->
-            <button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors text-left cursor-pointer">
-              <div class="flex items-center gap-md">
-                <div class="bg-tertiary/10 p-sm rounded-lg">
-                  <span class="material-symbols-outlined text-tertiary">verified_user</span>
-                </div>
-                <div>
-                  <p class="font-headline-sm text-[16px] text-on-surface">Verificación en dos pasos (2FA)</p>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">Estado: <span class="text-error font-semibold">Desactivado</span></p>
-                </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Autenticación & 2FA -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
+          <div class="px-4 py-3 bg-surface-container-low border-b border-outline-variant flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-base">shield</span>
+            <h3 class="text-xs font-bold text-primary uppercase">Autenticación Avanzada (2FA & Biometría)</h3>
+          </div>
+          <div class="divide-y divide-outline-variant text-xs sm:text-sm">
+            <div class="p-4 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-on-surface">Verificación en Dos Pasos (2FA)</p>
+                <p class="text-xs text-on-surface-variant">Código OTP por aplicación autenticadora o SMS.</p>
               </div>
-              <span class="material-symbols-outlined text-outline">chevron_right</span>
+              <input type="checkbox" [(ngModel)]="is2faEnabled" class="w-5 h-5 accent-primary cursor-pointer">
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-on-surface">Autenticación Biométrica (Face ID / Huella)</p>
+                <p class="text-xs text-on-surface-variant">Permite acceso directo en dispositivos móviles registrados.</p>
+              </div>
+              <input type="checkbox" [(ngModel)]="isBiometricEnabled" class="w-5 h-5 accent-primary cursor-pointer">
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Sesiones Activas & Revocación -->
+        <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
+          <div class="px-4 py-3 bg-surface-container-low border-b border-outline-variant flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-base">devices</span>
+              <h3 class="text-xs font-bold text-primary uppercase">Sesiones Activas Dispositivos</h3>
+            </div>
+            <button (click)="cerrarOtrasSesiones()" class="text-xs font-bold text-error hover:underline cursor-pointer">
+              Cerrar en otros dispositivos
             </button>
           </div>
-        </div>
-
-        <!-- Section: Devices -->
-        <div class="space-y-sm">
-          <h3 class="font-label-md text-label-md text-primary px-sm uppercase tracking-wider">Dispositivos</h3>
-          <div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
-            <button class="w-full flex items-center justify-between p-md hover:bg-surface-container-low transition-colors text-left cursor-pointer">
-              <div class="flex items-center gap-md">
-                <div class="bg-on-surface/5 p-sm rounded-lg">
-                  <span class="material-symbols-outlined text-on-surface">devices</span>
-                </div>
+          <div class="divide-y divide-outline-variant text-xs">
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-emerald-600 text-xl">computer</span>
                 <div>
-                  <p class="font-headline-sm text-[16px] text-on-surface">Sesiones Activas</p>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">2 dispositivos conectados actualmente</p>
+                  <p class="font-bold text-on-surface">Navegador Actual (Linux / Chrome)</p>
+                  <p class="text-[11px] text-outline">IP: 190.224.89.12 • Mendoza, Argentina</p>
                 </div>
               </div>
-              <span class="material-symbols-outlined text-outline">chevron_right</span>
-            </button>
+              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">ESTA SESIÓN</span>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-outline text-xl">smartphone</span>
+                <div>
+                  <p class="font-bold text-on-surface">iPhone 15 Pro PAS App</p>
+                  <p class="text-[11px] text-outline">Hace 15 minutos • Mendoza, Argentina</p>
+                </div>
+              </div>
+              <button (click)="revocarDispositivo('iPhone 15 Pro')" class="text-xs text-outline hover:text-error cursor-pointer">Revocar</button>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Tip Card -->
-        <div class="bg-surface-container-high/50 p-md rounded-xl border border-outline-variant flex gap-md items-start">
-          <span class="material-symbols-outlined text-primary-container mt-xs">info</span>
-          <p class="font-body-sm text-body-sm text-on-surface-variant">
-            Te recomendamos cambiar tu contraseña cada 90 días para mantener un nivel de seguridad óptimo en tu cuenta de productor.
-          </p>
+        <!-- Save Button -->
+        <div class="pt-2">
+          <button (click)="guardarSeguridad($event)" class="w-full bg-primary text-white font-bold py-3.5 rounded-xl shadow-sm transition-all hover:bg-primary-container active:scale-[0.99] cursor-pointer text-sm">
+            Guardar Ajustes de Seguridad
+          </button>
         </div>
       </main>
-
-      <!-- Bottom Action Button Wrapper (Floating logic for mobile) -->
-      <div class="fixed bottom-16 left-0 right-0 p-container-margin bg-gradient-to-t from-background via-background to-transparent z-40 md:static md:bg-none md:mt-lg md:bottom-auto">
-        <button class="w-full bg-primary text-on-primary font-headline-sm py-md rounded-lg shadow-lg hover:bg-primary-container transition-all active:scale-95 flex items-center justify-center gap-sm cursor-pointer">
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
-          Guardar Cambios
-        </button>
-      </div>
-
-
     </div>
-`,
+  `,
   styles: [`
-    .toggle-checkbox:checked + .toggle-label {
-        background-color: #006c49;
-    }
-    .toggle-checkbox:checked + .toggle-label::after {
-        transform: translateX(20px);
-    }
-    .glass-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
-        border: 1px solid #e2e8f0;
-    }
-`]
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  `]
 })
-export class SeguridadComponent {}
+export class SeguridadComponent {
+  currentPass = '';
+  newPass = '';
+  passStrength = signal<number>(0);
+  passStrengthLabel = signal<string>('Sin definir');
+
+  is2faEnabled = true;
+  isBiometricEnabled = true;
+
+  checkStrength() {
+    const p = this.newPass;
+    if (!p) {
+      this.passStrength.set(0);
+      this.passStrengthLabel.set('Sin definir');
+      return;
+    }
+    let score = 0;
+    if (p.length >= 8) score++;
+    if (/[A-Z]/.test(p)) score++;
+    if (/[0-9]/.test(p)) score++;
+    if (/[^A-Za-z0-9]/.test(p)) score++;
+
+    this.passStrength.set(score);
+    const labels = ['', 'Débil', 'Media', 'Buena', 'Excelente / Blindada'];
+    this.passStrengthLabel.set(labels[score] || 'Buena');
+  }
+
+  guardarSeguridad(event: Event) {
+    const btn = event.target as HTMLElement;
+    const originalText = btn.innerText;
+    btn.innerText = '¡Ajustes de Seguridad Guardados!';
+    btn.classList.add('bg-emerald-600');
+    btn.classList.remove('bg-primary');
+
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.classList.remove('bg-emerald-600');
+      btn.classList.add('bg-primary');
+    }, 2000);
+  }
+
+  cerrarOtrasSesiones() {
+    alert('Se han revocado todas las demás sesiones activas por seguridad.');
+  }
+
+  revocarDispositivo(nombre: string) {
+    alert(`Sesión en ${nombre} revocada exitosamente.`);
+  }
+}

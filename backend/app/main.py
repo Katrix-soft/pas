@@ -14,7 +14,7 @@ from typing import Optional
 import httpx
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, Header, HTTPException
+from fastapi import FastAPI, Depends, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -26,7 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db, engine, Base, AsyncSessionLocal
 from app.models import User, PasProfile, Client, Policy, Quotation, Ticket
 from app.redis_client import check_redis_health, get_cache, set_cache
-from app.auth_utils import hash_password, verify_password
+from app.auth_utils import hash_password, verify_password, sanitize_input, generate_secure_token, verify_secure_token
 
 # ============================================================
 # Carga de variables de entorno
@@ -40,6 +40,59 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# ------------------------------------------------------------
+# RATE LIMITER EN MEMORIA (PROTECCIÓN ANTI DDOS & BRUTE FORCE)
+# ------------------------------------------------------------
+RATE_LIMIT_STORE = {}
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    now = time.time()
+    
+    # Limpiar entradas antiguas (sliding window 60s)
+    if client_ip not in RATE_LIMIT_STORE:
+        RATE_LIMIT_STORE[client_ip] = []
+    
+    RATE_LIMIT_STORE[client_ip] = [t for t in RATE_LIMIT_STORE[client_ip] if now - t < 60]
+    
+    # Límite más estricto para auth login (30 req/min) y general (200 req/min)
+    max_requests = 30 if "/api/v1/auth/" in request.url.path else 200
+    
+    if len(RATE_LIMIT_STORE[client_ip]) >= max_requests:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Demasiadas peticiones. Por razones de seguridad, aguarde 60 segundos."}
+        )
+    
+    RATE_LIMIT_STORE[client_ip].append(now)
+    return await call_next(request)
+
+# ------------------------------------------------------------
+# SECURITY HEADERS MIDDLEWARE (PROTECCIÓN OWASP & ANTI-XSS)
+# ------------------------------------------------------------
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;"
+    return response
+
+# ------------------------------------------------------------
+# MANEJO GLOBAL SEGURO DE EXCEPCIONES (MÁSCARA DE SEGURIDAD)
+# ------------------------------------------------------------
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    # Enmascarar detalles internos para evitar filtración de stack trace o credenciales
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Ocurrió un error interno procesando la solicitud. Contacte al administrador de seguridad."}
+    )
+
 app.add_middleware(
     GZipMiddleware,
     minimum_size=1000
@@ -49,7 +102,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
