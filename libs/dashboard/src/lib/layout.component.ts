@@ -87,7 +87,7 @@ export const isPdfModalOpen = signal(false);
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex flex-col gap-2 px-3 mt-2 flex-1 overflow-y-auto">
+        <nav class="flex flex-col gap-2 px-3 mt-2 flex-1 overflow-y-auto no-scrollbar">
           
           <a routerLink="/dashboard" routerLinkActive="bg-[#2563eb] text-white" [routerLinkActiveOptions]="{exact: true}" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
@@ -103,8 +103,8 @@ export const isPdfModalOpen = signal(false);
              [class.justify-center]="!isExpanded()">
             <span class="material-symbols-outlined text-[24px] flex-shrink-0 text-indigo-400" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex justify-between items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
-              Multicotizador IA
-              <span class="bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase">Mercantil</span>
+              <span class="truncate min-w-0">Multicotizador IA</span>
+              <span class="bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase flex-shrink-0 ml-2">Mercantil</span>
             </span>
           </a>
           
@@ -140,8 +140,8 @@ export const isPdfModalOpen = signal(false);
              [class.justify-center]="!isExpanded()">
             <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">confirmation_number</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex justify-between items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
-               Mesa Operativa
-               <span class="bg-[#2563eb] text-white text-[12px] font-bold w-6 h-6 rounded-full flex items-center justify-center">4</span>
+               <span class="truncate min-w-0">Mesa Operativa</span>
+               <span class="bg-[#2563eb] text-white text-[12px] font-bold w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ml-2">4</span>
             </span>
             <!-- Badge when collapsed -->
             <span *ngIf="!isExpanded()" class="absolute top-2 right-2 w-3 h-3 bg-[#2563eb] rounded-full border-2 border-[#1c2e43]"></span>
@@ -163,8 +163,8 @@ export const isPdfModalOpen = signal(false);
              [class.justify-center]="!isExpanded()">
             <span class="material-symbols-outlined text-[24px] flex-shrink-0" style="font-variation-settings: 'wght' 400;">settings</span>
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 flex-1 flex justify-between items-center overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">
-              Configuraciones
-              <span class="w-2 h-2 rounded-full bg-error mr-2"></span>
+              <span class="truncate min-w-0">Configuraciones</span>
+              <span class="w-2 h-2 rounded-full bg-error mr-2 flex-shrink-0 ml-2"></span>
             </span>
             <!-- Badge when collapsed -->
             <span *ngIf="!isExpanded()" class="absolute top-2 right-2 w-3 h-3 bg-error rounded-full border-2 border-[#1c2e43]"></span>
@@ -193,7 +193,17 @@ export const isPdfModalOpen = signal(false);
 
     </div>
   `,
-  styles: [``]
+  styles: [`
+    /* Ocultar scrollbar para Chrome, Safari y Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    /* Ocultar scrollbar para IE, Edge y Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  `]
 })
 export class LayoutComponent {
   isPdfModalOpen = isPdfModalOpen;
