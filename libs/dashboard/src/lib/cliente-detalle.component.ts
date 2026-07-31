@@ -837,14 +837,16 @@ export class ClienteDetalleComponent implements OnInit {
     const tel = (this.clienteTelefono || '02614238800').replace(/[^0-9]/g, '');
     const poliza = mov.poliza || this.coopNroReferencia;
     const movTipo = mov.tipoMovimiento || 'Movimiento de Póliza';
-    const link = `http://localhost:4202/api/v1/cooperacion/polizas/pdf?numero_referencia=${encodeURIComponent(poliza)}`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const link = `${origin}/api/v1/cooperacion/polizas/pdf?numero_referencia=${encodeURIComponent(poliza)}`;
     const msg = `Hola ${this.clienteNombre}! 👋 Te enviamos la constancia de *Cooperación Seguros* para tu póliza N° ${poliza}:\n📌 Movimiento: ${movTipo}\n📄 Descarga de PDF: ${link}\n\nAnte cualquier consulta, estamos a tu disposición. — Gonzalo Paso (JC Organizadores)`;
     window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
   enviarPolizaCoopWpp(pol: PolizaCooperacion) {
     const tel = (this.clienteTelefono || '02614238800').replace(/[^0-9]/g, '');
-    const link = `http://localhost:4202/api/v1/cooperacion/polizas/pdf?numero_referencia=${encodeURIComponent(pol.poliza)}`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const link = `${origin}/api/v1/cooperacion/polizas/pdf?numero_referencia=${encodeURIComponent(pol.poliza)}`;
     const msg = `Hola ${this.clienteNombre}! 👋 Te envío los datos de tu póliza en *Cooperación Seguros* (N° ${pol.poliza}):\n📌 Ramo: ${pol.ramo}\n🚗 Objeto: ${pol.objeto}\n💰 Suma Asegurada: ${pol.sumaAsegurada}\n💵 Premio Mensual: ${pol.premioMensual}\n📄 Descargar PDF Oficial: ${link}\n\nQuedo a tu disposición. — Gonzalo Paso (Matrícula SSN #86992)`;
     window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
   }
