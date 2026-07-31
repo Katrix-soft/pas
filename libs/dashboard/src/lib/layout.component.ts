@@ -20,6 +20,52 @@ export interface PushPopAlert {
 
 export const activePushToast = signal<PushPopAlert | null>(null);
 
+// Función infalible para enviar Notificaciones a la barra del Sistema Operativo Android/iOS
+export async function enviarNotificacionSistemaAndroid(alerta: PushPopAlert) {
+  if (typeof window === 'undefined' || !('Notification' in window)) return;
+
+  let permission = Notification.permission;
+  if (permission === 'default') {
+    try {
+      permission = await Notification.requestPermission();
+    } catch (e) {}
+  }
+
+  if (permission !== 'granted') return;
+
+  const options: any = {
+    body: alerta.mensaje,
+    icon: '/assets/icons/icon-192x192.png',
+    badge: '/assets/icons/icon-192x192.png',
+    tag: alerta.id || ('jc-pas-' + Date.now()),
+    renotify: true,
+    requireInteraction: true,
+    vibrate: [300, 100, 300, 100, 300],
+    data: { url: alerta.link || '/dashboard' }
+  };
+
+  // En Android Chrome, la notificación DEBE enviarse vía Service Worker Registration para figurar en la persiana de Android
+  if ('serviceWorker' in navigator) {
+    try {
+      let reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) {
+        reg = await navigator.serviceWorker.register('/sw.js');
+      }
+      if (reg) {
+        await reg.showNotification(alerta.titulo, options);
+        return;
+      }
+    } catch (e) {
+      console.warn('Fallback SW Android Push:', e);
+    }
+  }
+
+  // Fallback para navegadores de escritorio
+  try {
+    new Notification(alerta.titulo, options);
+  } catch (e) {}
+}
+
 export function emitirAlertaPushPop(alerta: PushPopAlert) {
   activePushToast.set(alerta);
 
@@ -44,32 +90,10 @@ export function emitirAlertaPushPop(alerta: PushPopAlert) {
     try { navigator.vibrate([150, 70, 150, 70, 200]); } catch (e) {}
   }
 
-  // 3. Notificación Push nativa del SO / Teléfono vía Service Worker o API Nativa
-  if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-    try {
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(function(reg) {
-          reg.showNotification(alerta.titulo, {
-            body: alerta.mensaje,
-            icon: '/assets/icons/icon-192x192.png',
-            badge: '/assets/icons/icon-192x192.png',
-            tag: alerta.id,
-            renotify: true,
-            vibrate: [200, 100, 200],
-            data: { url: alerta.link || '/dashboard' }
-          } as any);
-        });
-      } else {
-        new Notification(alerta.titulo, {
-          body: alerta.mensaje,
-          icon: '/assets/icons/icon-192x192.png',
-          tag: alerta.id
-        } as any);
-      }
-    } catch (e) {}
-  }
+  // 3. Notificación Push a la barra del sistema Android/iOS
+  enviarNotificacionSistemaAndroid(alerta);
 
-  // Auto descartar después de 6.5 segundos
+  // Auto descartar después de 6.5 segundos del toast flotante
   setTimeout(() => {
     if (activePushToast()?.id === alerta.id) {
       activePushToast.set(null);
