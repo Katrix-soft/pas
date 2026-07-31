@@ -224,32 +224,5 @@ input, textarea {
 
 
 
-/* Overlay de Apagón de Pantalla (Screen Blackout Overlay) */
-#secure-screen-overlay {
-  position: fixed;
-  inset: 0;
-  background: #030712;
-  z-index: 9999999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  transition: opacity 0.1s ease-in-out;
-  pointer-events: none;
-  opacity: 0;
-  font-family: 'Manrope', sans-serif;
-  text-align: center;
-  padding: 1.5rem;
-}
 
-body.screen-blackout #secure-screen-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Filtro de Desenfoque al Desenfocar la Pantalla (Efecto Banco) */
-body.screen-blackout app-root {
-  filter: blur(20px) grayscale(100%);
-}
 
