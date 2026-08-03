@@ -293,14 +293,37 @@ export class PushNotificationService {
     }
   }
 
+  /** Lee las preferencias del usuario desde localStorage */
+  private getNotifPrefs(): { masterMuted: boolean; sound: boolean; vibration: boolean } {
+    try {
+      const raw = localStorage.getItem('jc_notif_prefs');
+      if (raw) {
+        const p = JSON.parse(raw);
+        return {
+          masterMuted: !!p.masterMuted,
+          sound: p.sound !== false,
+          vibration: p.vibration !== false
+        };
+      }
+    } catch { }
+    return { masterMuted: false, sound: true, vibration: true };
+  }
+
   public emitirAlertaLocal(alerta: PushPopAlert) {
+    const prefs = this.getNotifPrefs();
+
+    // Si el maestro está silenciado, no mostrar nada
+    if (prefs.masterMuted) return;
+
     this.activeToast.set(alerta);
 
-    // Reproducir tono de notificación SENSORIAL CALMANTE (Apto CEA / Autismo / Hipersensibilidad Auditiva)
-    this.reproducirSonidoSensorialCalmante();
+    // Reproducir tono SENSORIAL CALMANTE solo si sound está activo
+    if (prefs.sound) {
+      this.reproducirSonidoSensorialCalmante();
+    }
 
-    // Vibración suave
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    // Vibración suave solo si está activada
+    if (prefs.vibration && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try { navigator.vibrate([100, 50, 100]); } catch (e) {}
     }
 
