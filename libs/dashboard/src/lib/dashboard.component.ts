@@ -43,13 +43,13 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Falta reporte policial para siniestro de flota camionera.',
     prioridad: 'Alta',
     estado: 'En Proceso',
-    asignado: 'Gonzalo Paso',
-    asignadoInitials: 'GP',
+    asignado: 'Gonzalo',
+    asignadoInitials: 'G',
     tiempo: '12m ago',
     pas: 'Gonzalo Paso',
     pasMatricula: '86992',
     polizaRef: '5-894210-242193',
-    notasInternal: ['Mesa Operativa Gonzalo Paso: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura.']
+    notasInternal: ['Mesa Operativa Gonzalo: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura.']
   },
   {
     id: '#TK-8839',
@@ -57,13 +57,13 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Cambio de titularidad y modificación de CBU para cobro automático.',
     prioridad: 'Media',
     estado: 'En Proceso',
-    asignado: 'Candela Rossi',
-    asignadoInitials: 'CR',
+    asignado: 'Candela',
+    asignadoInitials: 'C',
     tiempo: '45m ago',
     pas: 'Carlos Benítez',
     pasMatricula: '74129',
     polizaRef: '20027144800',
-    notasInternal: ['Verificado CBU en AFIP por Candela Rossi.']
+    notasInternal: ['Verificado CBU en AFIP por Candela.']
   },
   {
     id: '#TK-8835',
@@ -71,8 +71,8 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.',
     prioridad: 'Alta',
     estado: 'Abierto',
-    asignado: 'Candela Rossi',
-    asignadoInitials: 'CR',
+    asignado: 'Candela',
+    asignadoInitials: 'C',
     tiempo: '1h ago',
     pas: 'Gonzalo Paso',
     pasMatricula: '86992',
@@ -85,12 +85,12 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Consulta sobre desglose de liquidación de comisiones quincena Mayo.',
     prioridad: 'Baja',
     estado: 'Cerrado',
-    asignado: 'Marina Soria',
-    asignadoInitials: 'MS',
+    asignado: 'Marina',
+    asignadoInitials: 'M',
     tiempo: '3h ago',
     pas: 'Gonzalo Paso',
     pasMatricula: '86992',
-    notasInternal: ['Liquidación enviada en formato PDF firmado por Marina Soria.']
+    notasInternal: ['Liquidación enviada en formato PDF firmado por Marina.']
   },
   {
     id: '#TK-8812',
@@ -98,8 +98,8 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.',
     prioridad: 'Crítica',
     estado: 'Abierto',
-    asignado: 'Gonzalo Paso',
-    asignadoInitials: 'GP',
+    asignado: 'Gonzalo',
+    asignadoInitials: 'G',
     tiempo: '4h ago',
     pas: 'Juan Pérez',
     pasMatricula: '91234',
@@ -260,23 +260,23 @@ const DEFAULT_TICKETS: Ticket[] = [
               <!-- Switcher de Operador Activo -->
               <div class="flex items-center gap-1.5 w-full md:w-auto bg-slate-800/90 p-1.5 rounded-xl border border-slate-700/60 overflow-x-auto no-scrollbar shrink-0">
                 <span class="text-[10px] text-slate-400 font-bold uppercase px-1.5 shrink-0">Operador:</span>
-                <button (click)="setActiveAdminAgent('Gonzalo Paso')" 
-                        [class]="activeAdminAgent() === 'Gonzalo Paso' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
+                <button (click)="setActiveAdminAgent('Gonzalo')" 
+                        [class]="activeAdminAgent() === 'Gonzalo' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
                         class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
                   <span>👑 Gonzalo</span>
-                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Gonzalo Paso') }}</span>
+                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Gonzalo') }}</span>
                 </button>
-                <button (click)="setActiveAdminAgent('Candela Rossi')" 
-                        [class]="activeAdminAgent() === 'Candela Rossi' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
+                <button (click)="setActiveAdminAgent('Candela')" 
+                        [class]="activeAdminAgent() === 'Candela' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
                         class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
                   <span>👩‍💼 Candela</span>
-                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Candela Rossi') }}</span>
+                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Candela') }}</span>
                 </button>
-                <button (click)="setActiveAdminAgent('Marina Soria')" 
-                        [class]="activeAdminAgent() === 'Marina Soria' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
+                <button (click)="setActiveAdminAgent('Marina')" 
+                        [class]="activeAdminAgent() === 'Marina' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
                         class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
                   <span>👩‍💼 Marina</span>
-                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Marina Soria') }}</span>
+                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Marina') }}</span>
                 </button>
               </div>
             </div>
@@ -1014,9 +1014,9 @@ const DEFAULT_TICKETS: Ticket[] = [
             <ng-container *ngIf="role() === 'admin'; else pasAgentReadOnly">
               <select [ngModel]="selectedTicket().asignado" (ngModelChange)="reassignSelectedTicket($event)"
                       class="w-full bg-surface-container-low border border-outline-variant text-xs text-on-surface font-bold p-2.5 rounded-xl">
-                <option value="Gonzalo Paso">👑 Gonzalo Paso (Coordinador General - Flotas & Críticos)</option>
-                <option value="Candela Rossi">👩‍💼 Candela Rossi (Especialista en Emisiones, Altas & Endosos)</option>
-                <option value="Marina Soria">👩‍💼 Marina Soria (Especialista en Siniestros & Cobranzas)</option>
+                <option value="Gonzalo">👑 Gonzalo (Mesa Operativa)</option>
+                <option value="Candela">👩‍💼 Candela (Mesa Operativa)</option>
+                <option value="Marina">👩‍💼 Marina (Mesa Operativa)</option>
               </select>
             </ng-container>
             <ng-template #pasAgentReadOnly>
@@ -1371,10 +1371,10 @@ export class DashboardComponent implements OnInit {
   tickets = signal<Ticket[]>(DEFAULT_TICKETS);
 
   // Perfiles Administrativos de Mesa Operativa Central
-  activeAdminAgent = signal<'Gonzalo Paso' | 'Candela Rossi' | 'Marina Soria'>('Gonzalo Paso');
+  activeAdminAgent = signal<'Gonzalo' | 'Candela' | 'Marina'>('Gonzalo');
   assignedFilter = signal<'mis' | 'todos'>('todos');
 
-  setActiveAdminAgent(agentName: 'Gonzalo Paso' | 'Candela Rossi' | 'Marina Soria') {
+  setActiveAdminAgent(agentName: 'Gonzalo' | 'Candela' | 'Marina') {
     this.activeAdminAgent.set(agentName);
     this.showToast(`Operador activo cambiado a: ${agentName}`);
   }
@@ -1387,7 +1387,7 @@ export class DashboardComponent implements OnInit {
     if (event) event.stopPropagation();
     const active = this.activeAdminAgent();
     ticket.asignado = active;
-    ticket.asignadoInitials = active.split(' ').map(n => n[0]).join('');
+    ticket.asignadoInitials = active.substring(0, 1).toUpperCase();
     ticket.tiempo = 'Justo ahora';
 
     if (!ticket.notasInternal) ticket.notasInternal = [];
@@ -1413,8 +1413,8 @@ export class DashboardComponent implements OnInit {
   producers = signal<ProducerStats[]>([
     {
       id: 'p1',
-      nombre: 'Gonzalo Paso',
-      region: 'Coordinación Central',
+      nombre: 'Gonzalo',
+      region: 'Mesa Operativa',
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0',
       ticketsResueltos: 142,
       porcentaje: 92,
@@ -1422,13 +1422,13 @@ export class DashboardComponent implements OnInit {
       satisfaccion: '4.9/5',
       carteraTotal: '$28.8M',
       matricula: '86992',
-      email: 'gpaso@jcorg.com.ar',
+      email: 'gonzalo@jcorg.com.ar',
       telefono: '+54 9 261 423-8800'
     },
     {
       id: 'p2',
-      nombre: 'Candela Rossi',
-      region: 'Emisiones & Endosos',
+      nombre: 'Candela',
+      region: 'Mesa Operativa',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
       ticketsResueltos: 118,
       porcentaje: 88,
@@ -1436,13 +1436,13 @@ export class DashboardComponent implements OnInit {
       satisfaccion: '4.9/5',
       carteraTotal: '$21.2M',
       matricula: 'ADM-102',
-      email: 'crossi@jcorg.com.ar',
+      email: 'candela@jcorg.com.ar',
       telefono: '+54 9 11 3322-1100'
     },
     {
       id: 'p3',
-      nombre: 'Marina Soria',
-      region: 'Siniestros & Cobranzas',
+      nombre: 'Marina',
+      region: 'Mesa Operativa',
       avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
       ticketsResueltos: 105,
       porcentaje: 84,
@@ -1450,7 +1450,7 @@ export class DashboardComponent implements OnInit {
       satisfaccion: '4.8/5',
       carteraTotal: '$18.4M',
       matricula: 'ADM-105',
-      email: 'msoria@jcorg.com.ar',
+      email: 'marina@jcorg.com.ar',
       telefono: '+54 9 261 412-9988'
     }
   ]);

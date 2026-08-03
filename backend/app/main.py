@@ -1257,13 +1257,13 @@ SHARED_TICKETS_STORE = [
         "asunto": "Falta reporte policial para siniestro de flota camionera.",
         "prioridad": "Alta",
         "estado": "En Proceso",
-        "asignado": "Gonzalo Paso",
-        "asignadoInitials": "GP",
+        "asignado": "Gonzalo",
+        "asignadoInitials": "G",
         "tiempo": "12m ago",
         "pas": "Gonzalo Paso",
         "pasMatricula": "86992",
         "polizaRef": "5-894210-242193",
-        "notasInternal": ["Mesa Operativa Gonzalo Paso: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura."]
+        "notasInternal": ["Mesa Operativa Gonzalo: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura."]
     },
     {
         "id": "#TK-8839",
@@ -1271,13 +1271,13 @@ SHARED_TICKETS_STORE = [
         "asunto": "Cambio de titularidad y modificación de CBU para cobro automático.",
         "prioridad": "Media",
         "estado": "En Proceso",
-        "asignado": "Candela Rossi",
-        "asignadoInitials": "CR",
+        "asignado": "Candela",
+        "asignadoInitials": "C",
         "tiempo": "45m ago",
         "pas": "Carlos Benítez",
         "pasMatricula": "74129",
         "polizaRef": "20027144800",
-        "notasInternal": ["Verificado CBU en AFIP por Candela Rossi."]
+        "notasInternal": ["Verificado CBU en AFIP por Candela."]
     },
     {
         "id": "#TK-8835",
@@ -1285,8 +1285,8 @@ SHARED_TICKETS_STORE = [
         "asunto": "Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.",
         "prioridad": "Alta",
         "estado": "Abierto",
-        "asignado": "Candela Rossi",
-        "asignadoInitials": "CR",
+        "asignado": "Candela",
+        "asignadoInitials": "C",
         "tiempo": "1h ago",
         "pas": "Gonzalo Paso",
         "pasMatricula": "86992",
@@ -1299,12 +1299,12 @@ SHARED_TICKETS_STORE = [
         "asunto": "Consulta sobre desglose de liquidación de comisiones quincena Mayo.",
         "prioridad": "Baja",
         "estado": "Cerrado",
-        "asignado": "Marina Soria",
-        "asignadoInitials": "MS",
+        "asignado": "Marina",
+        "asignadoInitials": "M",
         "tiempo": "3h ago",
         "pas": "Gonzalo Paso",
         "pasMatricula": "86992",
-        "notasInternal": ["Liquidación enviada en formato PDF firmado por Marina Soria."]
+        "notasInternal": ["Liquidación enviada en formato PDF firmado por Marina."]
     },
     {
         "id": "#TK-8812",
@@ -1312,8 +1312,8 @@ SHARED_TICKETS_STORE = [
         "asunto": "Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.",
         "prioridad": "Crítica",
         "estado": "Abierto",
-        "asignado": "Gonzalo Paso",
-        "asignadoInitials": "GP",
+        "asignado": "Gonzalo",
+        "asignadoInitials": "G",
         "tiempo": "4h ago",
         "pas": "Juan Pérez",
         "pasMatricula": "91234",
