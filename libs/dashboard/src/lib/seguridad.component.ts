@@ -94,21 +94,48 @@ export interface RegistroAuditoria {
             <span class="material-symbols-outlined text-primary text-base">shield</span>
             <h3 class="text-xs font-bold text-primary uppercase tracking-wide">AUTENTICACIÓN AVANZADA (2FA & BIOMETRÍA)</h3>
           </div>
-          <div class="divide-y divide-outline-variant/60 text-xs sm:text-sm">
-            <div class="p-4 sm:p-5 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
-              <div>
-                <p class="font-extrabold text-on-surface text-sm sm:text-base">Verificación en Dos Pasos (2FA)</p>
-                <p class="text-xs text-on-surface-variant mt-0.5">Código OTP por aplicación autenticadora o SMS.</p>
+          <div class="divide-y divide-outline-variant/60">
+
+            <!-- 2FA Row -->
+            <button type="button" (click)="toggle2FA()" class="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-surface-container-low/50 active:bg-surface-container-low transition-colors cursor-pointer text-left">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center transition-all"
+                     [ngClass]="is2faEnabled() ? 'bg-blue-600/15 text-blue-600' : 'bg-surface-container text-outline'">
+                  <span class="material-symbols-outlined text-xl">phonelink_lock</span>
+                </div>
+                <div class="min-w-0">
+                  <p class="font-extrabold text-on-surface text-sm">Verificación en Dos Pasos (2FA)</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">Código OTP por aplicación autenticadora o SMS.</p>
+                  <span *ngIf="is2faEnabled()" class="inline-block mt-1 text-[10px] font-extrabold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">✓ ACTIVO</span>
+                  <span *ngIf="!is2faEnabled()" class="inline-block mt-1 text-[10px] font-extrabold text-outline bg-surface-container px-2 py-0.5 rounded-full border border-outline-variant">DESACTIVADO</span>
+                </div>
               </div>
-              <input type="checkbox" [ngModel]="is2faEnabled()" (change)="toggle2FA($event)" class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0">
-            </div>
-            <div class="p-4 sm:p-5 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
-              <div>
-                <p class="font-extrabold text-on-surface text-sm sm:text-base">Autenticación Biométrica (Face ID / Huella)</p>
-                <p class="text-xs text-on-surface-variant mt-0.5">Permite acceso directo en dispositivos móviles registrados.</p>
+              <!-- iOS Toggle -->
+              <div class="toggle-track shrink-0 ml-4" [ngClass]="is2faEnabled() ? 'toggle-on' : 'toggle-off'">
+                <div class="toggle-thumb" [ngClass]="is2faEnabled() ? 'thumb-on' : 'thumb-off'"></div>
               </div>
-              <input type="checkbox" [ngModel]="isBiometricEnabled()" (change)="toggleBiometric($event)" class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0">
-            </div>
+            </button>
+
+            <!-- Biometría Row -->
+            <button type="button" (click)="toggleBiometric()" class="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-surface-container-low/50 active:bg-surface-container-low transition-colors cursor-pointer text-left">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl shrink-0 flex items-center justify-center transition-all"
+                     [ngClass]="isBiometricEnabled() ? 'bg-purple-600/15 text-purple-600' : 'bg-surface-container text-outline'">
+                  <span class="material-symbols-outlined text-xl">fingerprint</span>
+                </div>
+                <div class="min-w-0">
+                  <p class="font-extrabold text-on-surface text-sm">Biometría (Face ID / Huella)</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">Acceso directo en dispositivos móviles registrados.</p>
+                  <span *ngIf="isBiometricEnabled()" class="inline-block mt-1 text-[10px] font-extrabold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">✓ ACTIVO</span>
+                  <span *ngIf="!isBiometricEnabled()" class="inline-block mt-1 text-[10px] font-extrabold text-outline bg-surface-container px-2 py-0.5 rounded-full border border-outline-variant">DESACTIVADO</span>
+                </div>
+              </div>
+              <!-- iOS Toggle -->
+              <div class="toggle-track shrink-0 ml-4" [ngClass]="isBiometricEnabled() ? 'toggle-bio-on' : 'toggle-off'">
+                <div class="toggle-thumb" [ngClass]="isBiometricEnabled() ? 'thumb-on' : 'thumb-off'"></div>
+              </div>
+            </button>
+
           </div>
         </section>
 
@@ -366,6 +393,35 @@ export interface RegistroAuditoria {
   `,
   styles: [`
     .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    /* iOS-style Toggle Switch */
+    .toggle-track {
+      position: relative;
+      width: 52px;
+      height: 30px;
+      border-radius: 999px;
+      transition: background-color 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+      display: flex;
+      align-items: center;
+      padding: 0 3px;
+      box-sizing: border-box;
+    }
+    .toggle-on  { background-color: #2563eb; }
+    .toggle-bio-on { background-color: #7c3aed; }
+    .toggle-off { background-color: #9ca3af; }
+
+    .toggle-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: transform;
+    }
+    .thumb-on  { transform: translateX(22px); }
+    .thumb-off { transform: translateX(0); }
   `]
 })
 export class SeguridadComponent {
@@ -443,34 +499,33 @@ export class SeguridadComponent {
     { fecha: 'Ayer 18:30 hs', dispositivo: 'iPad Air Safari', ip: '190.224.89.12', resultado: 'Exitoso' }
   ];
 
-  toggle2FA(event: any) {
-    const checked = event.target.checked;
-    if (checked) {
+  toggle2FA() {
+    if (!this.is2faEnabled()) {
+      // Activar: abrir modal de configuración OTP
       this.otpCode = '';
       this.show2faModal.set(true);
     } else {
+      // Desactivar directamente
       this.is2faEnabled.set(false);
-      alert('La Verificación en Dos Pasos (2FA) fue desactivada.');
     }
   }
 
   confirm2FA() {
     if (!this.otpCode || this.otpCode.length < 6) {
-      alert('Ingrese el código OTP de 6 dígitos brindado por su aplicación autenticadora.');
+      alert('Ingresá el código OTP de 6 dígitos de tu aplicación autenticadora.');
       return;
     }
     this.is2faEnabled.set(true);
     this.show2faModal.set(false);
-    alert('✅ Verificación en Dos Pasos (2FA) configurada y activada exitosamente.');
   }
 
   close2faModal() {
     this.show2faModal.set(false);
   }
 
-  toggleBiometric(event: any) {
-    const checked = event.target.checked;
-    if (checked) {
+  toggleBiometric() {
+    if (!this.isBiometricEnabled()) {
+      // Activar: abrir modal de escáner biométrico
       this.biometricSuccess.set(false);
       this.biometricStatusText.set('Escaneando rostro / huella digital en este dispositivo...');
       this.showBiometricModal.set(true);
@@ -479,10 +534,10 @@ export class SeguridadComponent {
         this.biometricStatusText.set('¡Identidad Biométrica Confirmada! Dispositivo registrado.');
         this.biometricSuccess.set(true);
         this.isBiometricEnabled.set(true);
-      }, 1500);
+      }, 1800);
     } else {
+      // Desactivar directamente
       this.isBiometricEnabled.set(false);
-      alert('La autenticación biométrica fue desactivada para este dispositivo.');
     }
   }
 
