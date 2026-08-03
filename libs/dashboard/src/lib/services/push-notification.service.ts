@@ -81,6 +81,15 @@ export class PushNotificationService {
       this.fetchVapidPublicKey();
       this.checkExistingSubscriptionStatus();
 
+      // Escuchar eventos de sonido enviados desde el ServiceWorker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'PLAY_NOTIFICATION_SOUND') {
+            this.reproducirSonidoSensorialCalmante();
+          }
+        });
+      }
+
       // BroadcastChannel para sincronizar ventanas simultáneas
       if ('BroadcastChannel' in window) {
         try {

@@ -23,6 +23,7 @@ self.addEventListener('push', function(event) {
   const options = {
     body: data.body || data.mensaje || 'Nueva notificación de la cartera.',
     icon: '/assets/icons/icon-192x192.png',
+    badge: '/assets/icons/badge-72x72.png',
     vibrate: [300, 100, 300, 100, 300],
     tag: data.id || ('jc-pas-push-' + Date.now()),
     renotify: true,
@@ -30,7 +31,15 @@ self.addEventListener('push', function(event) {
     data: { url: data.link || data.url || '/dashboard' }
   };
 
-  event.waitUntil(self.registration.showNotification(data.title || data.titulo || 'JC Broker PAS', options));
+  // Notificar a todos los clientes web abiertos para reproducir el ruidito con Web Audio API
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (let i = 0; i < clientList.length; i++) {
+        clientList[i].postMessage({ type: 'PLAY_NOTIFICATION_SOUND', data: data });
+      }
+      return self.registration.showNotification(data.title || data.titulo || 'JC Broker PAS', options);
+    })
+  );
 });
 
 // Escuchar mensajes locales postMessage desde la aplicación web
@@ -38,10 +47,10 @@ self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options, delayMs } = event.data;
     
-    // Asegurar rutas absolutas para icon y remover badge cuadrado
+    // Asegurar rutas absolutas para icon y badge oficial
     if (options) {
       options.icon = options.icon || '/assets/icons/icon-192x192.png';
-      delete options.badge;
+      options.badge = options.badge || '/assets/icons/badge-72x72.png';
     }
 
     if (delayMs && delayMs > 0) {
