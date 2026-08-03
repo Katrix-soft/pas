@@ -250,6 +250,10 @@ export class PushNotificationService {
   async emitirAlerta(alerta: PushPopAlert, recipientRole: 'pas' | 'admin' | 'all' = 'pas') {
     alerta.recipientRole = recipientRole;
 
+    // Verificar preferencias ANTES de disparar cualquier cosa
+    const prefs = this.getNotifPrefs();
+    if (prefs.masterMuted || prefs.isDnd) return;
+
     // 1. Guardar en Cookie de alerta pendiente para sincronizar ventanas (incluyendo Incognito)
     try {
       setCookie('jc_pending_alert', JSON.stringify(alerta), 30);
@@ -266,8 +270,10 @@ export class PushNotificationService {
       } catch (e) {}
     }
 
-    // 3. Service worker broadcast
-    this.dispararLocalServiceWorker(alerta);
+    // 3. Service worker → notificación nativa del SO (solo si no silenciado)
+    if (prefs.sound) {
+      this.dispararLocalServiceWorker(alerta);
+    }
   }
 
   public checkAndConsumePendingAlert(currentRole: string) {
@@ -291,27 +297,45 @@ export class PushNotificationService {
     }
   }
 
-  /** Lee las preferencias del usuario desde localStorage */
-  private getNotifPrefs(): { masterMuted: boolean; sound: boolean; vibration: boolean } {
+  /** Lee las preferencias del usuario desde localStorage, incluyendo DND activo */
+  private getNotifPrefs(): { masterMuted: boolean; sound: boolean; vibration: boolean; isDnd: boolean } {
     try {
       const raw = localStorage.getItem('jc_notif_prefs');
       if (raw) {
         const p = JSON.parse(raw);
+        const isDnd = this.checkDndActive(!!p.dndEnabled, p.dndFrom || '22:00', p.dndTo || '08:00');
         return {
           masterMuted: !!p.masterMuted,
           sound: p.sound !== false,
-          vibration: p.vibration !== false
+          vibration: p.vibration !== false,
+          isDnd
         };
       }
     } catch { }
-    return { masterMuted: false, sound: true, vibration: true };
+    return { masterMuted: false, sound: true, vibration: true, isDnd: false };
+  }
+
+  /** Determina si el horario actual está dentro del rango DND */
+  private checkDndActive(enabled: boolean, from: string, to: string): boolean {
+    if (!enabled) return false;
+    try {
+      const now = new Date();
+      const [fH, fM] = from.split(':').map(Number);
+      const [tH, tM] = to.split(':').map(Number);
+      const cur = now.getHours() * 60 + now.getMinutes();
+      const start = fH * 60 + fM;
+      const end = tH * 60 + tM;
+      // Rango que cruza medianoche (ej: 22:00 -> 08:00)
+      if (start > end) return cur >= start || cur < end;
+      return cur >= start && cur < end;
+    } catch { return false; }
   }
 
   public emitirAlertaLocal(alerta: PushPopAlert) {
     const prefs = this.getNotifPrefs();
 
-    // Si el maestro está silenciado, no mostrar nada
-    if (prefs.masterMuted) return;
+    // Si el maestro está silenciado o estamos en DND, no mostrar nada
+    if (prefs.masterMuted || prefs.isDnd) return;
 
     this.activeToast.set(alerta);
 
