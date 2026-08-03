@@ -42,14 +42,14 @@ const DEFAULT_TICKETS: Ticket[] = [
     tipo: 'Siniestro',
     asunto: 'Falta reporte policial para siniestro de flota camionera.',
     prioridad: 'Alta',
-    estado: 'Falta Doc.',
-    asignado: 'Marta García',
-    asignadoInitials: 'MG',
+    estado: 'En Proceso',
+    asignado: 'Gonzalo Paso',
+    asignadoInitials: 'GP',
     tiempo: '12m ago',
     pas: 'Gonzalo Paso',
     pasMatricula: '86992',
     polizaRef: '5-894210-242193',
-    notasInternal: ['Mesa Operativa: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura.']
+    notasInternal: ['Mesa Operativa Gonzalo Paso: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura.']
   },
   {
     id: '#TK-8839',
@@ -57,13 +57,13 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Cambio de titularidad y modificación de CBU para cobro automático.',
     prioridad: 'Media',
     estado: 'En Proceso',
-    asignado: 'Carlos Pires',
-    asignadoInitials: 'CP',
+    asignado: 'Candela Rossi',
+    asignadoInitials: 'CR',
     tiempo: '45m ago',
     pas: 'Carlos Benítez',
     pasMatricula: '74129',
     polizaRef: '20027144800',
-    notasInternal: ['Verificado CBU en AFIP.']
+    notasInternal: ['Verificado CBU en AFIP por Candela Rossi.']
   },
   {
     id: '#TK-8835',
@@ -71,8 +71,8 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.',
     prioridad: 'Alta',
     estado: 'Abierto',
-    asignado: 'Lucía Fernández',
-    asignadoInitials: 'LF',
+    asignado: 'Candela Rossi',
+    asignadoInitials: 'CR',
     tiempo: '1h ago',
     pas: 'Gonzalo Paso',
     pasMatricula: '86992',
@@ -85,12 +85,12 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Consulta sobre desglose de liquidación de comisiones quincena Mayo.',
     prioridad: 'Baja',
     estado: 'Cerrado',
-    asignado: 'Roberto Gómez',
-    asignadoInitials: 'RG',
+    asignado: 'Marina Soria',
+    asignadoInitials: 'MS',
     tiempo: '3h ago',
     pas: 'Gonzalo Paso',
     pasMatricula: '86992',
-    notasInternal: ['Liquidación enviada en formato PDF firmado.']
+    notasInternal: ['Liquidación enviada en formato PDF firmado por Marina Soria.']
   },
   {
     id: '#TK-8812',
@@ -98,8 +98,8 @@ const DEFAULT_TICKETS: Ticket[] = [
     asunto: 'Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.',
     prioridad: 'Crítica',
     estado: 'Abierto',
-    asignado: 'Marta García',
-    asignadoInitials: 'MG',
+    asignado: 'Gonzalo Paso',
+    asignadoInitials: 'GP',
     tiempo: '4h ago',
     pas: 'Juan Pérez',
     pasMatricula: '91234',
@@ -242,12 +242,51 @@ const DEFAULT_TICKETS: Ticket[] = [
           <!-- VISTA ADMINISTRADOR -->
           <section class="p-container-margin md:p-lg space-y-lg pb-24 max-w-7xl mx-auto w-full">
             
+            <!-- Administrative Team Workload Selector (3 Perfiles Reales) -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-md border border-indigo-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-black text-xl shrink-0">
+                  🛡️
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="font-extrabold text-base sm:text-lg text-white truncate">Mesa Operativa Central (3 Administrativos)</h3>
+                    <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-500/30 uppercase shrink-0">Protección Anti-Solapamiento</span>
+                  </div>
+                  <p class="text-xs text-slate-300 mt-0.5 leading-snug">Distribución de carga por especialidad para no pisar el trabajo entre operadores.</p>
+                </div>
+              </div>
+
+              <!-- Switcher de Operador Activo -->
+              <div class="flex items-center gap-1.5 w-full md:w-auto bg-slate-800/90 p-1.5 rounded-xl border border-slate-700/60 overflow-x-auto no-scrollbar shrink-0">
+                <span class="text-[10px] text-slate-400 font-bold uppercase px-1.5 shrink-0">Operador:</span>
+                <button (click)="setActiveAdminAgent('Gonzalo Paso')" 
+                        [class]="activeAdminAgent() === 'Gonzalo Paso' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
+                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
+                  <span>👑 Gonzalo</span>
+                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Gonzalo Paso') }}</span>
+                </button>
+                <button (click)="setActiveAdminAgent('Candela Rossi')" 
+                        [class]="activeAdminAgent() === 'Candela Rossi' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
+                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
+                  <span>👩‍💼 Candela</span>
+                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Candela Rossi') }}</span>
+                </button>
+                <button (click)="setActiveAdminAgent('Marina Soria')" 
+                        [class]="activeAdminAgent() === 'Marina Soria' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
+                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
+                  <span>👩‍💼 Marina</span>
+                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Marina Soria') }}</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Welcome Header & Quick Action Buttons -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-base border-b border-outline-variant/40 pb-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-outline-variant/40 pb-4">
               <div>
                 <div class="flex items-center gap-2">
                   <h2 class="font-extrabold text-xl sm:text-2xl text-on-surface">Panel Administrativo</h2>
-                  <span class="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-indigo-500/20 uppercase tracking-wider">Centro Operativo JC</span>
+                  <span class="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-indigo-500/20 uppercase tracking-wider">Operador: {{ activeAdminAgent() }}</span>
                 </div>
                 <p class="text-xs sm:text-sm text-on-surface-variant mt-1 font-medium">Supervisión en tiempo real de endosos, siniestros y solicitudes de PAS.</p>
               </div>
@@ -975,10 +1014,9 @@ const DEFAULT_TICKETS: Ticket[] = [
             <ng-container *ngIf="role() === 'admin'; else pasAgentReadOnly">
               <select [ngModel]="selectedTicket().asignado" (ngModelChange)="reassignSelectedTicket($event)"
                       class="w-full bg-surface-container-low border border-outline-variant text-xs text-on-surface font-bold p-2.5 rounded-xl">
-                <option value="Marta García">Marta García (Región Norte)</option>
-                <option value="Carlos Pires">Carlos Pires (Región Sur)</option>
-                <option value="Lucía Fernández">Lucía Fernández (Mesa de Entradas)</option>
-                <option value="Roberto Gómez">Roberto Gómez (Siniestros Flota)</option>
+                <option value="Gonzalo Paso">👑 Gonzalo Paso (Coordinador General - Flotas & Críticos)</option>
+                <option value="Candela Rossi">👩‍💼 Candela Rossi (Especialista en Emisiones, Altas & Endosos)</option>
+                <option value="Marina Soria">👩‍💼 Marina Soria (Especialista en Siniestros & Cobranzas)</option>
               </select>
             </ng-container>
             <ng-template #pasAgentReadOnly>
@@ -1332,47 +1370,87 @@ export class DashboardComponent implements OnInit {
   // Tickets signal
   tickets = signal<Ticket[]>(DEFAULT_TICKETS);
 
+  // Perfiles Administrativos de Mesa Operativa Central
+  activeAdminAgent = signal<'Gonzalo Paso' | 'Candela Rossi' | 'Marina Soria'>('Gonzalo Paso');
+  assignedFilter = signal<'mis' | 'todos'>('todos');
+
+  setActiveAdminAgent(agentName: 'Gonzalo Paso' | 'Candela Rossi' | 'Marina Soria') {
+    this.activeAdminAgent.set(agentName);
+    this.showToast(`Operador activo cambiado a: ${agentName}`);
+  }
+
+  countByAgent(agentName: string): number {
+    return this.tickets().filter(t => t.asignado === agentName).length;
+  }
+
+  tomarTramiteDirecto(ticket: Ticket, event?: Event) {
+    if (event) event.stopPropagation();
+    const active = this.activeAdminAgent();
+    ticket.asignado = active;
+    ticket.asignadoInitials = active.split(' ').map(n => n[0]).join('');
+    ticket.tiempo = 'Justo ahora';
+
+    if (!ticket.notasInternal) ticket.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    ticket.notasInternal.unshift(`[${timestamp}] ⚡ Trámite tomado por ${active} para gestión exclusiva.`);
+
+    const alertData = {
+      id: 'auto-take-' + Date.now(),
+      titulo: `⚡ Trámite Asignado (${ticket.id})`,
+      mensaje: `${active} tomó el trámite "${ticket.asunto}".`,
+      tipo: 'cartera',
+      icon: 'person',
+      remitente: active.toUpperCase(),
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(ticket, alertData);
+    this.showToast(`Trámite ${ticket.id} asignado a ${active}`);
+  }
+
   producers = signal<ProducerStats[]>([
     {
       id: 'p1',
-      nombre: 'Marta García',
-      region: 'Región Norte',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDLXKTm9fdfuxX1umSqlgzvi6Cmh8jk6QYMgn4ymVmzLpzXhUIfLkZFS0QB3Kz1m5w40BHo-IGwB4Pm5jyAtc7rXXmq9m0sD8qvtsMENBYgQjfVhkUW6SNZKZneDXEI21C7F_l2m7JvDKrPNhYbQwyx9Y1LIOyBYiVCjNKAnGbOvEjVWfiRDNnu26AOFcFvb_6ewGdmWEmZuktDlEvMbefU3fDuHFmeLAbvVCNd_blC79a0iR0YRGQN5w',
+      nombre: 'Gonzalo Paso',
+      region: 'Coordinación Central',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0',
       ticketsResueltos: 142,
       porcentaje: 92,
-      tiempoRespuesta: '18 min',
+      tiempoRespuesta: '12 min',
       satisfaccion: '4.9/5',
-      carteraTotal: '$24.8M',
-      matricula: '84102',
-      email: 'mgarcia@jcorg.com.ar',
-      telefono: '+54 9 11 4455-8899'
+      carteraTotal: '$28.8M',
+      matricula: '86992',
+      email: 'gpaso@jcorg.com.ar',
+      telefono: '+54 9 261 423-8800'
     },
     {
       id: 'p2',
-      nombre: 'Carlos Pires',
-      region: 'Región Sur',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnvFVytqaWCZv-TNI6ISNP3Hueq3mmKgV4P-RNPxma-vQWimrZAuOeDNQ9PVcp3lraLjCAHY3u8S3E5VQstYIH_LyCRSMDnHWQmsnFsofN_0f3tsitCG1akXwqeanWdP-MZughxm9NG0B7AewhPBSnThluUmU461TNAmT9ByPCj6X5ntIK235O1siHhHM7R0xxZkY1YkZfoeEGKFhT2VAfV1Q96vVkShYc3RyZ5n9jQPZYRWMeVIpAbQ',
+      nombre: 'Candela Rossi',
+      region: 'Emisiones & Endosos',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
       ticketsResueltos: 118,
-      porcentaje: 78,
-      tiempoRespuesta: '25 min',
-      satisfaccion: '4.8/5',
-      carteraTotal: '$19.2M',
-      matricula: '74129',
-      email: 'cpires@jcorg.com.ar',
+      porcentaje: 88,
+      tiempoRespuesta: '15 min',
+      satisfaccion: '4.9/5',
+      carteraTotal: '$21.2M',
+      matricula: 'ADM-102',
+      email: 'crossi@jcorg.com.ar',
       telefono: '+54 9 11 3322-1100'
     },
     {
       id: 'p3',
-      nombre: 'Lucía Fernández',
-      region: 'Región Cuyo',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0',
-      ticketsResueltos: 96,
-      porcentaje: 65,
-      tiempoRespuesta: '32 min',
-      satisfaccion: '4.7/5',
-      carteraTotal: '$15.4M',
-      matricula: '65432',
-      email: 'lfernandez@jcorg.com.ar',
+      nombre: 'Marina Soria',
+      region: 'Siniestros & Cobranzas',
+      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
+      ticketsResueltos: 105,
+      porcentaje: 84,
+      tiempoRespuesta: '19 min',
+      satisfaccion: '4.8/5',
+      carteraTotal: '$18.4M',
+      matricula: 'ADM-105',
+      email: 'msoria@jcorg.com.ar',
       telefono: '+54 9 261 412-9988'
     }
   ]);
