@@ -175,7 +175,6 @@ export class PushNotificationService {
 
       this.pushPermissionStatus.set(permission);
       if (permission !== 'granted') {
-        alert('Permiso de notificaciones denegado en el dispositivo.');
         this.isSubscribing.set(false);
         return false;
       }
@@ -244,7 +243,6 @@ export class PushNotificationService {
       this.isSubscribedBackend.set(false);
       this.isSubscribing.set(false);
       this.subscriptionError.set(err?.message || 'Error en flujo de suscripción');
-      alert('⚠️ Error en suscripción: ' + (err?.message || err));
       return false;
     }
   }

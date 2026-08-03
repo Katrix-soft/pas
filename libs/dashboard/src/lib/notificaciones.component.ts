@@ -1,7 +1,7 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { PushNotificationService } from './services/push-notification.service';
 
@@ -52,6 +52,8 @@ const defaultPrefs: NotifPrefs = {
   seguridad: true,
   sistema: true,
 };
+
+// ─────────────────────────────────────────────────────────
 
 @Component({
   selector: 'lib-notificaciones',
@@ -373,16 +375,34 @@ const defaultPrefs: NotifPrefs = {
               </div>
               <div>
                 <p class="font-bold text-sm text-on-surface">{{ pushService.isSubscribedBackend() ? 'Push activo en este dispositivo' : 'Push no activado' }}</p>
-                <p class="text-xs text-on-surface-variant">{{ pushService.isSubscribedBackend() ? 'Recibirás alertas en la persiana del celular.' : 'Activá para recibir avisos en pantalla bloqueada.' }}</p>
+                <p class="text-xs text-on-surface-variant">{{ pushService.isSubscribedBackend() ? 'Recibirás alertas en la persiana del celular.' : 'Tocá el botón para recibir avisos en pantalla bloqueada.' }}</p>
               </div>
             </div>
             <button *ngIf="!pushService.isSubscribedBackend()"
                     (click)="activarNotificaciones()"
-                    [disabled]="pushService.isSubscribing()"
-                    class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50">
-              <span class="material-symbols-outlined text-lg">phonelink_ring</span>
-              <span>Activar Push</span>
+                    [disabled]="pushService.isSubscribing() || pushDenied()"
+                    class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span class="material-symbols-outlined text-lg">{{ pushService.isSubscribing() ? 'progress_activity' : 'phonelink_ring' }}</span>
+              <span>{{ pushService.isSubscribing() ? 'Solicitando permiso...' : 'Activar Push en este dispositivo' }}</span>
             </button>
+          </div>
+
+          <!-- Banner: Permiso Denegado por el navegador -->
+          <div *ngIf="pushDenied()" class="flex items-start gap-3 bg-amber-50/80 dark:bg-amber-900/20 border border-amber-300/50 rounded-xl p-3.5 text-xs">
+            <span class="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5">info</span>
+            <div>
+              <p class="font-bold text-amber-800 dark:text-amber-300">Permiso bloqueado en el navegador</p>
+              <p class="text-amber-700 dark:text-amber-400 mt-0.5">El navegador tiene las notificaciones bloqueadas para este sitio. Para habilitarlas: hacé clic en el 🔒 candado en la barra de dirección → <strong>Notificaciones → Permitir</strong> → recargá la página.</p>
+            </div>
+          </div>
+
+          <!-- Banner: Error genérico -->
+          <div *ngIf="pushError() && !pushDenied()" class="flex items-start gap-3 bg-error/8 border border-error/25 rounded-xl p-3.5 text-xs">
+            <span class="material-symbols-outlined text-error text-xl shrink-0 mt-0.5">error</span>
+            <div>
+              <p class="font-bold text-error">No se pudo activar el push</p>
+              <p class="text-on-surface-variant mt-0.5">{{ pushError() }}</p>
+            </div>
           </div>
 
           <!-- Probar Notificación -->
@@ -616,11 +636,15 @@ export class NotificacionesComponent implements OnInit {
     return list.filter(a => a.categoria === cat);
   });
 
+  pushDenied = signal<boolean>(false);
+  pushError = signal<string | null>(null);
+
   // ── Lifecycle ──────────────────────────────────────────────
   ngOnInit() {
     this.loadPrefs();
-    if (typeof window !== 'undefined') {
-      this.pushService.solicitarPermisoYSuscribir();
+    // Detectar si el permiso ya fue denegado previamente (sin disparar alert)
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      this.pushDenied.set(Notification.permission === 'denied');
     }
   }
 
@@ -657,8 +681,29 @@ export class NotificacionesComponent implements OnInit {
   }
 
   // ── Push ───────────────────────────────────────────────────
-  activarNotificaciones() {
-    this.pushService.solicitarPermisoYSuscribir();
+  async activarNotificaciones() {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      this.pushError.set('Tu navegador no soporta notificaciones push.');
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      this.pushDenied.set(true);
+      return;
+    }
+    this.pushError.set(null);
+    this.pushDenied.set(false);
+    try {
+      const ok = await this.pushService.solicitarPermisoYSuscribir();
+      if (!ok) {
+        if (Notification.permission === 'denied') {
+          this.pushDenied.set(true);
+        } else {
+          this.pushError.set('No se pudo completar la suscripción push. Intentá de nuevo.');
+        }
+      }
+    } catch (e: any) {
+      this.pushError.set(e?.message || 'Error inesperado al activar push.');
+    }
   }
 
   async desuscribirPush() {
