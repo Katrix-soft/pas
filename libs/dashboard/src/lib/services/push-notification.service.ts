@@ -185,8 +185,11 @@ export class PushNotificationService {
         throw new Error('No se pudo obtener la VAPID_PUBLIC_KEY del servidor.');
       }
 
-      await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.register('/sw.js?v=20260803');
       const reg = await navigator.serviceWorker.ready;
+      if (reg && reg.update) {
+        try { await reg.update(); } catch (e) {}
+      }
 
       if (!reg || !reg.pushManager) {
         throw new Error('reg.pushManager no está disponible en este navegador.');
