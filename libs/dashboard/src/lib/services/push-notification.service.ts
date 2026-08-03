@@ -297,7 +297,7 @@ export class PushNotificationService {
       try {
         new Notification(alerta.titulo, {
           body: alerta.mensaje,
-          icon: '/assets/logo1.png'
+          icon: '/assets/icons/icon-192x192.png'
         });
       } catch (e) {}
     }
@@ -377,10 +377,9 @@ export class PushNotificationService {
     if ('serviceWorker' in navigator) {
       try {
         const reg = await navigator.serviceWorker.getRegistration();
-        const options = {
+        const options: any = {
           body: alerta.mensaje,
-          icon: '/assets/logo1.png',
-          badge: '/assets/logo1.png',
+          icon: '/assets/icons/icon-192x192.png',
           tag: alerta.id || ('jc-pas-' + Date.now()),
           renotify: true,
           requireInteraction: true,

@@ -1339,4 +1339,44 @@ async def update_tickets(payload: dict):
         alert_data = payload["alert"]
         alert_data["created_at"] = time.time()
         PENDING_REALTIME_ALERTS.append(alert_data)
+
+        # Enviar notificación VAPID Push nativa a celulares suscritos
+        try:
+            async with AsyncSessionLocal() as db:
+                stmt = select(PushSubscriptionModel)
+                res = await db.execute(stmt)
+                subs = res.scalars().all()
+                if subs:
+                    vapid_claims = {"sub": VAPID_CLAIMS_EMAIL}
+                    push_payload = json.dumps({
+                        "title": alert_data.get("titulo", "JC Broker PAS"),
+                        "body": alert_data.get("mensaje", "Nueva actualización de trámite."),
+                        "link": alert_data.get("link", "/dashboard"),
+                        "tipo": alert_data.get("tipo", "siniestro"),
+                        "timestamp": time.time()
+                    })
+                    for sub in subs:
+                        try:
+                            subscription_info = {
+                                "endpoint": sub.endpoint,
+                                "keys": {
+                                    "p256dh": sub.p256dh,
+                                    "auth": sub.auth
+                                }
+                            }
+                            webpush(
+                                subscription_info=subscription_info,
+                                data=push_payload,
+                                vapid_private_key=VAPID_PRIVATE_KEY,
+                                vapid_claims=vapid_claims
+                            )
+                        except WebPushException as ex:
+                            if ex.response is not None and ex.response.status_code in [404, 410]:
+                                await db.delete(sub)
+                                await db.commit()
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
     return {"success": True, "tickets": SHARED_TICKETS_STORE}

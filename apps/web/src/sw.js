@@ -23,7 +23,6 @@ self.addEventListener('push', function(event) {
   const options = {
     body: data.body || data.mensaje || 'Nueva notificación de la cartera.',
     icon: '/assets/icons/icon-192x192.png',
-    badge: '/assets/icons/icon-192x192.png',
     vibrate: [300, 100, 300, 100, 300],
     tag: data.id || ('jc-pas-push-' + Date.now()),
     renotify: true,
@@ -39,10 +38,10 @@ self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options, delayMs } = event.data;
     
-    // Asegurar rutas absolutas para icon y badge
+    // Asegurar rutas absolutas para icon y remover badge cuadrado
     if (options) {
       options.icon = options.icon || '/assets/icons/icon-192x192.png';
-      options.badge = options.badge || '/assets/icons/icon-192x192.png';
+      delete options.badge;
     }
 
     if (delayMs && delayMs > 0) {
