@@ -16,7 +16,7 @@ export const isPdfModalOpen = signal(false);
     <div class="flex h-screen w-full bg-background overflow-hidden relative">
       
       <!-- BANNER SOLICITUD DE PERMISO PUSH SI NO ESTÁ PERMITIDO -->
-      <div *ngIf="pushService.pushPermissionStatus() !== 'granted' && !dismissedPushPrompt()" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-slate-900 text-white border border-emerald-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl animate-in slide-in-from-top-4 flex items-center justify-between gap-3">
+      <div *ngIf="showPushPrompt()" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-slate-900 text-white border border-emerald-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl animate-in slide-in-from-top-4 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold shrink-0">
             <span class="material-symbols-outlined text-xl">notifications_active</span>
@@ -30,7 +30,7 @@ export const isPdfModalOpen = signal(false);
           <button (click)="solicitarPush()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl cursor-pointer shadow-sm active:scale-95">
             Activar
           </button>
-          <button (click)="dismissedPushPrompt.set(true)" class="text-white/40 hover:text-white p-1 rounded-lg cursor-pointer">
+          <button (click)="dismissPushPrompt()" class="text-white/40 hover:text-white p-1 rounded-lg cursor-pointer">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
@@ -259,9 +259,24 @@ export class LayoutComponent {
   isPdfModalOpen = isPdfModalOpen;
   pushService = inject(PushNotificationService);
   isExpanded = signal(false);
-  dismissedPushPrompt = signal(false);
   authService = inject(AuthService);
   router = inject(Router);
+
+  private readonly DISMISS_KEY = 'jc_push_prompt_dismissed';
+
+  // El banner se muestra solo si: push NO está concedido Y el usuario no lo cerró antes
+  showPushPrompt = computed(() => {
+    if (this.pushService.isSubscribedBackend()) return false;
+    if (this.pushService.pushPermissionStatus() === 'granted') return false;
+    if (typeof localStorage !== 'undefined' && localStorage.getItem(this.DISMISS_KEY) === '1') return false;
+    return true;
+  });
+
+  dismissPushPrompt() {
+    try { localStorage.setItem(this.DISMISS_KEY, '1'); } catch { }
+    // Forzar re-evaluación del computed
+    this.pushService.pushPermissionStatus.set(this.pushService.pushPermissionStatus());
+  }
 
   role = computed<Role>(() => this.authService.currentUser()?.role || 'admin');
   userFullName = computed(() => {
@@ -280,7 +295,8 @@ export class LayoutComponent {
     try {
       await this.pushService.solicitarPermisoYSuscribir();
     } finally {
-      this.dismissedPushPrompt.set(true);
+      try { localStorage.setItem(this.DISMISS_KEY, '1'); } catch { }
+      this.pushService.pushPermissionStatus.set(this.pushService.pushPermissionStatus());
     }
   }
 
