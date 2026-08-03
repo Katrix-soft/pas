@@ -276,10 +276,12 @@ export class LayoutComponent {
     this.isExpanded.set(!this.isExpanded());
   }
 
-  solicitarPush() {
-    this.pushService.solicitarPermisoYSuscribir().then(() => {
+  async solicitarPush() {
+    try {
+      await this.pushService.solicitarPermisoYSuscribir();
+    } finally {
       this.dismissedPushPrompt.set(true);
-    });
+    }
   }
 
   logout() {
