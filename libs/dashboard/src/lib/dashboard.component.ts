@@ -205,22 +205,22 @@ const DEFAULT_TICKETS: Ticket[] = [
       <main class="flex-1 flex flex-col pb-24 md:pb-lg w-full overflow-x-hidden">
         
         <!-- Top Header Bar -->
-        <header class="sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-4 md:px-8 py-3 w-full shadow-xs">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-primary text-2xl">{{ role() === 'admin' ? 'admin_panel_settings' : 'dashboard' }}</span>
-            <div>
-              <h1 class="font-black text-base sm:text-lg text-primary tracking-tight">Métricas de Gestión</h1>
-              <p class="text-[11px] text-on-surface-variant font-medium hidden sm:block">
+        <header class="sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-3 sm:px-8 py-2.5 w-full shadow-xs gap-2">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <span class="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">{{ role() === 'admin' ? 'admin_panel_settings' : 'dashboard' }}</span>
+            <div class="min-w-0 flex-1">
+              <h1 class="font-black text-sm sm:text-lg text-primary tracking-tight truncate">Métricas de Gestión</h1>
+              <p class="text-[11px] text-on-surface-variant font-medium hidden sm:block truncate">
                 {{ role() === 'admin' ? 'Control de Trámites & Operaciones Centralizadoras' : 'Panel Principal de Productor de Seguros (PAS)' }}
               </p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 shrink-0">
             <!-- Period Selector -->
             <div class="relative">
               <select [(ngModel)]="selectedPeriod" (change)="showToast('Período actualizado: ' + selectedPeriod())"
-                      class="bg-surface-container-low border border-outline-variant text-on-surface text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer focus:outline-none focus:border-primary">
+                      class="bg-surface-container-low border border-outline-variant text-on-surface text-[11px] sm:text-xs font-bold px-2.5 py-1.5 rounded-xl cursor-pointer focus:outline-none focus:border-primary">
                 <option value="Junio 2026">Junio 2026</option>
                 <option value="Mayo 2026">Mayo 2026</option>
                 <option value="Abril 2026">Abril 2026</option>
