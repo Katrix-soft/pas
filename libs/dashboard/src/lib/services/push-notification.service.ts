@@ -11,6 +11,30 @@ export interface PushPopAlert {
   icon: string;
   hora: string;
   remitente?: string;
+  recipientRole?: 'pas' | 'admin' | 'all';
+}
+
+function setCookie(name: string, value: string, seconds: number = 3600) {
+  if (typeof document === 'undefined') return;
+  const d = new Date();
+  d.setTime(d.getTime() + (seconds * 1000));
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+  }
+  return null;
+}
+
+function deleteCookie(name: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
 }
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -36,13 +60,17 @@ export class PushNotificationService {
   pushPermissionStatus = signal<string>('default');
   isHttps = signal<boolean>(true);
   
-  // Flag estricto: Se establece en true ÚNICAMENTE cuando POST /api/v1/push/subscribe responde HTTP 200 OK
   isSubscribedBackend = signal<boolean>(false);
   isSubscribing = signal<boolean>(false);
   subscriptionError = signal<string | null>(null);
 
+  // Modo sensorial suave (activado por defecto para evitar sobrecarga sensorial / autismo / hipersensibilidad)
+  isSensoryModeEnabled = signal<boolean>(true);
+
   countdownSecs = signal<number>(0);
   vapidPublicKey = '';
+
+  private broadcastChannel: BroadcastChannel | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -52,6 +80,20 @@ export class PushNotificationService {
       }
       this.fetchVapidPublicKey();
       this.checkExistingSubscriptionStatus();
+
+      // BroadcastChannel para sincronizar ventanas simultáneas
+      if ('BroadcastChannel' in window) {
+        try {
+          this.broadcastChannel = new BroadcastChannel('jc_pas_realtime_notifications');
+          this.broadcastChannel.onmessage = (event) => {
+            if (event.data?.type === 'EMIT_PUSH_ALERT' && event.data?.alert) {
+              const alert = event.data.alert;
+              const role = event.data.recipientRole || 'pas';
+              this.handleIncomingAlert(alert, role);
+            }
+          };
+        } catch (e) {}
+      }
     }
   }
 
@@ -61,11 +103,8 @@ export class PushNotificationService {
       const res = await firstValueFrom(this.http.get<{ public_key: string }>('/api/v1/push/vapid-public-key'));
       if (res && res.public_key) {
         this.vapidPublicKey = res.public_key.trim();
-        console.log('🔑 Key VAPID Pública cargada del backend:', this.vapidPublicKey);
       }
-    } catch (err) {
-      console.warn('⚠️ No se pudo obtener la llave VAPID del backend:', err);
-    }
+    } catch (err) {}
     return this.vapidPublicKey;
   }
 
@@ -76,7 +115,6 @@ export class PushNotificationService {
       if (reg && reg.pushManager) {
         const sub = await reg.pushManager.getSubscription();
         if (sub && Notification.permission === 'granted') {
-          // Re-sincronizar con el backend
           const subJson = sub.toJSON();
           const payload = {
             endpoint: subJson.endpoint,
@@ -88,7 +126,6 @@ export class PushNotificationService {
           this.http.post('/api/v1/push/subscribe', payload).subscribe({
             next: () => {
               this.isSubscribedBackend.set(true);
-              console.log('✅ Suscripción PWA existente re-verificada en backend FastAPI (HTTP 200 OK)');
             },
             error: () => {
               this.isSubscribedBackend.set(false);
@@ -103,7 +140,6 @@ export class PushNotificationService {
     this.activeToast.set(null);
   }
 
-  // FLUJO OBLIGATORIO EN ORDEN ESTRICTO
   async solicitarPermisoYSuscribir(): Promise<boolean> {
     if (typeof window === 'undefined' || !('Notification' in window)) {
       alert('Tu navegador o dispositivo no soporta Notificaciones Push.');
@@ -114,8 +150,6 @@ export class PushNotificationService {
     this.subscriptionError.set(null);
 
     try {
-      // 1. Pedir permiso con Notification.requestPermission()
-      console.log('PASO 1: Solicitando permiso con Notification.requestPermission()...');
       let permission = Notification.permission;
       if (permission !== 'granted') {
         permission = await new Promise<NotificationPermission>((resolve) => {
@@ -137,15 +171,11 @@ export class PushNotificationService {
         return false;
       }
 
-      // 2. Obtener la clave VAPID pública
-      console.log('PASO 2: Obtener VAPID_PUBLIC_KEY del backend...');
       const publicKey = await this.fetchVapidPublicKey();
       if (!publicKey) {
         throw new Error('No se pudo obtener la VAPID_PUBLIC_KEY del servidor.');
       }
 
-      // 3. Esperar el SW con await navigator.serviceWorker.ready
-      console.log('PASO 3: Esperar Service Worker con await navigator.serviceWorker.ready...');
       await navigator.serviceWorker.register('/sw.js');
       const reg = await navigator.serviceWorker.ready;
 
@@ -153,8 +183,6 @@ export class PushNotificationService {
         throw new Error('reg.pushManager no está disponible en este navegador.');
       }
 
-      // 4. Llamar a pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) })
-      console.log('PASO 4: Llamar a reg.pushManager.subscribe() con Uint8Array VAPID key...');
       const applicationServerKey = urlBase64ToUint8Array(publicKey);
       
       let subscription: PushSubscription | null = null;
@@ -167,7 +195,6 @@ export class PushNotificationService {
           });
         }
       } catch (subErr: any) {
-        console.error('❌ Error en reg.pushManager.subscribe():', subErr);
         throw new Error(`PushManager error: ${subErr?.message || subErr}`);
       }
 
@@ -184,95 +211,166 @@ export class PushNotificationService {
         }
       };
 
-      // 5. Hacer POST /api/v1/push/subscribe con el objeto suscripción
-      console.log('PASO 5: Enviando POST /api/v1/push/subscribe al backend:', payload);
-      const res = await firstValueFrom(this.http.post<any>('/api/v1/push/subscribe', payload));
-      console.log('✅ Backend respondió 200 OK a /api/v1/push/subscribe:', res);
+      await firstValueFrom(this.http.post<any>('/api/v1/push/subscribe', payload));
 
-      // SOLO DESPUÉS DE QUE EL SUBSCRIBE RESPONDA 200, HABILITAR EL BOTÓN
       this.isSubscribedBackend.set(true);
       this.isSubscribing.set(false);
 
-      this.emitirAlertaLocal({
+      this.emitirAlerta({
         id: 'push-granted-' + Date.now(),
-        titulo: '🔔 Suscripción Push VAPID Guardada',
-        mensaje: '¡Éxito! Tu dispositivo quedó registrado en la base de datos para recibir notificaciones nativas en persiana.',
+        titulo: '🔔 Suscripción Push Registrada',
+        mensaje: 'Tu dispositivo quedó configurado para recibir notificaciones nativas en pantalla.',
         tipo: 'cartera',
         icon: 'notifications_active',
-        remitente: 'JC PAS PUSH 200 OK',
+        remitente: 'JC PAS MESA OPERATIVA',
         hora: 'Ahora'
       });
 
       return true;
 
     } catch (err: any) {
-      console.error('❌ FLUJO DE SUSCRIPCIÓN FALLÓ:', err);
       this.isSubscribedBackend.set(false);
       this.isSubscribing.set(false);
       this.subscriptionError.set(err?.message || 'Error en flujo de suscripción');
-      alert('⚠️ Error en suscripción VAPID: ' + (err?.message || err));
+      alert('⚠️ Error en suscripción: ' + (err?.message || err));
       return false;
     }
   }
 
-  async emitirAlerta(alerta: PushPopAlert, delayMs: number = 0) {
-    // 1. Mostrar Toast emergente en pantalla siempre
-    this.emitirAlertaLocal(alerta);
+  async emitirAlerta(alerta: PushPopAlert, recipientRole: 'pas' | 'admin' | 'all' = 'pas') {
+    alerta.recipientRole = recipientRole;
 
-    // 2. Si no hay suscripción guardada en el backend, no llamar a send-notification
-    if (!this.isSubscribedBackend()) {
-      console.warn('⚠️ No hay suscripción backend confirmada, disparando Service Worker local...');
-      this.dispararLocalServiceWorker(alerta, delayMs);
-      return;
-    }
-
-    // 3. Disparar notificaciones VAPID vía Backend FastAPI a Google FCM / Apple Push
-    this.http.post('/api/v1/push/send-notification', {
-      titulo: alerta.titulo,
-      mensaje: alerta.mensaje,
-      tipo: alerta.tipo,
-      link: alerta.link || '/dashboard'
-    }).subscribe({
-      next: (res: any) => {
-        console.log('✅ Push VAPID enviado desde backend FastAPI a Google/Apple:', res);
-      },
-      error: (err) => {
-        console.warn('⚠️ Error en send-notification backend:', err);
-        this.dispararLocalServiceWorker(alerta, delayMs);
-      }
-    });
-  }
-
-  private emitirAlertaLocal(alerta: PushPopAlert) {
-    this.activeToast.set(alerta);
-
+    // 1. Guardar en Cookie de alerta pendiente para sincronizar ventanas (incluyendo Incognito)
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioContextClass) {
-        const audioCtx = new AudioContextClass();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.35);
-      }
+      setCookie('jc_pending_alert', JSON.stringify(alerta), 30);
     } catch (e) {}
 
+    // 2. Difundir por BroadcastChannel a otras pestañas
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          type: 'EMIT_PUSH_ALERT',
+          alert: alerta,
+          recipientRole
+        });
+      } catch (e) {}
+    }
+
+    // 3. Service worker broadcast
+    this.dispararLocalServiceWorker(alerta);
+  }
+
+  public checkAndConsumePendingAlert(currentRole: string) {
+    const raw = getCookie('jc_pending_alert');
+    if (raw) {
+      try {
+        const alerta: PushPopAlert = JSON.parse(raw);
+        const recipientRole = alerta.recipientRole || 'pas';
+        
+        if (recipientRole === 'all' || recipientRole === currentRole) {
+          deleteCookie('jc_pending_alert');
+          this.emitirAlertaLocal(alerta);
+        }
+      } catch (e) {}
+    }
+  }
+
+  private handleIncomingAlert(alerta: PushPopAlert, recipientRole: string) {
+    if (recipientRole === 'all' || recipientRole === 'pas') {
+      this.emitirAlertaLocal(alerta);
+    }
+  }
+
+  public emitirAlertaLocal(alerta: PushPopAlert) {
+    this.activeToast.set(alerta);
+
+    // Reproducir tono de notificación SENSORIAL CALMANTE (Apto CEA / Autismo / Hipersensibilidad Auditiva)
+    this.reproducirSonidoSensorialCalmante();
+
+    // Vibración suave
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      try { navigator.vibrate([200, 100, 200, 100, 250]); } catch (e) {}
+      try { navigator.vibrate([100, 50, 100]); } catch (e) {}
+    }
+
+    // Notificación Nativa del Sistema Operativo
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification(alerta.titulo, {
+          body: alerta.mensaje,
+          icon: '/assets/logo1.png'
+        });
+      } catch (e) {}
     }
 
     setTimeout(() => {
       if (this.activeToast()?.id === alerta.id) {
         this.activeToast.set(null);
       }
-    }, 6500);
+    }, 8500);
+  }
+
+  /**
+   * SINTETIZADOR DE AUDIO SENSORIALMENTE AMIGABLE (CEA / AUTISMO / SENSORY FRIENDLY)
+   * Diseñado con tonos cálidos, frecuencias bajas, arpegio mayor tipo Marimba / Campanilla suave
+   * y rampa de ataque/decaimiento envolvente para EVITAR estruendos o agudos punzantes.
+   */
+  public reproducirSonidoSensorialCalmante() {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const audioCtx = new AudioContextClass();
+
+      // Arpegio armónico relajante en Do Mayor (C4 - E4 - G4 - C5)
+      // Frecuencias orgánicas de baja intensidad (sin estridentismo)
+      const notas = [
+        { freq: 261.63, delay: 0.00, dur: 0.6 }, // Do4 (C4)
+        { freq: 329.63, delay: 0.12, dur: 0.6 }, // Mi4 (E4)
+        { freq: 392.00, delay: 0.24, dur: 0.7 }, // Sol4 (G4)
+        { freq: 523.25, delay: 0.36, dur: 0.9 }  // Do5 (C5)
+      ];
+
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.12, audioCtx.currentTime); // Volumen controlado sin sobrecargas
+      masterGain.connect(audioCtx.destination);
+
+      notas.forEach((n) => {
+        const startTime = audioCtx.currentTime + n.delay;
+
+        // Oscilador 1: Triángulo suave (sonido tipo madera/marimba)
+        const osc = audioCtx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(n.freq, startTime);
+
+        // Oscilador 2: Seno armónico secundario para calidez
+        const subOsc = audioCtx.createOscillator();
+        subOsc.type = 'sine';
+        subOsc.frequency.setValueAtTime(n.freq * 2, startTime);
+
+        const noteGain = audioCtx.createGain();
+        // Rampa de entrada suave (30ms fade-in para evitar sobresaltos bruscos)
+        noteGain.gain.setValueAtTime(0, startTime);
+        noteGain.gain.linearRampToValueAtTime(0.28, startTime + 0.03);
+        // Decaimiento envolvente exponencial suave
+        noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + n.dur);
+
+        const subGain = audioCtx.createGain();
+        subGain.gain.setValueAtTime(0, startTime);
+        subGain.gain.linearRampToValueAtTime(0.08, startTime + 0.03);
+        subGain.gain.exponentialRampToValueAtTime(0.001, startTime + n.dur);
+
+        osc.connect(noteGain);
+        subOsc.connect(subGain);
+
+        noteGain.connect(masterGain);
+        subGain.connect(masterGain);
+
+        osc.start(startTime);
+        subOsc.start(startTime);
+
+        osc.stop(startTime + n.dur);
+        subOsc.stop(startTime + n.dur);
+      });
+    } catch (e) {}
   }
 
   private async dispararLocalServiceWorker(alerta: PushPopAlert, delayMs: number = 0) {
@@ -281,12 +379,12 @@ export class PushNotificationService {
         const reg = await navigator.serviceWorker.getRegistration();
         const options = {
           body: alerta.mensaje,
-          icon: '/assets/icons/icon-192x192.png',
-          badge: '/assets/icons/icon-192x192.png',
+          icon: '/assets/logo1.png',
+          badge: '/assets/logo1.png',
           tag: alerta.id || ('jc-pas-' + Date.now()),
           renotify: true,
           requireInteraction: true,
-          vibrate: [300, 100, 300, 100, 300],
+          vibrate: [100, 50, 100],
           data: { url: alerta.link || '/dashboard' }
         };
 
@@ -300,21 +398,5 @@ export class PushNotificationService {
         }
       } catch (e) {}
     }
-  }
-
-  probarPersianaAndroidConCuentaRegresiva(alerta: PushPopAlert) {
-    this.countdownSecs.set(4);
-    
-    const interval = setInterval(() => {
-      const current = this.countdownSecs();
-      if (current > 1) {
-        this.countdownSecs.set(current - 1);
-      } else {
-        clearInterval(interval);
-        this.countdownSecs.set(0);
-      }
-    }, 1000);
-
-    this.emitirAlerta(alerta, 3500);
   }
 }

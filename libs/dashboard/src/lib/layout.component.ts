@@ -57,15 +57,15 @@ export const isPdfModalOpen = signal(false);
             <span class="material-symbols-outlined text-[20px]">grid_view</span>
             <span class="text-[9px] mt-0.5 font-bold">Panel</span>
           </a>
-          <a routerLink="/siniestros" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+          <a *ngIf="role() === 'pas'" routerLink="/siniestros" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
             <span class="material-symbols-outlined text-[20px]">report_problem</span>
             <span class="text-[9px] mt-0.5 font-bold">Siniestros</span>
           </a>
-          <a routerLink="/cobranzas" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+          <a *ngIf="role() === 'pas'" routerLink="/cobranzas" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
             <span class="material-symbols-outlined text-[20px]">payments</span>
             <span class="text-[9px] mt-0.5 font-bold">Cobros</span>
           </a>
-          <a routerLink="/clientes" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
+          <a *ngIf="role() === 'pas'" routerLink="/clientes" routerLinkActive="text-[#10b981]" class="flex flex-col items-center justify-center text-white/70 hover:text-white p-1.5 rounded-xl transition-all cursor-pointer min-w-[56px]">
             <span class="material-symbols-outlined text-[20px]">group</span>
             <span class="text-[9px] mt-0.5 font-bold">Clientes</span>
           </a>
@@ -144,7 +144,7 @@ export const isPdfModalOpen = signal(false);
             </span>
           </a>
           
-          <a routerLink="/cobranzas" routerLinkActive="bg-[#2563eb] text-white" 
+          <a *ngIf="role() === 'pas'" routerLink="/cobranzas" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
              [title]="!isExpanded() ? 'Cobranzas' : ''"
              [class.justify-center]="!isExpanded()">
@@ -152,7 +152,7 @@ export const isPdfModalOpen = signal(false);
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">Cobranzas</span>
           </a>
           
-          <a routerLink="/clientes" routerLinkActive="bg-[#2563eb] text-white" 
+          <a *ngIf="role() === 'pas'" routerLink="/clientes" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
              [title]="!isExpanded() ? 'Clientes' : ''"
              [class.justify-center]="!isExpanded()">
@@ -160,7 +160,7 @@ export const isPdfModalOpen = signal(false);
             <span class="tracking-wide whitespace-nowrap transition-all duration-200 overflow-hidden" [class.opacity-0]="!isExpanded()" [class.w-0]="!isExpanded()" [class.hidden]="!isExpanded()">Clientes</span>
           </a>
           
-          <a routerLink="/siniestros" routerLinkActive="bg-[#2563eb] text-white" 
+          <a *ngIf="role() === 'pas'" routerLink="/siniestros" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"
              [title]="!isExpanded() ? 'Siniestros' : ''"
              [class.justify-center]="!isExpanded()">

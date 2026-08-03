@@ -1242,3 +1242,101 @@ async def send_web_push_notification(data: SendPushNotificationSchema, db: Async
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error enviando push VAPID: {str(e)}")
+
+
+# ------------------------------------------------------------
+# CENTRAL TICKET & REALTIME NOTIFICATION ENDPOINTS
+# ------------------------------------------------------------
+SHARED_TICKETS_STORE = [
+    {
+        "id": "#TK-8842",
+        "tipo": "Siniestro",
+        "asunto": "Falta reporte policial para siniestro de flota camionera.",
+        "prioridad": "Alta",
+        "estado": "Falta Doc.",
+        "asignado": "Marta García",
+        "asignadoInitials": "MG",
+        "tiempo": "12m ago",
+        "pas": "Gonzalo Paso",
+        "pasMatricula": "86992",
+        "polizaRef": "5-894210-242193",
+        "notasInternal": ["Mesa Operativa: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura."]
+    },
+    {
+        "id": "#TK-8839",
+        "tipo": "Endoso",
+        "asunto": "Cambio de titularidad y modificación de CBU para cobro automático.",
+        "prioridad": "Media",
+        "estado": "En Proceso",
+        "asignado": "Carlos Pires",
+        "asignadoInitials": "CP",
+        "tiempo": "45m ago",
+        "pas": "Carlos Benítez",
+        "pasMatricula": "74129",
+        "polizaRef": "20027144800",
+        "notasInternal": ["Verificado CBU en AFIP."]
+    },
+    {
+        "id": "#TK-8835",
+        "tipo": "Alta",
+        "asunto": "Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.",
+        "prioridad": "Alta",
+        "estado": "Abierto",
+        "asignado": "Lucía Fernández",
+        "asignadoInitials": "LF",
+        "tiempo": "1h ago",
+        "pas": "Gonzalo Paso",
+        "pasMatricula": "86992",
+        "polizaRef": "5-302194-950723",
+        "notasInternal": []
+    },
+    {
+        "id": "#TK-8820",
+        "tipo": "Facturación",
+        "asunto": "Consulta sobre desglose de liquidación de comisiones quincena Mayo.",
+        "prioridad": "Baja",
+        "estado": "Cerrado",
+        "asignado": "Roberto Gómez",
+        "asignadoInitials": "RG",
+        "tiempo": "3h ago",
+        "pas": "Gonzalo Paso",
+        "pasMatricula": "86992",
+        "notasInternal": ["Liquidación enviada en formato PDF firmado."]
+    },
+    {
+        "id": "#TK-8812",
+        "tipo": "Endoso",
+        "asunto": "Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.",
+        "prioridad": "Crítica",
+        "estado": "Abierto",
+        "asignado": "Marta García",
+        "asignadoInitials": "MG",
+        "tiempo": "4h ago",
+        "pas": "Juan Pérez",
+        "pasMatricula": "91234",
+        "notasInternal": []
+    }
+]
+
+import time
+
+PENDING_REALTIME_ALERTS = []
+
+@app.get("/api/v1/tickets", tags=["Tickets"])
+async def get_tickets():
+    global SHARED_TICKETS_STORE, PENDING_REALTIME_ALERTS
+    now = time.time()
+    # Mantener alertas durante 15 segundos para que todas las pestañas/ventanas las reciban sin consumirlas prematuramente
+    PENDING_REALTIME_ALERTS = [a for a in PENDING_REALTIME_ALERTS if (now - a.get("created_at", now)) < 15]
+    return {"tickets": SHARED_TICKETS_STORE, "pending_alerts": PENDING_REALTIME_ALERTS}
+
+@app.post("/api/v1/tickets", tags=["Tickets"])
+async def update_tickets(payload: dict):
+    global SHARED_TICKETS_STORE, PENDING_REALTIME_ALERTS
+    if "tickets" in payload:
+        SHARED_TICKETS_STORE = payload["tickets"]
+    if "alert" in payload:
+        alert_data = payload["alert"]
+        alert_data["created_at"] = time.time()
+        PENDING_REALTIME_ALERTS.append(alert_data)
+    return {"success": True, "tickets": SHARED_TICKETS_STORE}

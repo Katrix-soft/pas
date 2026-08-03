@@ -2,241 +2,237 @@ import { Component, signal, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from './services/auth.service';
+import { PushNotificationService } from './services/push-notification.service';
+
+export interface Ticket {
+  id: string;
+  tipo: 'Siniestro' | 'Endoso' | 'Alta' | 'Facturación' | 'Consulta';
+  asunto: string;
+  prioridad: 'Crítica' | 'Alta' | 'Media' | 'Baja';
+  estado: 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado';
+  asignado: string;
+  asignadoInitials: string;
+  tiempo: string;
+  pas: string;
+  pasMatricula: string;
+  polizaRef?: string;
+  notasInternal?: string[];
+}
+
+export interface ProducerStats {
+  id: string;
+  nombre: string;
+  region: string;
+  avatar: string;
+  ticketsResueltos: number;
+  porcentaje: number;
+  tiempoRespuesta: string;
+  satisfaccion: string;
+  carteraTotal: string;
+  matricula: string;
+  email: string;
+  telefono: string;
+}
+
+const DEFAULT_TICKETS: Ticket[] = [
+  {
+    id: '#TK-8842',
+    tipo: 'Siniestro',
+    asunto: 'Falta reporte policial para siniestro de flota camionera.',
+    prioridad: 'Alta',
+    estado: 'Falta Doc.',
+    asignado: 'Marta García',
+    asignadoInitials: 'MG',
+    tiempo: '12m ago',
+    pas: 'Gonzalo Paso',
+    pasMatricula: '86992',
+    polizaRef: '5-894210-242193',
+    notasInternal: ['Mesa Operativa: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura.']
+  },
+  {
+    id: '#TK-8839',
+    tipo: 'Endoso',
+    asunto: 'Cambio de titularidad y modificación de CBU para cobro automático.',
+    prioridad: 'Media',
+    estado: 'En Proceso',
+    asignado: 'Carlos Pires',
+    asignadoInitials: 'CP',
+    tiempo: '45m ago',
+    pas: 'Carlos Benítez',
+    pasMatricula: '74129',
+    polizaRef: '20027144800',
+    notasInternal: ['Verificado CBU en AFIP.']
+  },
+  {
+    id: '#TK-8835',
+    tipo: 'Alta',
+    asunto: 'Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.',
+    prioridad: 'Alta',
+    estado: 'Abierto',
+    asignado: 'Lucía Fernández',
+    asignadoInitials: 'LF',
+    tiempo: '1h ago',
+    pas: 'Gonzalo Paso',
+    pasMatricula: '86992',
+    polizaRef: '5-302194-950723',
+    notasInternal: []
+  },
+  {
+    id: '#TK-8820',
+    tipo: 'Facturación',
+    asunto: 'Consulta sobre desglose de liquidación de comisiones quincena Mayo.',
+    prioridad: 'Baja',
+    estado: 'Cerrado',
+    asignado: 'Roberto Gómez',
+    asignadoInitials: 'RG',
+    tiempo: '3h ago',
+    pas: 'Gonzalo Paso',
+    pasMatricula: '86992',
+    notasInternal: ['Liquidación enviada en formato PDF firmado.']
+  },
+  {
+    id: '#TK-8812',
+    tipo: 'Endoso',
+    asunto: 'Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.',
+    prioridad: 'Crítica',
+    estado: 'Abierto',
+    asignado: 'Marta García',
+    asignadoInitials: 'MG',
+    tiempo: '4h ago',
+    pas: 'Juan Pérez',
+    pasMatricula: '91234',
+    notasInternal: []
+  }
+];
 
 @Component({
   selector: 'lib-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, HttpClientModule],
+  imports: [CommonModule, RouterLink, HttpClientModule, FormsModule],
   template: `
     @if (isLoading()) {
 
     <div class="text-on-surface font-body-md bg-background min-h-screen">
-      <!-- Main Content Area -->
+      <!-- Main Content Area Skeleton -->
       <main class="min-h-screen px-container-margin pb-24 md:pb-8 pt-lg">
-        <!-- Dashboard Header / Welcome Skeleton -->
         <div class="mb-xl">
           <div class="skeleton h-8 w-48 rounded-lg mb-sm"></div>
           <div class="skeleton h-4 w-64 rounded-lg"></div>
         </div>
 
-        <!-- KPI Bento Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl">
-          <!-- Card: Premio Administrado -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-md mb-xl">
           <div class="bg-surface-container-lowest p-md rounded-xl card-accent-blue shadow-sm">
-            <div class="flex justify-between items-start mb-sm">
-              <div class="skeleton h-4 w-32 rounded-md"></div>
-              <div class="skeleton h-6 w-12 rounded-full"></div>
-            </div>
-            <div class="skeleton h-10 w-40 rounded-lg mb-xs"></div>
-            <div class="skeleton h-4 w-24 rounded-md"></div>
+            <div class="skeleton h-10 w-20 rounded-lg mb-xs"></div>
           </div>
-
-          <!-- Card: Clientes -->
-          <div class="bg-surface-container-lowest p-md rounded-xl card-accent-green shadow-sm">
-            <div class="flex justify-between items-start mb-sm">
-              <div class="skeleton h-4 w-24 rounded-md"></div>
-              <div class="skeleton h-6 w-12 rounded-full"></div>
-            </div>
-            <div class="skeleton h-10 w-24 rounded-lg mb-xs"></div>
-            <div class="skeleton h-4 w-32 rounded-md"></div>
+          <div class="bg-surface-container-lowest p-md rounded-xl card-accent-orange shadow-sm">
+            <div class="skeleton h-10 w-20 rounded-lg mb-xs"></div>
           </div>
-
-          <!-- Card: Pólizas con Deuda -->
           <div class="bg-surface-container-lowest p-md rounded-xl card-accent-red shadow-sm">
-            <div class="flex justify-between items-start mb-sm">
-              <div class="skeleton h-4 w-40 rounded-md"></div>
-              <span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
-            </div>
-            <div class="skeleton h-10 w-16 rounded-lg mb-xs"></div>
-            <div class="skeleton h-4 w-48 rounded-md"></div>
+            <div class="skeleton h-10 w-20 rounded-lg mb-xs"></div>
           </div>
-        </div>
-
-        <!-- Charts and Lists Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg">
-          <!-- Distribution Chart Placeholder -->
-          <div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant">
-            <div class="flex items-center justify-between mb-lg">
-              <div class="skeleton h-6 w-48 rounded-md"></div>
-              <div class="skeleton h-6 w-6 rounded-full"></div>
-            </div>
-            <div class="flex flex-col items-center justify-center py-xl">
-              <!-- Circular Chart Skeleton -->
-              <div class="relative w-48 h-48 rounded-full border-[16px] border-surface-container-low flex items-center justify-center">
-                <div class="skeleton h-12 w-24 rounded-lg"></div>
-              </div>
-              <!-- Legend Skeletons -->
-              <div class="grid grid-cols-2 gap-md mt-lg w-full">
-                <div class="flex items-center gap-sm">
-                  <div class="skeleton w-3 h-3 rounded-full"></div>
-                  <div class="skeleton h-4 w-20 rounded-md"></div>
-                </div>
-                <div class="flex items-center gap-sm">
-                  <div class="skeleton w-3 h-3 rounded-full"></div>
-                  <div class="skeleton h-4 w-20 rounded-md"></div>
-                </div>
-                <div class="flex items-center gap-sm">
-                  <div class="skeleton w-3 h-3 rounded-full"></div>
-                  <div class="skeleton h-4 w-20 rounded-md"></div>
-                </div>
-                <div class="flex items-center gap-sm">
-                  <div class="skeleton w-3 h-3 rounded-full"></div>
-                  <div class="skeleton h-4 w-20 rounded-md"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Companies List Placeholder -->
-          <div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant">
-            <div class="flex items-center justify-between mb-lg">
-              <div class="skeleton h-6 w-40 rounded-md"></div>
-              <div class="skeleton h-4 w-16 rounded-md"></div>
-            </div>
-            <div class="space-y-md">
-              <!-- Company Row 1 -->
-              <div class="flex items-center justify-between p-sm border-b border-surface-container">
-                <div class="flex items-center gap-md">
-                  <div class="skeleton w-10 h-10 rounded-lg"></div>
-                  <div class="space-y-xs">
-                    <div class="skeleton h-4 w-32 rounded-md"></div>
-                    <div class="skeleton h-3 w-20 rounded-md"></div>
-                  </div>
-                </div>
-                <div class="skeleton h-5 w-16 rounded-md"></div>
-              </div>
-              <!-- Company Row 2 -->
-              <div class="flex items-center justify-between p-sm border-b border-surface-container">
-                <div class="flex items-center gap-md">
-                  <div class="skeleton w-10 h-10 rounded-lg"></div>
-                  <div class="space-y-xs">
-                    <div class="skeleton h-4 w-24 rounded-md"></div>
-                    <div class="skeleton h-3 w-16 rounded-md"></div>
-                  </div>
-                </div>
-                <div class="skeleton h-5 w-16 rounded-md"></div>
-              </div>
-              <!-- Company Row 3 -->
-              <div class="flex items-center justify-between p-sm border-b border-surface-container">
-                <div class="flex items-center gap-md">
-                  <div class="skeleton w-10 h-10 rounded-lg"></div>
-                  <div class="space-y-xs">
-                    <div class="skeleton h-4 w-36 rounded-md"></div>
-                    <div class="skeleton h-3 w-24 rounded-md"></div>
-                  </div>
-                </div>
-                <div class="skeleton h-5 w-16 rounded-md"></div>
-              </div>
-              <!-- Company Row 4 -->
-              <div class="flex items-center justify-between p-sm">
-                <div class="flex items-center gap-md">
-                  <div class="skeleton w-10 h-10 rounded-lg"></div>
-                  <div class="space-y-xs">
-                    <div class="skeleton h-4 w-28 rounded-md"></div>
-                    <div class="skeleton h-3 w-20 rounded-md"></div>
-                  </div>
-                </div>
-                <div class="skeleton h-5 w-16 rounded-md"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Activity Skeleton -->
-        <div class="mt-lg bg-surface-container-lowest p-lg rounded-xl border border-outline-variant">
-          <div class="skeleton h-6 w-32 rounded-md mb-lg"></div>
-          <div class="space-y-md">
-            <div class="flex items-center gap-md p-xs">
-              <div class="skeleton w-2 h-2 rounded-full"></div>
-              <div class="skeleton h-4 flex-1 rounded-md"></div>
-              <div class="skeleton h-4 w-12 rounded-md"></div>
-            </div>
-            <div class="flex items-center gap-md p-xs">
-              <div class="skeleton w-2 h-2 rounded-full"></div>
-              <div class="skeleton h-4 flex-1 rounded-md"></div>
-              <div class="skeleton h-4 w-12 rounded-md"></div>
-            </div>
-            <div class="flex items-center gap-md p-xs">
-              <div class="skeleton w-2 h-2 rounded-full"></div>
-              <div class="skeleton h-4 flex-1 rounded-md"></div>
-              <div class="skeleton h-4 w-12 rounded-md"></div>
-            </div>
+          <div class="bg-surface-container-lowest p-md rounded-xl card-accent-green shadow-sm">
+            <div class="skeleton h-10 w-20 rounded-lg mb-xs"></div>
           </div>
         </div>
       </main>
     </div>
+
     } @else if (isError()) {
 
-    <div class="bg-background text-on-background min-h-screen flex flex-col md:flex-row overflow-x-hidden">
-      <!-- Main Content Canvas -->
-      <main class="flex-1 flex flex-col items-center justify-center p-md lg:p-xl mb-16 md:mb-0 bg-background relative w-full overflow-hidden">
-
-
-        <!-- Background Decoration (Subtle Gradients) -->
-        <div class="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
-          <div class="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-surface-container-high rounded-full blur-[100px]"></div>
-          <div class="absolute -bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-primary-fixed-dim rounded-full blur-[100px]"></div>
+    <div class="bg-background text-on-background min-h-screen flex flex-col items-center justify-center p-md">
+      <div class="max-w-xl w-full flex flex-col items-center text-center">
+        <div class="relative mb-lg">
+          <div class="relative bg-surface-container-lowest border border-error-container shadow-lg rounded-full p-xl flex items-center justify-center error-shake">
+            <span class="material-symbols-outlined text-[80px] text-error">error</span>
+          </div>
         </div>
-
-        <!-- Error Container -->
-        <div class="max-w-xl w-full flex flex-col items-center text-center z-10 mt-12 md:mt-0">
-          <!-- Illustration / Icon Area -->
-          <div class="relative mb-lg">
-            <!-- Inner glow effect -->
-            <div class="absolute inset-0 bg-error-container blur-2xl opacity-40 rounded-full animate-pulse"></div>
-            <div class="relative bg-surface-container-lowest border border-error-container shadow-lg rounded-full p-xl flex items-center justify-center error-shake" [class.animate-none]="isRetrying()">
-              <span class="material-symbols-outlined text-[80px] text-error" style="font-variation-settings: 'FILL' 1;">error</span>
-            </div>
-          </div>
-
-          <!-- Error Messaging -->
-          <div class="space-y-md mb-xl">
-            <h2 class="font-headline-lg text-headline-lg text-on-background">¡Vaya! Algo salió mal</h2>
-            <p class="font-body-lg text-on-surface-variant px-md">
-              No pudimos sincronizar los datos de tu cartera de seguros en este momento. Por favor, verifica tu conexión o intenta nuevamente.
-            </p>
-            <div class="inline-flex items-center gap-sm px-md py-xs bg-error-container text-on-error-container rounded-full text-label-md font-label-md">
-              <span class="material-symbols-outlined text-sm">wifi_off</span>
-              Código de error: ERR_DATA_FETCH_TIMEOUT
-            </div>
-          </div>
-
-          <!-- Action Area -->
-          <div class="flex flex-col sm:flex-row items-center gap-md">
-            <button (click)="simulateReload()" [disabled]="isRetrying()" class="flex items-center gap-sm px-xl py-md bg-primary text-on-primary rounded-xl font-headline-sm text-headline-sm shadow-md hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed">
-              <span class="material-symbols-outlined" [class.animate-spin]="isRetrying()">refresh</span>
-              <span>{{ isRetrying() ? 'Cargando...' : 'Reintentar carga' }}</span>
-            </button>
-            <button class="px-xl py-md bg-transparent border border-outline-variant text-primary rounded-xl font-headline-sm text-headline-sm hover:bg-surface-container-low transition-colors">
-              Contactar soporte
-            </button>
-          </div>
-
-          <!-- Footer Details (Optional context) -->
-          <p class="mt-xl font-body-sm text-on-surface-variant opacity-60">
-            Último intento: hace 2 minutos
-          </p>
-        </div>
-      </main>
+        <h2 class="font-bold text-2xl mb-2">Error de Sincronización</h2>
+        <p class="text-on-surface-variant mb-6">No pudimos conectar con los servicios centrales.</p>
+        <button (click)="simulateReload()" class="px-6 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2">
+          <span class="material-symbols-outlined" [class.animate-spin]="isRetrying()">refresh</span>
+          Reintentar Carga
+        </button>
+      </div>
     </div>
 
     } @else {
 
-    <div class="font-body-md text-on-background min-h-screen bg-background flex flex-col w-full">
+    <div class="font-body-md text-on-background min-h-screen bg-background flex flex-col w-full relative">
+      
+      <!-- BANNER EMERGENTE PUSH-POP ESTILO WHATSAPP DE ALERTA PUSH (VISTA PAS Y ADMIN) -->
+      <div *ngIf="pushService.activeToast()" class="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10">
+        <div class="w-11 h-11 rounded-2xl bg-[#25d366]/20 text-[#25d366] border border-[#25d366]/40 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+          <span class="material-symbols-outlined text-2xl">{{ pushService.activeToast()?.icon || 'notifications_active' }}</span>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-black text-[#25d366] uppercase tracking-wider bg-[#25d366]/10 px-2 py-0.5 rounded border border-[#25d366]/20">
+              {{ pushService.activeToast()?.remitente || 'JC PAS MESA OPERATIVA' }}
+            </span>
+            <span class="text-[10px] text-white/50 font-semibold">{{ pushService.activeToast()?.hora }}</span>
+          </div>
+
+          <h4 class="font-extrabold text-xs sm:text-sm text-white mt-1 leading-snug">{{ pushService.activeToast()?.titulo }}</h4>
+          <p class="text-xs text-white/80 mt-0.5 leading-relaxed">{{ pushService.activeToast()?.mensaje }}</p>
+          
+          <div class="mt-2.5 flex items-center gap-2">
+            <button (click)="pushService.descartarToast()" class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer">
+              Entendido
+            </button>
+          </div>
+        </div>
+
+        <button (click)="pushService.descartarToast()" class="text-white/40 hover:text-white p-1 rounded-lg shrink-0 cursor-pointer">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
+      <!-- Toast Notification Alert (Solo visible para el destinatario PAS) -->
+      <div *ngIf="toastMessage()" class="fixed top-20 right-5 z-[9999] bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined text-lg">check_circle</span>
+        </div>
+        <span class="text-sm font-semibold">{{ toastMessage() }}</span>
+        <button (click)="toastMessage.set(null)" class="text-white/60 hover:text-white ml-2">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
       <!-- Main Content Area -->
       <main class="flex-1 flex flex-col pb-24 md:pb-lg w-full overflow-x-hidden">
-        <!-- TopAppBar -->
-        <header class="sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-4 py-3 w-full shadow-xs">
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold text-base sm:text-lg text-primary tracking-tight">Métricas de Gestión</h1>
+        
+        <!-- Top Header Bar -->
+        <header class="sticky top-0 z-40 bg-surface/95 dark:bg-on-background/95 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-4 md:px-8 py-3 w-full shadow-xs">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-2xl">{{ role() === 'admin' ? 'admin_panel_settings' : 'dashboard' }}</span>
+            <div>
+              <h1 class="font-black text-base sm:text-lg text-primary tracking-tight">Métricas de Gestión</h1>
+              <p class="text-[11px] text-on-surface-variant font-medium hidden sm:block">
+                {{ role() === 'admin' ? 'Control de Trámites & Operaciones Centralizadoras' : 'Panel Principal de Productor de Seguros (PAS)' }}
+              </p>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <div routerLink="/perfil" class="w-8 h-8 rounded-full border-2 border-primary-fixed overflow-hidden cursor-pointer shrink-0">
+
+          <div class="flex items-center gap-3">
+            <!-- Period Selector -->
+            <div class="relative">
+              <select [(ngModel)]="selectedPeriod" (change)="showToast('Período actualizado: ' + selectedPeriod())"
+                      class="bg-surface-container-low border border-outline-variant text-on-surface text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer focus:outline-none focus:border-primary">
+                <option value="Junio 2026">Junio 2026</option>
+                <option value="Mayo 2026">Mayo 2026</option>
+                <option value="Abril 2026">Abril 2026</option>
+              </select>
+            </div>
+
+            <!-- Profile Avatar & Direct Logout -->
+            <div routerLink="/perfil" class="w-8 h-8 rounded-full border-2 border-primary-fixed overflow-hidden cursor-pointer shrink-0 shadow-xs" title="Mi Perfil">
               <img class="w-full h-full object-cover" alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0">
             </div>
             
-            <button routerLink="/login" class="hidden md:flex items-center gap-xs ml-2 p-1.5 text-error hover:bg-error-container rounded-full transition-all cursor-pointer" title="Cerrar Sesión">
+            <button routerLink="/login" class="hidden md:flex items-center justify-center w-8 h-8 text-error hover:bg-error-container/20 rounded-full transition-all cursor-pointer" title="Cerrar Sesión">
               <span class="material-symbols-outlined text-lg">logout</span>
             </button>
           </div>
@@ -244,175 +240,326 @@ import { AuthService } from './services/auth.service';
 
         @if (role() === 'admin') {
           <!-- VISTA ADMINISTRADOR -->
-          <section class="p-container-margin md:p-lg space-y-lg pb-24">
-            <!-- Welcome Section -->
-            <div class="flex justify-between items-end mb-base">
+          <section class="p-container-margin md:p-lg space-y-lg pb-24 max-w-7xl mx-auto w-full">
+            
+            <!-- Welcome Header & Quick Action Buttons -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-base border-b border-outline-variant/40 pb-4">
               <div>
-                <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Panel Administrativo</h2>
-                <p class="text-body-md text-on-surface-variant mt-1">Control centralizado de trámites y tickets operativos.</p>
+                <div class="flex items-center gap-2">
+                  <h2 class="font-extrabold text-xl sm:text-2xl text-on-surface">Panel Administrativo</h2>
+                  <span class="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-indigo-500/20 uppercase tracking-wider">Centro Operativo JC</span>
+                </div>
+                <p class="text-xs sm:text-sm text-on-surface-variant mt-1 font-medium">Supervisión en tiempo real de endosos, siniestros y solicitudes de PAS.</p>
               </div>
-              <span class="text-label-md font-label-md text-primary bg-primary-fixed px-2 py-1 rounded-full">Junio 2026</span>
-            </div>
 
-            <!-- Gestión de Tickets (Counters) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl">
-              <div class="premium-card rounded-xl p-md left-accent-blue cursor-pointer">
-                <p class="text-label-md font-label-md text-on-surface-variant mb-1">Abiertos</p>
-                <div class="flex justify-between items-end">
-                  <h4 class="font-headline-md text-headline-md text-on-surface">124</h4>
-                  <span class="material-symbols-outlined text-primary">mail</span>
-                </div>
-              </div>
-              <div class="premium-card rounded-xl p-md left-accent-orange cursor-pointer">
-                <p class="text-label-md font-label-md text-on-surface-variant mb-1">En Proceso</p>
-                <div class="flex justify-between items-end">
-                  <h4 class="font-headline-md text-headline-md text-on-surface">56</h4>
-                  <span class="material-symbols-outlined text-tertiary">pending_actions</span>
-                </div>
-              </div>
-              <div class="premium-card rounded-xl p-md left-accent-red cursor-pointer">
-                <p class="text-label-md font-label-md text-on-surface-variant mb-1">Falta Doc.</p>
-                <div class="flex justify-between items-end">
-                  <h4 class="font-headline-md text-headline-md text-on-surface">18</h4>
-                  <span class="material-symbols-outlined text-error">description</span>
-                </div>
-              </div>
-              <div class="premium-card rounded-xl p-md left-accent-green cursor-pointer">
-                <p class="text-label-md font-label-md text-on-surface-variant mb-1">Cerrados (Hoy)</p>
-                <div class="flex justify-between items-end">
-                  <h4 class="font-headline-md text-headline-md text-on-surface">42</h4>
-                  <span class="material-symbols-outlined text-secondary">check_circle</span>
-                </div>
+              <!-- Quick Action Toolbar -->
+              <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <button (click)="openNewTicketModal()" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary text-on-primary font-bold text-xs px-4 py-2.5 rounded-xl hover:bg-primary-container transition-all shadow-sm cursor-pointer active:scale-95">
+                  <span class="material-symbols-outlined text-base">add_box</span>
+                  <span>Nuevo Ticket</span>
+                </button>
+
+                <button (click)="exportReport()" class="flex items-center justify-center gap-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs px-3.5 py-2.5 rounded-xl border border-outline-variant transition-colors cursor-pointer" title="Exportar reporte de gestión">
+                  <span class="material-symbols-outlined text-base">download</span>
+                  <span class="hidden sm:inline">Exportar Excel</span>
+                </button>
               </div>
             </div>
 
-            <!-- Dashboard Columns: Salud Operativa & Tickets Recientes -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl mb-xl">
-              <!-- Salud Operativa (Administrative Focus) -->
-              <div>
-                <div class="flex items-center gap-sm mb-md">
-                  <span class="material-symbols-outlined text-error">notification_important</span>
-                  <h3 class="font-headline-sm text-headline-sm text-on-surface">Alertas Administrativas</h3>
+            <!-- Interactive KPI Stat Cards (Counter Filters) -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Estado Global de Trámites</span>
+                <span *ngIf="activeStatusFilter() !== 'all'" (click)="setStatusFilter('all')" class="text-xs text-primary font-bold hover:underline cursor-pointer">
+                  Limpiar Filtro (Ver Todos) ✕
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl">
+                <!-- Abiertos -->
+                <div (click)="setStatusFilter('Abierto')" 
+                     class="premium-card rounded-xl p-md left-accent-blue cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                     [class.ring-2]="activeStatusFilter() === 'Abierto'"
+                     [class.ring-primary]="activeStatusFilter() === 'Abierto'">
+                  <p class="text-label-md font-label-md text-on-surface-variant mb-1 flex items-center justify-between">
+                    <span>Abiertos</span>
+                    <span class="text-[10px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded font-bold">Total</span>
+                  </p>
+                  <div class="flex justify-between items-end">
+                    <h4 class="font-black text-2xl sm:text-3xl text-on-surface">{{ countByStatus('Abierto') }}</h4>
+                    <span class="material-symbols-outlined text-primary text-2xl">mail</span>
+                  </div>
                 </div>
+
+                <!-- En Proceso -->
+                <div (click)="setStatusFilter('En Proceso')" 
+                     class="premium-card rounded-xl p-md left-accent-orange cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                     [class.ring-2]="activeStatusFilter() === 'En Proceso'"
+                     [class.ring-amber-500]="activeStatusFilter() === 'En Proceso'">
+                  <p class="text-label-md font-label-md text-on-surface-variant mb-1 flex items-center justify-between">
+                    <span>En Proceso</span>
+                    <span class="text-[10px] bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded font-bold">Asignados</span>
+                  </p>
+                  <div class="flex justify-between items-end">
+                    <h4 class="font-black text-2xl sm:text-3xl text-on-surface">{{ countByStatus('En Proceso') }}</h4>
+                    <span class="material-symbols-outlined text-amber-500 text-2xl">pending_actions</span>
+                  </div>
+                </div>
+
+                <!-- Falta Doc -->
+                <div (click)="setStatusFilter('Falta Doc.')" 
+                     class="premium-card rounded-xl p-md left-accent-red cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                     [class.ring-2]="activeStatusFilter() === 'Falta Doc.'"
+                     [class.ring-error]="activeStatusFilter() === 'Falta Doc.'">
+                  <p class="text-label-md font-label-md text-on-surface-variant mb-1 flex items-center justify-between">
+                    <span>Falta Doc.</span>
+                    <span class="text-[10px] bg-red-500/10 text-red-600 px-1.5 py-0.5 rounded font-bold">Requeridos</span>
+                  </p>
+                  <div class="flex justify-between items-end">
+                    <h4 class="font-black text-2xl sm:text-3xl text-on-surface">{{ countByStatus('Falta Doc.') }}</h4>
+                    <span class="material-symbols-outlined text-error text-2xl">description</span>
+                  </div>
+                </div>
+
+                <!-- Cerrados (Hoy) -->
+                <div (click)="setStatusFilter('Cerrado')" 
+                     class="premium-card rounded-xl p-md left-accent-green cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                     [class.ring-2]="activeStatusFilter() === 'Cerrado'"
+                     [class.ring-emerald-500]="activeStatusFilter() === 'Cerrado'">
+                  <p class="text-label-md font-label-md text-on-surface-variant mb-1 flex items-center justify-between">
+                    <span>Cerrados (Hoy)</span>
+                    <span class="text-[10px] bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded font-bold">Listos</span>
+                  </p>
+                  <div class="flex justify-between items-end">
+                    <h4 class="font-black text-2xl sm:text-3xl text-on-surface">{{ countByStatus('Cerrado') }}</h4>
+                    <span class="material-symbols-outlined text-emerald-600 text-2xl">check_circle</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Administrative Alerts & Tickets Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-xl mb-xl">
+              
+              <!-- Left Column (1 col): Administrative Alerts -->
+              <div class="lg:col-span-1 space-y-md">
+                <div class="flex items-center justify-between mb-sm">
+                  <div class="flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-error text-xl">notification_important</span>
+                    <h3 class="font-extrabold text-base text-on-surface">Alertas Administrativas</h3>
+                  </div>
+                  <span class="text-[11px] font-bold bg-error/10 text-error px-2 py-0.5 rounded-full">Acción Requerida</span>
+                </div>
+
+                <!-- Alert Item 1: Endosos Críticos -->
+                <div (click)="openAlertModal('endosos')" 
+                     class="premium-card rounded-xl p-md bg-error-container/10 border-error/30 hover:border-error flex items-center gap-md cursor-pointer hover:bg-error-container/20 transition-all group">
+                  <div class="w-10 h-10 rounded-2xl bg-error/10 border border-error/20 flex items-center justify-center text-error shrink-0">
+                    <span class="material-symbols-outlined">priority_high</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-black text-on-surface">8 Endosos Críticos</p>
+                      <span class="text-[9px] bg-error text-white font-extrabold px-1.5 py-0.5 rounded">Urgente</span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-0.5 truncate">Requieren firma digital inmediata para emisión.</p>
+                  </div>
+                  <span class="material-symbols-outlined text-outline group-hover:text-error group-hover:translate-x-1 transition-all">chevron_right</span>
+                </div>
+
+                <!-- Alert Item 2: Altas Pendientes -->
+                <div (click)="openAlertModal('altas')" 
+                     class="premium-card rounded-xl p-md bg-secondary-container/10 border-secondary/30 hover:border-secondary flex items-center gap-md cursor-pointer hover:bg-secondary-container/20 transition-all group">
+                  <div class="w-10 h-10 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                    <span class="material-symbols-outlined">task</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-black text-on-surface">15 Altas Pendientes</p>
+                      <span class="text-[9px] bg-secondary text-white font-extrabold px-1.5 py-0.5 rounded">Revisión</span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-0.5 truncate">En espera de validación de identidad técnica.</p>
+                  </div>
+                  <span class="material-symbols-outlined text-outline group-hover:text-secondary group-hover:translate-x-1 transition-all">chevron_right</span>
+                </div>
+
+                <!-- Alert Item 3: Liquidaciones Comisiones PAS -->
+                <div (click)="showToast('Panel de Liquidación Abierto')" 
+                     class="premium-card rounded-xl p-md bg-amber-500/10 border-amber-500/30 hover:border-amber-500 flex items-center gap-md cursor-pointer hover:bg-amber-500/20 transition-all group">
+                  <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 shrink-0">
+                    <span class="material-symbols-outlined">payments</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-black text-on-surface">Liquidación Quincenal</p>
+                    <p class="text-xs text-on-surface-variant mt-0.5 truncate">32 recibos de comisiones pendientes de aprobación.</p>
+                  </div>
+                  <span class="material-symbols-outlined text-outline group-hover:text-amber-500 group-hover:translate-x-1 transition-all">chevron_right</span>
+                </div>
+              </div>
+
+              <!-- Right Column (2 cols): Urgent Tickets & Search -->
+              <div class="lg:col-span-2 space-y-md">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-sm">
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-extrabold text-base text-on-surface">Tickets Operativos & Urgentes</h3>
+                    <span class="text-xs text-on-surface-variant font-bold">({{ filteredTickets().length }} de {{ tickets().length }})</span>
+                  </div>
+
+                  <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative flex-1 sm:w-64">
+                      <span class="material-symbols-outlined absolute left-2.5 top-2 text-outline text-base">search</span>
+                      <input type="text" [(ngModel)]="ticketSearchQuery" placeholder="Buscar por #TK, PAS o asunto..."
+                             class="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-8 pr-3 py-1.5 text-xs text-on-surface focus:outline-none focus:border-primary">
+                    </div>
+
+                    <a routerLink="/ticketera/kanban" class="text-xs font-extrabold text-primary hover:underline shrink-0 whitespace-nowrap">
+                      Ver Kanban →
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
+                  <button (click)="setStatusFilter('all')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
+                          [ngClass]="activeStatusFilter() === 'all' ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    Todos ({{ tickets().length }})
+                  </button>
+                  <button (click)="setStatusFilter('Abierto')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
+                          [ngClass]="activeStatusFilter() === 'Abierto' ? 'bg-blue-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    Abiertos ({{ countByStatus('Abierto') }})
+                  </button>
+                  <button (click)="setStatusFilter('En Proceso')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
+                          [ngClass]="activeStatusFilter() === 'En Proceso' ? 'bg-amber-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    En Proceso ({{ countByStatus('En Proceso') }})
+                  </button>
+                  <button (click)="setStatusFilter('Falta Doc.')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
+                          [ngClass]="activeStatusFilter() === 'Falta Doc.' ? 'bg-red-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    Falta Doc ({{ countByStatus('Falta Doc.') }})
+                  </button>
+                  <button (click)="setStatusFilter('Cerrado')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
+                          [ngClass]="activeStatusFilter() === 'Cerrado' ? 'bg-emerald-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    Cerrados ({{ countByStatus('Cerrado') }})
+                  </button>
+                </div>
+
+                <!-- Ticket List Container -->
                 <div class="space-y-sm">
-                  <!-- Administrative Task 1 -->
-                  <div class="premium-card rounded-xl p-md bg-error-container/10 border-error/20 flex items-center gap-md cursor-pointer hover:bg-error-container/20">
-                    <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error">
-                      <span class="material-symbols-outlined">priority_high</span>
+                  @for (t of filteredTickets(); track t.id) {
+                    <div (click)="openTicketDetail(t)" 
+                         class="premium-card rounded-xl p-md flex flex-col gap-sm cursor-pointer hover:shadow-md transition-all border-l-4 group"
+                         [ngClass]="{
+                           'border-l-blue-600': t.estado === 'Abierto',
+                           'border-l-amber-500': t.estado === 'En Proceso',
+                           'border-l-red-600': t.estado === 'Falta Doc.',
+                           'border-l-emerald-600': t.estado === 'Cerrado'
+                         }">
+                      
+                      <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="text-xs font-extrabold bg-surface-container px-2 py-0.5 rounded text-on-surface">{{ t.id }}</span>
+                          <span class="text-xs font-bold px-2 py-0.5 rounded-full"
+                                [ngClass]="{
+                                  'bg-red-500/10 text-red-600': t.tipo === 'Siniestro',
+                                  'bg-indigo-500/10 text-indigo-600': t.tipo === 'Endoso',
+                                  'bg-emerald-500/10 text-emerald-600': t.tipo === 'Alta',
+                                  'bg-amber-500/10 text-amber-600': t.tipo === 'Facturación'
+                                }">{{ t.tipo }}</span>
+
+                          <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase"
+                                [ngClass]="{
+                                  'bg-red-600 text-white': t.prioridad === 'Crítica',
+                                  'bg-amber-500 text-white': t.prioridad === 'Alta',
+                                  'bg-blue-500 text-white': t.prioridad === 'Media',
+                                  'bg-slate-400 text-white': t.prioridad === 'Baja'
+                                }">{{ t.prioridad }}</span>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                          <span class="text-[11px] text-outline font-bold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">schedule</span> {{ t.tiempo }}
+                          </span>
+                          <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-base">open_in_new</span>
+                        </div>
+                      </div>
+
+                      <p class="text-xs sm:text-sm text-on-surface font-semibold leading-snug">{{ t.asunto }}</p>
+
+                      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-outline-variant/40 text-xs">
+                        <div class="flex items-center gap-2">
+                          <div class="w-6 h-6 rounded-full bg-primary-container text-[10px] font-black flex items-center justify-center text-primary shrink-0">
+                            {{ t.asignadoInitials }}
+                          </div>
+                          <span class="text-on-surface-variant font-medium">Asignado: <strong>{{ t.asignado }}</strong></span>
+                        </div>
+
+                        <span class="text-outline text-[11px]">PAS: <strong>{{ t.pas }}</strong> (#{{ t.pasMatricula }})</span>
+                      </div>
                     </div>
-                    <div class="flex-1">
-                      <p class="text-body-md font-semibold text-on-surface">8 Endosos Críticos</p>
-                      <p class="text-body-sm text-on-surface-variant">Requieren firma digital inmediata para emisión.</p>
+                  } @empty {
+                    <div class="p-8 text-center bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant">
+                      <span class="material-symbols-outlined text-4xl text-outline mb-2">inbox</span>
+                      <p class="text-sm font-bold text-on-surface">No se encontraron tickets con el filtro seleccionado</p>
+                      <button (click)="setStatusFilter('all'); ticketSearchQuery.set('')" class="mt-3 text-xs text-primary font-bold underline">
+                        Restablecer filtros de búsqueda
+                      </button>
                     </div>
-                    <span class="material-symbols-outlined text-outline">chevron_right</span>
-                  </div>
-                  <!-- Administrative Task 2 -->
-                  <div class="premium-card rounded-xl p-md bg-secondary-container/10 border-secondary/20 flex items-center gap-md cursor-pointer hover:bg-secondary-container/20">
-                    <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-                      <span class="material-symbols-outlined">task</span>
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-body-md font-semibold text-on-surface">15 Altas Pendientes</p>
-                      <p class="text-body-sm text-on-surface-variant">En espera de validación de identidad técnica.</p>
-                    </div>
-                    <span class="material-symbols-outlined text-outline">chevron_right</span>
-                  </div>
+                  }
                 </div>
               </div>
 
-              <!-- Tickets Recientes/Urgentes -->
-              <div>
-                <div class="flex justify-between items-center mb-md">
-                  <h3 class="font-headline-sm text-headline-sm text-on-surface">Tickets Urgentes</h3>
-                  <button class="text-label-md font-bold text-primary hover:underline">Ver todos</button>
-                </div>
-                <div class="space-y-sm">
-                  <!-- Ticket Item 1 -->
-                  <div class="premium-card rounded-xl p-md flex flex-col gap-sm">
-                    <div class="flex justify-between items-start">
-                      <div class="flex items-center gap-2">
-                        <span class="text-label-md font-bold bg-surface-container px-2 py-0.5 rounded">#TK-8842</span>
-                        <span class="text-label-md font-medium text-tertiary">Siniestro</span>
-                      </div>
-                      <span class="text-[10px] text-error font-bold flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">schedule</span> 12m ago
-                      </span>
-                    </div>
-                    <p class="text-body-sm text-on-surface font-medium">Falta reporte policial para siniestro de flota.</p>
-                    <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-full bg-primary-container text-[10px] flex items-center justify-center text-white">MG</div>
-                      <p class="text-[12px] text-on-surface-variant">Asignado a: Marta García</p>
-                    </div>
-                  </div>
-                  <!-- Ticket Item 2 -->
-                  <div class="premium-card rounded-xl p-md flex flex-col gap-sm">
-                    <div class="flex justify-between items-start">
-                      <div class="flex items-center gap-2">
-                        <span class="text-label-md font-bold bg-surface-container px-2 py-0.5 rounded">#TK-8839</span>
-                        <span class="text-label-md font-medium text-primary">Endoso</span>
-                      </div>
-                      <span class="text-[10px] text-outline font-bold flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">schedule</span> 45m ago
-                      </span>
-                    </div>
-                    <p class="text-body-sm text-on-surface font-medium">Cambio de titularidad y medio de pago.</p>
-                    <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-full bg-secondary-container text-[10px] flex items-center justify-center text-on-secondary-container">CP</div>
-                      <p class="text-[12px] text-on-surface-variant">Asignado a: Carlos Pires</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <!-- Top Productores (Gestión Focus) -->
-            <div class="mb-xl overflow-hidden">
-              <h3 class="font-headline-sm text-headline-sm text-on-surface mb-md">Productores con Mayor Gestión</h3>
-              <div class="flex gap-md overflow-x-auto hide-scrollbar pb-2">
-                <!-- Producer Card 1 -->
-                <div class="min-w-[240px] premium-card rounded-xl p-md">
-                  <div class="flex items-center gap-md mb-md">
-                    <img alt="Marta García" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLXKTm9fdfuxX1umSqlgzvi6Cmh8jk6QYMgn4ymVmzLpzXhUIfLkZFS0QB3Kz1m5w40BHo-IGwB4Pm5jyAtc7rXXmq9m0sD8qvtsMENBYgQjfVhkUW6SNZKZneDXEI21C7F_l2m7JvDKrPNhYbQwyx9Y1LIOyBYiVCjNKAnGbOvEjVWfiRDNnu26AOFcFvb_6ewGdmWEmZuktDlEvMbefU3fDuHFmeLAbvVCNd_blC79a0iR0YRGQN5w"/>
-                    <div>
-                      <p class="text-body-md font-bold">Marta García</p>
-                      <p class="text-label-md text-on-surface-variant">Región Norte</p>
-                    </div>
-                  </div>
-                  <div class="space-y-sm">
-                    <div class="flex justify-between text-body-sm">
-                      <span class="text-on-surface-variant">Tickets Resueltos</span>
-                      <span class="font-bold">142</span>
-                    </div>
-                    <div class="w-full bg-surface-container rounded-full h-1.5">
-                      <div class="bg-primary h-1.5 rounded-full" style="width: 92%"></div>
-                    </div>
-                  </div>
+            <!-- Top Productores (Gestión Focus & Ranking) -->
+            <div class="mb-xl">
+              <div class="flex justify-between items-center mb-md">
+                <div>
+                  <h3 class="font-extrabold text-base text-on-surface">Productores con Mayor Gestión</h3>
+                  <p class="text-xs text-on-surface-variant">Rendimiento mensual y tiempo promedio de resolución de trámites.</p>
                 </div>
-                <!-- Producer Card 2 -->
-                <div class="min-w-[240px] premium-card rounded-xl p-md">
-                  <div class="flex items-center gap-md mb-md">
-                    <img alt="Carlos Pires" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnvFVytqaWCZv-TNI6ISNP3Hueq3mmKgV4P-RNPxma-vQWimrZAuOeDNQ9PVcp3lraLjCAHY3u8S3E5VQstYIH_LyCRSMDnHWQmsnFsofN_0f3tsitCG1akXwqeanWdP-MZughxm9NG0B7AewhPBSnThluUmU461TNAmT9ByPCj6X5ntIK235O1siHhHM7R0xxZkY1YkZfoeEGKFhT2VAfV1Q96vVkShYc3RyZ5n9jQPZYRWMeVIpAbQ"/>
-                    <div>
-                      <p class="text-body-md font-bold">Carlos Pires</p>
-                      <p class="text-label-md text-on-surface-variant">Región Sur</p>
+                <span class="text-xs font-bold text-primary">Ranking Regional 2026</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
+                @for (p of producers(); track p.id) {
+                  <div (click)="openProducerDetail(p)" class="premium-card rounded-xl p-md cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all group">
+                    <div class="flex items-center gap-md mb-md">
+                      <img [alt]="p.nombre" class="w-12 h-12 rounded-full object-cover border-2 border-primary-fixed shadow-xs" [src]="p.avatar"/>
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between">
+                          <p class="text-sm font-bold text-on-surface group-hover:text-primary transition-colors truncate">{{ p.nombre }}</p>
+                          <span class="text-[10px] font-black bg-indigo-500/10 text-indigo-600 px-2 py-0.5 rounded border border-indigo-500/20">PAS #{{ p.matricula }}</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant font-medium">{{ p.region }}</p>
+                      </div>
+                    </div>
+
+                    <div class="space-y-sm bg-surface-container-low p-3 rounded-lg border border-outline-variant/30">
+                      <div class="flex justify-between text-xs">
+                        <span class="text-on-surface-variant font-medium">Tickets Resueltos</span>
+                        <span class="font-black text-primary">{{ p.ticketsResueltos }}</span>
+                      </div>
+                      <div class="w-full bg-surface-container rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full transition-all duration-500" [style.width.%]="p.porcentaje"></div>
+                      </div>
+                      <div class="flex justify-between items-center pt-1 text-[11px] text-outline">
+                        <span>Tiempo prom.: <strong>{{ p.tiempoRespuesta }}</strong></span>
+                        <span class="text-emerald-600 font-bold">★ {{ p.satisfaccion }}</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="space-y-sm">
-                    <div class="flex justify-between text-body-sm">
-                      <span class="text-on-surface-variant">Tickets Resueltos</span>
-                      <span class="font-bold">118</span>
-                    </div>
-                    <div class="w-full bg-surface-container rounded-full h-1.5">
-                      <div class="bg-primary h-1.5 rounded-full" style="width: 78%"></div>
-                    </div>
-                  </div>
-                </div>
+                }
               </div>
             </div>
 
           </section>
         } @else {
-          <!-- VISTA PAS (Productor) -->
+          <!-- VISTA PRODUCTOR (PAS) COMPLETA -->
           <section class="px-4 sm:px-6 lg:px-8 py-4 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
             
             <!-- Greeting & Producer Profile Banner -->
@@ -442,10 +589,68 @@ import { AuthService } from './services/auth.service';
               </button>
             </div>
 
-            <!-- Metrics Grid -->
+            <!-- Mis Solicitudes / Tickets Operativos (PAS View) -->
+            <div class="bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-sm w-full">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <div>
+                  <h3 class="text-base sm:text-lg font-extrabold flex items-center gap-2 text-on-surface">
+                    <span class="material-symbols-outlined text-primary">confirmation_number</span>
+                    Mis Solicitudes & Trámites Operativos
+                  </h3>
+                  <p class="text-xs text-on-surface-variant">Estado en tiempo real de trámites gestionados por Mesa Operativa Central.</p>
+                </div>
+                <a routerLink="/ticket/seguimiento" class="text-xs text-primary font-bold hover:underline shrink-0">Ver todos mis tickets →</a>
+              </div>
+
+              <div class="space-y-3">
+                @for (t of pasTickets(); track t.id) {
+                  <div (click)="openTicketDetail(t)" class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:bg-surface-container transition-all group">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-black text-xs shrink-0 shadow-xs"
+                           [ngClass]="{
+                             'bg-red-500/10 text-red-600 border border-red-500/20': t.estado === 'Falta Doc.',
+                             'bg-amber-500/10 text-amber-600 border border-amber-500/20': t.estado === 'En Proceso',
+                             'bg-blue-500/10 text-blue-600 border border-blue-500/20': t.estado === 'Abierto',
+                             'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20': t.estado === 'Cerrado'
+                           }">
+                        <span>{{ t.id }}</span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <p class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary transition-colors truncate">{{ t.asunto }}</p>
+                          <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full"
+                                [ngClass]="{
+                                  'bg-red-600 text-white': t.estado === 'Falta Doc.',
+                                  'bg-amber-500 text-white': t.estado === 'En Proceso',
+                                  'bg-blue-600 text-white': t.estado === 'Abierto',
+                                  'bg-emerald-600 text-white': t.estado === 'Cerrado'
+                                }">{{ t.estado }}</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant mt-0.5 truncate">
+                          Asignado: <strong>{{ t.asignado }}</strong> • Actualizado: {{ t.tiempo }}
+                        </p>
+                        <p *ngIf="t.notasInternal && t.notasInternal.length > 0" class="text-[11px] text-amber-700 dark:text-amber-300 font-semibold mt-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 truncate">
+                          📌 Última observación: {{ t.notasInternal[0] }}
+                        </p>
+                      </div>
+                    </div>
+                    <button class="bg-primary hover:bg-primary-container text-white text-xs font-bold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs">
+                      Ver Detalle
+                    </button>
+                  </div>
+                } @empty {
+                  <div class="p-6 text-center text-xs text-outline bg-surface-container-low rounded-xl">
+                    No tenés tickets activos en este momento.
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Metrics Grid PAS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <!-- Premio Administrado -->
-              <div routerLink="/premio" class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm col-span-1 sm:col-span-2 flex flex-col justify-between hover:scale-[0.99] transition-transform cursor-pointer">
+              <div (click)="showToast('Abriendo detalle de premio administrado...')" 
+                   class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm col-span-1 sm:col-span-2 flex flex-col justify-between hover:scale-[0.99] transition-transform cursor-pointer">
                 <div class="flex justify-between items-start">
                   <div>
                     <p class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Premio Administrado (Mensual)</p>
@@ -494,7 +699,7 @@ import { AuthService } from './services/auth.service';
               </div>
             </div>
 
-            <!-- Solicitudes Quick Actions -->
+            <!-- Solicitudes Quick Actions Bar -->
             <div class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant shadow-sm w-full">
               <h3 class="text-[11px] text-on-surface-variant mb-3 font-bold uppercase tracking-widest">Gestiones Rápidas del Productor</h3>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
@@ -502,7 +707,7 @@ import { AuthService } from './services/auth.service';
                   <span class="material-symbols-outlined text-base">add_circle</span>
                   <span>Nueva Cotización / Emisión</span>
                 </button>
-                <button routerLink="/endoso" class="w-full py-2.5 px-3 rounded-xl border border-primary text-primary font-bold text-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                <button (click)="openNewTicketModal()" class="w-full py-2.5 px-3 rounded-xl border border-primary text-primary font-bold text-xs hover:bg-primary-container transition-colors flex items-center justify-center gap-2 cursor-pointer">
                   <span class="material-symbols-outlined text-base">edit_document</span>
                   <span>Solicitar Endoso</span>
                 </button>
@@ -569,7 +774,8 @@ import { AuthService } from './services/auth.service';
                 </h3>
                 <div class="grid grid-cols-1 gap-2.5">
                   <!-- Mercantil Andina -->
-                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'mercantil' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
+                  <div (click)="showToast('Filtrando cartera Mercantil Andina...')" 
+                       class="flex items-center justify-between p-3 sm:p-3.5 bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md shrink-0">
                         MA
@@ -586,7 +792,8 @@ import { AuthService } from './services/auth.service';
                   </div>
 
                   <!-- San Cristóbal -->
-                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancristobal' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+                  <div (click)="showToast('Filtrando cartera San Cristóbal...')" 
+                       class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
                         SC
@@ -600,7 +807,8 @@ import { AuthService } from './services/auth.service';
                   </div>
 
                   <!-- Sancor Seguros -->
-                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancor' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
+                  <div (click)="showToast('Filtrando cartera Sancor Seguros...')" 
+                       class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
                         SS
@@ -614,7 +822,8 @@ import { AuthService } from './services/auth.service';
                   </div>
 
                   <!-- Cooperación Seguros -->
-                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'cooperacion' }" class="flex items-center justify-between p-3 sm:p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/30 cursor-pointer hover:bg-amber-500/20 transition-all">
+                  <div (click)="showToast('Ariendo integrador Cooperación Seguros...')" 
+                       class="flex items-center justify-between p-3 sm:p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/30 cursor-pointer hover:bg-amber-500/20 transition-all">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md shrink-0">
                         CS
@@ -632,19 +841,19 @@ import { AuthService } from './services/auth.service';
               </div>
             </div>
 
-            <!-- Bento Section: Activity & Vencimientos Mercantil -->
+            <!-- Bento Section: Próximas Renovaciones Mercantil -->
             <div class="bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-sm flex flex-col w-full">
               <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                 <h3 class="text-base sm:text-lg font-bold flex items-center gap-2">
                   <span class="material-symbols-outlined text-amber-500">event_upcoming</span>
                   Próximas Renovaciones de Cartera
                 </h3>
-                <span class="text-xs font-bold text-primary">Ver todas (18 este mes)</span>
+                <span (click)="showToast('Mostrando todas las renovaciones del mes')" class="text-xs font-bold text-primary cursor-pointer hover:underline">Ver todas (18 este mes)</span>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 @for (r of renovaciones(); track r.poliza_numero) {
-                  <div [routerLink]="['/clientes/detalle']" [queryParams]="{ nombre: r.cliente, id: r.cliente_id }" class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:bg-surface-container hover:shadow-sm transition-all">
+                  <div (click)="showToast('Abriendo trámite de renovación ' + r.poliza_numero)" class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:bg-surface-container hover:shadow-sm transition-all">
                     <div class="flex items-center gap-3 min-w-0 w-full sm:w-auto">
                       <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-bold border shrink-0"
                            [ngClass]="{
@@ -674,16 +883,296 @@ import { AuthService } from './services/auth.service';
           </section>
         }
 
-        <!-- Global Footer Info (Admin & PAS) -->
+        <!-- Global Footer Info -->
         <footer class="py-6 px-4 text-center border-t border-outline-variant/40 mt-8 mb-20 md:mb-4 space-y-1">
           <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
           <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Operación Centralizada • Powered by <strong class="text-primary">Katrix</strong></p>
         </footer>
+
       </main>
+
+      <!-- ================= MODALS INTERACTIVOS ================= -->
+
+      <!-- 1. MODAL DETALLE DE TICKET -->
+      <div *ngIf="selectedTicket()" class="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          
+          <div class="flex justify-between items-start border-b border-outline-variant/40 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black bg-primary text-white px-2 py-0.5 rounded">{{ selectedTicket().id }}</span>
+                <span class="text-xs font-bold text-tertiary uppercase">{{ selectedTicket().tipo }}</span>
+              </div>
+              <h3 class="font-extrabold text-base sm:text-lg text-on-surface mt-1">{{ selectedTicket().asunto }}</h3>
+            </div>
+            <button (click)="closeTicketDetail()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <!-- Quick Stats Row -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-surface-container-low p-3 rounded-xl text-xs">
+            <div>
+              <span class="text-on-surface-variant block font-medium">PAS Solicitante:</span>
+              <strong class="text-on-surface">{{ selectedTicket().pas }}</strong>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block font-medium">Matrícula:</span>
+              <strong class="text-on-surface">#{{ selectedTicket().pasMatricula }}</strong>
+            </div>
+            <div>
+              <span class="text-on-surface-variant block font-medium">Prioridad:</span>
+              <strong class="text-error uppercase">{{ selectedTicket().prioridad }}</strong>
+            </div>
+          </div>
+
+          <!-- Change Status Form (Solo editable por Administrador, Lectura para PAS) -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-on-surface-variant block">Estado del Trámite</label>
+            <ng-container *ngIf="role() === 'admin'; else pasStatusReadOnly">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button (click)="changeSelectedTicketStatus('Abierto')" 
+                        class="py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
+                        [ngClass]="selectedTicket().estado === 'Abierto' ? 'bg-blue-600 text-white border-blue-600' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  Abierto
+                </button>
+                <button (click)="changeSelectedTicketStatus('En Proceso')" 
+                        class="py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
+                        [ngClass]="selectedTicket().estado === 'En Proceso' ? 'bg-amber-600 text-white border-amber-600' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  En Proceso
+                </button>
+                <button (click)="changeSelectedTicketStatus('Falta Doc.')" 
+                        class="py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
+                        [ngClass]="selectedTicket().estado === 'Falta Doc.' ? 'bg-red-600 text-white border-red-600' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  Falta Doc
+                </button>
+                <button (click)="changeSelectedTicketStatus('Cerrado')" 
+                        class="py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer"
+                        [ngClass]="selectedTicket().estado === 'Cerrado' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  Cerrado
+                </button>
+              </div>
+            </ng-container>
+            <ng-template #pasStatusReadOnly>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black px-3.5 py-1.5 rounded-xl text-white shadow-xs"
+                      [ngClass]="{
+                        'bg-blue-600': selectedTicket().estado === 'Abierto',
+                        'bg-amber-600': selectedTicket().estado === 'En Proceso',
+                        'bg-red-600': selectedTicket().estado === 'Falta Doc.',
+                        'bg-emerald-600': selectedTicket().estado === 'Cerrado'
+                      }">
+                  Estado Actual: {{ selectedTicket().estado }}
+                </span>
+                <span class="text-[11px] text-on-surface-variant font-medium">(Gestionado por Mesa Operativa Central)</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Reassign Agent (Solo editable por Administrador, Lectura para PAS) -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-on-surface-variant block">Agente Asignado en Mesa Operativa</label>
+            <ng-container *ngIf="role() === 'admin'; else pasAgentReadOnly">
+              <select [ngModel]="selectedTicket().asignado" (ngModelChange)="reassignSelectedTicket($event)"
+                      class="w-full bg-surface-container-low border border-outline-variant text-xs text-on-surface font-bold p-2.5 rounded-xl">
+                <option value="Marta García">Marta García (Región Norte)</option>
+                <option value="Carlos Pires">Carlos Pires (Región Sur)</option>
+                <option value="Lucía Fernández">Lucía Fernández (Mesa de Entradas)</option>
+                <option value="Roberto Gómez">Roberto Gómez (Siniestros Flota)</option>
+              </select>
+            </ng-container>
+            <ng-template #pasAgentReadOnly>
+              <div class="p-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs font-bold text-on-surface flex items-center justify-between">
+                <span>{{ selectedTicket().asignado }}</span>
+                <span class="text-[10px] text-primary font-extrabold uppercase">Mesa Operativa Central</span>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Add Note Section (Abierto para PAS y Admin para intercambio de respuestas) -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-on-surface-variant block">
+              {{ role() === 'admin' ? 'Agregar Observación Operativa (Notifica al PAS)' : 'Enviar Respuesta / Documentación a Mesa Operativa' }}
+            </label>
+            <div class="flex gap-2">
+              <input type="text" [(ngModel)]="newTicketNote" 
+                     [placeholder]="role() === 'admin' ? 'Ej: Se solicitó copia de cédula verde al PAS...' : 'Ej: Adjunto informe policial o consulta sobre el trámite...'"
+                     class="flex-1 bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary">
+              <button (click)="addNoteToSelectedTicket()" class="bg-primary hover:bg-primary-container text-white px-3 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-xs">
+                {{ role() === 'admin' ? 'Agregar & Notificar' : 'Enviar a Mesa Operativa' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Internal Notes Timeline -->
+          <div *ngIf="selectedTicket().notasInternal && selectedTicket().notasInternal.length > 0" class="space-y-1">
+            <span class="text-[11px] font-bold text-on-surface-variant uppercase">Historial de Notas:</span>
+            <div class="space-y-1 max-h-32 overflow-y-auto">
+              <div *ngFor="let note of selectedTicket().notasInternal" class="text-xs bg-surface-container p-2 rounded-lg text-on-surface border-l-2 border-primary">
+                {{ note }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Footer -->
+          <div class="pt-3 border-t border-outline-variant/40 flex justify-end gap-2">
+            <button (click)="closeTicketDetail()" class="bg-primary hover:bg-primary-container text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-sm">
+              Guardar & Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. MODAL NUEVO TICKET OPERATIVO -->
+      <div *ngIf="showNewTicketModal()" class="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center border-b border-outline-variant/40 pb-3">
+            <h3 class="font-extrabold text-lg text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">add_circle</span>
+              Nuevo Ticket Operativo
+            </h3>
+            <button (click)="showNewTicketModal.set(false)" class="p-1 rounded-lg text-outline hover:text-on-surface">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="font-bold text-on-surface-variant block mb-1">Asunto o Motivo del Trámite *</label>
+              <input type="text" [(ngModel)]="newTicketForm.asunto" placeholder="Ej: Cambio de plan cobertura peugeot 208..."
+                     class="w-full bg-surface-container-low border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:border-primary">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="font-bold text-on-surface-variant block mb-1">Tipo de Trámite</label>
+                <select [(ngModel)]="newTicketForm.tipo" class="w-full bg-surface-container-low border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface">
+                  <option value="Endoso">Endoso</option>
+                  <option value="Siniestro">Siniestro</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Facturación">Facturación</option>
+                </select>
+              </div>
+              <div>
+                <label class="font-bold text-on-surface-variant block mb-1">Prioridad</label>
+                <select [(ngModel)]="newTicketForm.prioridad" class="w-full bg-surface-container-low border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface">
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Crítica">Crítica</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="font-bold text-on-surface-variant block mb-1">Productor PAS Solicitante</label>
+                <input type="text" [(ngModel)]="newTicketForm.pas" placeholder="Nombre PAS"
+                       class="w-full bg-surface-container-low border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface">
+              </div>
+              <div>
+                <label class="font-bold text-on-surface-variant block mb-1">Agente Responsable</label>
+                <select [(ngModel)]="newTicketForm.asignado" class="w-full bg-surface-container-low border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface">
+                  <option value="Marta García">Marta García</option>
+                  <option value="Carlos Pires">Carlos Pires</option>
+                  <option value="Lucía Fernández">Lucía Fernández</option>
+                  <option value="Roberto Gómez">Roberto Gómez</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-outline-variant/40 flex justify-end gap-2">
+            <button (click)="showNewTicketModal.set(false)" class="px-4 py-2 rounded-xl text-xs font-bold border border-outline-variant">
+              Cancelar
+            </button>
+            <button (click)="submitNewTicket()" class="px-5 py-2 rounded-xl text-xs font-bold bg-primary text-white shadow-sm cursor-pointer">
+              Crear Ticket
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. MODAL DE ALERTAS (ENDOSOS Y ALTAS CRÍTICAS) -->
+      <div *ngIf="alertType()" class="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+          <div class="flex justify-between items-center border-b border-outline-variant/40 pb-3">
+            <h3 class="font-extrabold text-base text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-error">priority_high</span>
+              {{ alertType() === 'endosos' ? '8 Endosos Críticos por Firmar' : '15 Altas Pendientes de Validación' }}
+            </h3>
+            <button (click)="alertType.set(null)" class="p-1 rounded-lg text-outline hover:text-on-surface">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="space-y-2 max-h-60 overflow-y-auto">
+            <div *ngFor="let item of alertItems()" class="p-3 bg-surface-container-low rounded-xl border border-outline-variant flex items-center justify-between text-xs">
+              <div>
+                <p class="font-bold text-on-surface">{{ item.titulo }}</p>
+                <p class="text-on-surface-variant text-[11px]">{{ item.sub }}</p>
+              </div>
+              <button (click)="resolveAlertItem(item)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-[11px] cursor-pointer">
+                Aprobar
+              </button>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-outline-variant/40 flex justify-end">
+            <button (click)="alertType.set(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-surface-container text-on-surface">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. MODAL DETALLE DE PRODUCTOR -->
+      <div *ngIf="selectedProducer()" class="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div class="flex justify-between items-start border-b border-outline-variant/40 pb-3">
+            <div class="flex items-center gap-3">
+              <img [src]="selectedProducer().avatar" class="w-12 h-12 rounded-full object-cover border-2 border-primary">
+              <div>
+                <h3 class="font-extrabold text-base text-on-surface">{{ selectedProducer().nombre }}</h3>
+                <p class="text-xs text-on-surface-variant font-medium">{{ selectedProducer().region }} • PAS #{{ selectedProducer().matricula }}</p>
+              </div>
+            </div>
+            <button (click)="selectedProducer.set(null)" class="p-1 rounded-lg text-outline">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between p-2.5 bg-surface-container rounded-xl">
+              <span class="text-on-surface-variant font-medium">Tickets Resueltos Este Mes:</span>
+              <strong class="text-primary font-black">{{ selectedProducer().ticketsResueltos }}</strong>
+            </div>
+            <div class="flex justify-between p-2.5 bg-surface-container rounded-xl">
+              <span class="text-on-surface-variant font-medium">Tiempo Promedio de Respuesta:</span>
+              <strong class="text-on-surface">{{ selectedProducer().tiempoRespuesta }}</strong>
+            </div>
+            <div class="flex justify-between p-2.5 bg-surface-container rounded-xl">
+              <span class="text-on-surface-variant font-medium">Calificación de Servicio:</span>
+              <strong class="text-emerald-600">★ {{ selectedProducer().satisfaccion }}</strong>
+            </div>
+            <div class="flex justify-between p-2.5 bg-surface-container rounded-xl">
+              <span class="text-on-surface-variant font-medium">Cartera Administrada:</span>
+              <strong class="text-on-surface">{{ selectedProducer().carteraTotal }}</strong>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-outline-variant/40 flex justify-end gap-2">
+            <button (click)="selectedProducer.set(null)" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white cursor-pointer">
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   
     }
-`,
+  `,
   styles: [`
     .error-shake {
       animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
@@ -715,7 +1204,6 @@ import { AuthService } from './services/auth.service';
     .metric-card-accent-red { border-left: 4px solid #ba1a1a; }
     .metric-card-accent-tertiary { border-left: 4px solid #4648d4; }
 
-    /* Estilos nuevos Admin Dashboard */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
@@ -724,16 +1212,11 @@ import { AuthService } from './services/auth.service';
         border: 1px solid #E2E8F0;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .premium-card:active {
-        transform: scale(0.98);
-    }
     .left-accent-blue { border-left: 4px solid #0058be; }
     .left-accent-green { border-left: 4px solid #006c49; }
     .left-accent-red { border-left: 4px solid #ba1a1a; }
-    .left-accent-purple { border-left: 4px solid #4648d4; }
     .left-accent-orange { border-left: 4px solid #f59e0b; }
-  
-`]
+  `]
 })
 export class DashboardComponent implements OnInit {
   isLoading = signal(true);
@@ -741,8 +1224,16 @@ export class DashboardComponent implements OnInit {
   isRetrying = signal(false);
 
   private authService = inject(AuthService);
+  private pushService = inject(PushNotificationService);
   private http = inject(HttpClient);
 
+  // States
+  selectedPeriod = signal('Junio 2026');
+  activeStatusFilter = signal<'all' | 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado'>('all');
+  ticketSearchQuery = signal('');
+  toastMessage = signal<string | null>(null);
+
+  // PAS Specific Stats
   premioTotalFmt = signal('$18.5M');
   clientesCount = signal(219);
   polizasCount = signal(312);
@@ -789,6 +1280,122 @@ export class DashboardComponent implements OnInit {
     }
   ]);
 
+  // Modals state
+  selectedTicket = signal<Ticket | null>(null);
+  newTicketNote = '';
+  showNewTicketModal = signal(false);
+  alertType = signal<'endosos' | 'altas' | null>(null);
+  selectedProducer = signal<ProducerStats | null>(null);
+
+  newTicketForm = {
+    asunto: '',
+    tipo: 'Endoso' as 'Endoso' | 'Siniestro' | 'Alta' | 'Facturación',
+    prioridad: 'Media' as 'Baja' | 'Media' | 'Alta' | 'Crítica',
+    pas: 'Gonzalo Paso',
+    asignado: 'Marta García'
+  };
+
+  // Tickets signal
+  tickets = signal<Ticket[]>(DEFAULT_TICKETS);
+
+  producers = signal<ProducerStats[]>([
+    {
+      id: 'p1',
+      nombre: 'Marta García',
+      region: 'Región Norte',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDLXKTm9fdfuxX1umSqlgzvi6Cmh8jk6QYMgn4ymVmzLpzXhUIfLkZFS0QB3Kz1m5w40BHo-IGwB4Pm5jyAtc7rXXmq9m0sD8qvtsMENBYgQjfVhkUW6SNZKZneDXEI21C7F_l2m7JvDKrPNhYbQwyx9Y1LIOyBYiVCjNKAnGbOvEjVWfiRDNnu26AOFcFvb_6ewGdmWEmZuktDlEvMbefU3fDuHFmeLAbvVCNd_blC79a0iR0YRGQN5w',
+      ticketsResueltos: 142,
+      porcentaje: 92,
+      tiempoRespuesta: '18 min',
+      satisfaccion: '4.9/5',
+      carteraTotal: '$24.8M',
+      matricula: '84102',
+      email: 'mgarcia@jcorg.com.ar',
+      telefono: '+54 9 11 4455-8899'
+    },
+    {
+      id: 'p2',
+      nombre: 'Carlos Pires',
+      region: 'Región Sur',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnvFVytqaWCZv-TNI6ISNP3Hueq3mmKgV4P-RNPxma-vQWimrZAuOeDNQ9PVcp3lraLjCAHY3u8S3E5VQstYIH_LyCRSMDnHWQmsnFsofN_0f3tsitCG1akXwqeanWdP-MZughxm9NG0B7AewhPBSnThluUmU461TNAmT9ByPCj6X5ntIK235O1siHhHM7R0xxZkY1YkZfoeEGKFhT2VAfV1Q96vVkShYc3RyZ5n9jQPZYRWMeVIpAbQ',
+      ticketsResueltos: 118,
+      porcentaje: 78,
+      tiempoRespuesta: '25 min',
+      satisfaccion: '4.8/5',
+      carteraTotal: '$19.2M',
+      matricula: '74129',
+      email: 'cpires@jcorg.com.ar',
+      telefono: '+54 9 11 3322-1100'
+    },
+    {
+      id: 'p3',
+      nombre: 'Lucía Fernández',
+      region: 'Región Cuyo',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0',
+      ticketsResueltos: 96,
+      porcentaje: 65,
+      tiempoRespuesta: '32 min',
+      satisfaccion: '4.7/5',
+      carteraTotal: '$15.4M',
+      matricula: '65432',
+      email: 'lfernandez@jcorg.com.ar',
+      telefono: '+54 9 261 412-9988'
+    }
+  ]);
+
+  // Computed Filtered Tickets for Admin
+  filteredTickets = computed(() => {
+    let list = this.tickets();
+    const filter = this.activeStatusFilter();
+    const query = this.ticketSearchQuery().toLowerCase().trim();
+
+    if (filter !== 'all') {
+      list = list.filter(t => t.estado === filter);
+    }
+
+    if (query) {
+      list = list.filter(t => 
+        t.id.toLowerCase().includes(query) ||
+        t.asunto.toLowerCase().includes(query) ||
+        t.pas.toLowerCase().includes(query) ||
+        t.tipo.toLowerCase().includes(query)
+      );
+    }
+
+    return list;
+  });
+
+  // Computed Tickets for PAS view (Gonzalo Paso / Carlos Benítez)
+  pasTickets = computed(() => {
+    const all = this.tickets();
+    const pasName = this.userFullName();
+    const mat = this.userMatricula();
+    return all.filter(t => 
+      t.pasMatricula === mat || 
+      t.pas.toLowerCase().includes('gonzalo') ||
+      t.pas.toLowerCase().includes('carlos') ||
+      t.pas.toLowerCase().includes(pasName.toLowerCase())
+    );
+  });
+
+  // Computed Alert Items
+  alertItems = computed(() => {
+    if (this.alertType() === 'endosos') {
+      return [
+        { id: 1, titulo: '#END-901 Toyota Hilux SRX', sub: 'Inclusión cláusula no repetición • PAS Gonzalo Paso' },
+        { id: 2, titulo: '#END-904 Peugeot 208 Feline', sub: 'Cambio de titularidad • PAS Carlos Benítez' },
+        { id: 3, titulo: '#END-908 Volkswagen Amarok V6', sub: 'Aumento suma asegurada $45M • PAS Marta García' },
+        { id: 4, titulo: '#END-912 Ford Ranger Limited', sub: 'Modificación zona de riesgo • PAS Juan Pérez' }
+      ];
+    } else {
+      return [
+        { id: 10, titulo: '#ALT-301 Bahamonde José', sub: 'Scoring A+ • Mercantil Andina' },
+        { id: 11, titulo: '#ALT-302 Pérez Claudia', sub: 'Combinado Familiar • Cooperación Seguros' },
+        { id: 12, titulo: '#ALT-305 Gómez Roberto', sub: 'Accidentes Personales Flota' }
+      ];
+    }
+  });
+
   role = computed(() => this.authService.currentUser()?.role || 'admin');
   userFullName = computed(() => {
     const name = this.authService.currentUser()?.name;
@@ -796,15 +1403,69 @@ export class DashboardComponent implements OnInit {
   });
   userMatricula = computed(() => this.authService.currentUser()?.matricula || '86992');
   userOrganizador = computed(() => this.authService.currentUser()?.organizador || 'JCORG Broker de Seguros');
-  userEmail = computed(() => this.authService.currentUser()?.email || 'gpaso@jcorg.com.ar');
-  userName = computed(() => {
-    const name = this.userFullName();
-    return name.split(' ')[0];
-  });
 
   ngOnInit() {
     this.initialLoadSequence();
     this.cargarMetricasCartera();
+
+    // Sincronizar inicialmente desde FastAPI backend
+    this.syncTicketsFromBackend();
+
+    // Sincronización continua en vivo (cada 800ms) desde la API central de FastAPI
+    if (typeof window !== 'undefined') {
+      setInterval(() => {
+        this.syncTicketsFromBackend();
+      }, 800);
+    }
+  }
+
+  private processedAlertIds = new Set<string>();
+
+  private syncTicketsFromBackend() {
+    this.http.get<any>('/api/v1/tickets').subscribe({
+      next: (res) => {
+        if (res && res.tickets) {
+          const remoteJson = JSON.stringify(res.tickets);
+          const currentJson = JSON.stringify(this.tickets());
+          if (remoteJson !== currentJson) {
+            this.tickets.set(res.tickets);
+
+            // Si hay un modal abierto (selectedTicket), actualizar sus notas y estado en tiempo real
+            if (this.selectedTicket()) {
+              const currentId = this.selectedTicket()!.id;
+              const updatedTicket = res.tickets.find((t: any) => t.id === currentId);
+              if (updatedTicket) {
+                this.selectedTicket.set({ ...updatedTicket });
+              }
+            }
+          }
+        }
+        if (res && res.pending_alerts && res.pending_alerts.length > 0) {
+          for (const alertData of res.pending_alerts) {
+            const alertId = alertData.id || alertData.titulo;
+            if (!this.processedAlertIds.has(alertId)) {
+              this.processedAlertIds.add(alertId);
+              const targetRole = alertData.recipientRole || 'pas';
+              if (targetRole === 'all' || targetRole === this.role()) {
+                this.pushService.emitirAlertaLocal(alertData);
+              }
+            }
+          }
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  private persistTickets(list: Ticket[], pendingAlert?: any) {
+    this.tickets.set([...list]);
+    const payload: any = { tickets: list };
+    if (pendingAlert) {
+      payload.alert = pendingAlert;
+    }
+    this.http.post('/api/v1/tickets', payload).subscribe({
+      error: () => {}
+    });
   }
 
   cargarMetricasCartera() {
@@ -823,22 +1484,203 @@ export class DashboardComponent implements OnInit {
 
   initialLoadSequence() {
     this.isLoading.set(false);
-    
-    if (!navigator.onLine) {
-      this.isError.set(true);
-    } else {
-      this.isError.set(false);
-    }
+    this.isError.set(false);
   }
 
   simulateReload() {
     this.isRetrying.set(true);
-    
-    // Mostramos estado de carga en el boton y al 1.5s cargamos dashboard final (exitoso)
     setTimeout(() => {
       this.isRetrying.set(false);
       this.isError.set(false);
       this.isLoading.set(false);
-    }, 1500);
+    }, 1200);
+  }
+
+  // Interactivity Methods
+  setStatusFilter(status: 'all' | 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado') {
+    this.activeStatusFilter.set(status);
+  }
+
+  countByStatus(status: 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado'): number {
+    return this.tickets().filter(t => t.estado === status).length;
+  }
+
+  openTicketDetail(ticket: Ticket) {
+    this.selectedTicket.set({ ...ticket, notasInternal: [...(ticket.notasInternal || [])] });
+  }
+
+  closeTicketDetail() {
+    this.selectedTicket.set(null);
+    this.newTicketNote = '';
+  }
+
+  // CAMBIO DE ESTADO EN TIEMPO REAL: Notifica al backend y actualiza UI reactiva
+  changeSelectedTicketStatus(status: 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado') {
+    const t = this.selectedTicket();
+    if (!t) return;
+    t.estado = status;
+    t.tiempo = 'Justo ahora';
+
+    // Forzar actualización reactiva de la señal modal
+    this.selectedTicket.set({ ...t });
+
+    const alertData = {
+      id: 'auto-pas-' + Date.now(),
+      titulo: `🔔 Mesa Operativa (${t.id})`,
+      mensaje: `Tu trámite (${t.tipo}): "${t.asunto}" cambió a estado "${status}".`,
+      tipo: 'siniestro',
+      icon: 'notifications_active',
+      remitente: 'JC PAS MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.showToast(`Estado del ticket ${t.id} actualizado a "${status}"`);
+  }
+
+  // REASIGNACIÓN EN TIEMPO REAL
+  reassignSelectedTicket(agentName: string) {
+    const t = this.selectedTicket();
+    if (!t) return;
+    t.asignado = agentName;
+    t.asignadoInitials = agentName.split(' ').map(n => n[0]).join('');
+    t.tiempo = 'Justo ahora';
+
+    this.selectedTicket.set({ ...t });
+
+    const alertData = {
+      id: 'auto-pas-' + Date.now(),
+      titulo: `👤 Agente Reasignado (${t.id})`,
+      mensaje: `Tu trámite ${t.id} fue reasignado al agente ${agentName} en Mesa Operativa.`,
+      tipo: 'cartera',
+      icon: 'person',
+      remitente: 'JC PAS MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.showToast(`Ticket ${t.id} reasignado a ${agentName}`);
+  }
+
+  // NUEVA OBSERVACIÓN O RESPUESTA EN TIEMPO REAL
+  addNoteToSelectedTicket() {
+    if (!this.newTicketNote.trim() || !this.selectedTicket()) return;
+    const t = this.selectedTicket()!;
+    if (!t.notasInternal) t.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const noteContent = this.newTicketNote.trim();
+    const isAdmin = this.role() === 'admin';
+    const sender = isAdmin ? 'Mesa Operativa' : `PAS ${this.userFullName()}`;
+
+    t.notasInternal.unshift(`[${timestamp}] ${sender}: ${noteContent}`);
+    t.tiempo = 'Justo ahora';
+
+    this.selectedTicket.set({ ...t });
+
+    const recipientRole: 'pas' | 'admin' = isAdmin ? 'pas' : 'admin';
+    const alertData = {
+      id: 'auto-note-' + Date.now(),
+      titulo: isAdmin ? `📌 Nueva Observación en ${t.id}` : `📩 Mensaje del PAS (${t.id})`,
+      mensaje: `${sender}: "${noteContent}"`,
+      tipo: 'siniestro',
+      icon: 'edit_note',
+      remitente: sender.toUpperCase(),
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: recipientRole
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.newTicketNote = '';
+    this.showToast(isAdmin ? 'Observación guardada y notificada al PAS' : 'Respuesta enviada a Mesa Operativa');
+  }
+
+  private updateTicketInList(updated: Ticket, alertData?: any) {
+    const current = [...this.tickets()];
+    const idx = current.findIndex(x => x.id === updated.id);
+    if (idx !== -1) {
+      current[idx] = { ...updated };
+      this.persistTickets(current, alertData);
+    }
+  }
+
+  openNewTicketModal() {
+    this.newTicketForm = {
+      asunto: '',
+      tipo: 'Endoso',
+      prioridad: 'Media',
+      pas: 'Gonzalo Paso',
+      asignado: 'Marta García'
+    };
+    this.showNewTicketModal.set(true);
+  }
+
+  submitNewTicket() {
+    if (!this.newTicketForm.asunto.trim()) {
+      this.showToast('Por favor ingresá el asunto del ticket');
+      return;
+    }
+    const newId = `#TK-${Math.floor(8850 + Math.random() * 100)}`;
+    const initials = this.newTicketForm.asignado.split(' ').map(n => n[0]).join('');
+
+    const newT: Ticket = {
+      id: newId,
+      tipo: this.newTicketForm.tipo,
+      asunto: this.newTicketForm.asunto,
+      prioridad: this.newTicketForm.prioridad,
+      estado: 'Abierto',
+      asignado: this.newTicketForm.asignado,
+      asignadoInitials: initials,
+      tiempo: 'Justo ahora',
+      pas: this.newTicketForm.pas,
+      pasMatricula: '86992',
+      notasInternal: ['Ticket creado desde la plataforma']
+    };
+
+    const alertData = {
+      id: 'new-ticket-' + Date.now(),
+      titulo: `📋 Nuevo Ticket Operativo (${newId})`,
+      mensaje: `Trámite "${newT.asunto}" registrado para el PAS ${newT.pas}.`,
+      tipo: 'cartera',
+      icon: 'add_task',
+      remitente: 'JC PAS MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    const updated = [newT, ...this.tickets()];
+    this.persistTickets(updated, alertData);
+    this.showNewTicketModal.set(false);
+    this.showToast(`Ticket ${newId} creado con éxito`);
+  }
+
+  openAlertModal(type: 'endosos' | 'altas') {
+    this.alertType.set(type);
+  }
+
+  resolveAlertItem(item: any) {
+    this.showToast(`Trámite ${item.titulo} aprobado con éxito`);
+  }
+
+  openProducerDetail(producer: ProducerStats) {
+    this.selectedProducer.set(producer);
+  }
+
+  exportReport() {
+    this.showToast('Generando y descargando reporte de gestión en Excel (XLSX)...');
+  }
+
+  showToast(msg: string) {
+    this.toastMessage.set(msg);
+    setTimeout(() => {
+      if (this.toastMessage() === msg) {
+        this.toastMessage.set(null);
+      }
+    }, 3500);
   }
 }
