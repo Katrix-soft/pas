@@ -994,29 +994,63 @@ const DEFAULT_TICKETS: Ticket[] = [
             <label class="text-xs font-bold text-on-surface-variant block">
               {{ role() === 'admin' ? 'Agregar Observación Operativa (Notifica al PAS)' : 'Enviar Respuesta / Documentación a Mesa Operativa' }}
             </label>
-            <div class="flex gap-2">
-              <input type="text" [(ngModel)]="newTicketNote" 
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" [(ngModel)]="newTicketNote" (keyup.enter)="addNoteToSelectedTicket()"
                      [placeholder]="role() === 'admin' ? 'Ej: Se solicitó copia de cédula verde al PAS...' : 'Ej: Adjunto informe policial o consulta sobre el trámite...'"
                      class="flex-1 bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-primary">
-              <button (click)="addNoteToSelectedTicket()" class="bg-primary hover:bg-primary-container text-white px-3 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-xs">
+              <button (click)="addNoteToSelectedTicket()" class="w-full sm:w-auto bg-primary hover:bg-primary-container text-white px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-xs text-center">
                 {{ role() === 'admin' ? 'Agregar & Notificar' : 'Enviar a Mesa Operativa' }}
               </button>
             </div>
           </div>
 
-          <!-- Internal Notes Timeline -->
-          <div *ngIf="selectedTicket().notasInternal && selectedTicket().notasInternal.length > 0" class="space-y-1">
-            <span class="text-[11px] font-bold text-on-surface-variant uppercase">Historial de Notas:</span>
-            <div class="space-y-1 max-h-32 overflow-y-auto">
-              <div *ngFor="let note of selectedTicket().notasInternal" class="text-xs bg-surface-container p-2 rounded-lg text-on-surface border-l-2 border-primary">
-                {{ note }}
+          <!-- Acciones Rápidas & Herramientas del Trámite -->
+          <div class="space-y-1.5 pt-2 border-t border-outline-variant/30">
+            <span class="text-[11px] font-bold text-on-surface-variant uppercase block">Acciones Rápidas & Herramientas:</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button *ngIf="role() === 'admin'" (click)="ejecutarAccionRapidaTicket('doc')" class="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-xl text-xs font-bold transition-all border border-red-500/20 flex items-center gap-1 cursor-pointer active:scale-95">
+                <span class="material-symbols-outlined text-sm">assignment_late</span>
+                <span>Requerir Doc.</span>
+              </button>
+              <button *ngIf="role() === 'admin'" (click)="ejecutarAccionRapidaTicket('firma')" class="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 rounded-xl text-xs font-bold transition-all border border-amber-500/20 flex items-center gap-1 cursor-pointer active:scale-95">
+                <span class="material-symbols-outlined text-sm">draw</span>
+                <span>Pedir Firma Digital</span>
+              </button>
+              <button *ngIf="role() === 'admin'" (click)="ejecutarAccionRapidaTicket('aprobar')" class="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 rounded-xl text-xs font-bold transition-all border border-emerald-500/20 flex items-center gap-1 cursor-pointer active:scale-95">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                <span>Aprobar & Cerrar</span>
+              </button>
+              <button (click)="adjuntarDocumentoTicket()" class="px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold transition-all border border-primary/20 flex items-center gap-1 cursor-pointer active:scale-95">
+                <span class="material-symbols-outlined text-sm">attach_file</span>
+                <span>Adjuntar Documento / PDF</span>
+              </button>
+              <button (click)="contactarWhatsAppTicket()" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-xs active:scale-95">
+                <span class="material-symbols-outlined text-sm">chat</span>
+                <span>Abrir WhatsApp</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Internal Notes & Movement History Timeline -->
+          <div *ngIf="selectedTicket().notasInternal && selectedTicket().notasInternal.length > 0" class="space-y-1.5 pt-2 border-t border-outline-variant/30">
+            <span class="text-[11px] font-bold text-on-surface-variant uppercase flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs text-primary">history</span> Historial de Movimientos y Observaciones:
+            </span>
+            <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+              <div *ngFor="let note of selectedTicket().notasInternal; let first = first" 
+                   class="text-xs p-2.5 rounded-xl text-on-surface border transition-all"
+                   [ngClass]="first ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200 font-semibold' : 'bg-surface-container border-outline-variant/40'">
+                <div class="flex items-center justify-between gap-1 mb-0.5">
+                  <span class="text-[10px] font-bold text-primary uppercase" *ngIf="first">📌 ÚLTIMO MOVIMIENTO</span>
+                </div>
+                <span>{{ note }}</span>
               </div>
             </div>
           </div>
 
           <!-- Actions Footer -->
           <div class="pt-3 border-t border-outline-variant/40 flex justify-end gap-2">
-            <button (click)="closeTicketDetail()" class="bg-primary hover:bg-primary-container text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-sm">
+            <button (click)="closeTicketDetail()" class="bg-primary hover:bg-primary-container text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-sm active:scale-95">
               Guardar & Cerrar
             </button>
           </div>
@@ -1597,6 +1631,83 @@ export class DashboardComponent implements OnInit {
     this.updateTicketInList(t, alertData);
     this.newTicketNote = '';
     this.showToast(isAdmin ? 'Observación guardada y notificada al PAS' : 'Respuesta enviada a Mesa Operativa');
+  }
+
+  adjuntarDocumentoTicket() {
+    const t = this.selectedTicket();
+    if (!t) return;
+    const fileName = prompt('Ingrese el nombre del archivo o documento a adjuntar (ej: denuncia_policial.pdf):', 'denuncia_policial_comisaria_2da.pdf');
+    if (!fileName) return;
+
+    if (!t.notasInternal) t.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const sender = this.role() === 'admin' ? 'Mesa Operativa' : `PAS ${this.userFullName()}`;
+
+    t.notasInternal.unshift(`[${timestamp}] 📎 ${sender} adjuntó documento: ${fileName} (Válido)`);
+    t.tiempo = 'Justo ahora';
+
+    this.selectedTicket.set({ ...t });
+
+    const alertData = {
+      id: 'auto-doc-' + Date.now(),
+      titulo: `📎 Documento Adjunto (${t.id})`,
+      mensaje: `${sender} adjuntó "${fileName}" al trámite.`,
+      tipo: 'siniestro',
+      icon: 'attach_file',
+      remitente: sender.toUpperCase(),
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: this.role() === 'admin' ? 'pas' : 'admin'
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.showToast(`Documento "${fileName}" adjuntado exitosamente`);
+  }
+
+  ejecutarAccionRapidaTicket(accion: 'doc' | 'firma' | 'aprobar') {
+    const t = this.selectedTicket();
+    if (!t) return;
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    if (accion === 'doc') {
+      t.estado = 'Falta Doc.';
+      if (!t.notasInternal) t.notasInternal = [];
+      t.notasInternal.unshift(`[${timestamp}] Mesa Operativa: Se requirió documentación complementaria (Cédula / DNI / Informe) al PAS.`);
+    } else if (accion === 'firma') {
+      t.estado = 'En Proceso';
+      if (!t.notasInternal) t.notasInternal = [];
+      t.notasInternal.unshift(`[${timestamp}] Mesa Operativa: Se envió enlace de Firma Digital por Email/SMS al asegurado.`);
+    } else if (accion === 'aprobar') {
+      t.estado = 'Cerrado';
+      if (!t.notasInternal) t.notasInternal = [];
+      t.notasInternal.unshift(`[${timestamp}] Mesa Operativa: Trámite verificado y Aprobado exitosamente. Póliza/Endoso listo.`);
+    }
+    t.tiempo = 'Justo ahora';
+
+    this.selectedTicket.set({ ...t });
+
+    const alertData = {
+      id: 'auto-action-' + Date.now(),
+      titulo: `⚡ Actualización de Trámite ${t.id}`,
+      mensaje: `El trámite cambió a estado "${t.estado}".`,
+      tipo: 'siniestro',
+      icon: 'sync',
+      remitente: 'MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.showToast(`Acción ejecutada: Estado actualizado a "${t.estado}"`);
+  }
+
+  contactarWhatsAppTicket() {
+    const t = this.selectedTicket();
+    if (!t) return;
+    const msg = `Hola! 👋 Te escribo respecto al trámite ${t.id} (${t.tipo}): "${t.asunto}". Estado actual: ${t.estado}.`;
+    const phone = '02614238800';
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   }
 
   private updateTicketInList(updated: Ticket, alertData?: any) {
