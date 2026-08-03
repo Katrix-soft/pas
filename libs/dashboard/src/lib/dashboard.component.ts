@@ -560,30 +560,30 @@ const DEFAULT_TICKETS: Ticket[] = [
           </section>
         } @else {
           <!-- VISTA PRODUCTOR (PAS) COMPLETA -->
-          <section class="px-4 sm:px-6 lg:px-8 py-4 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
+          <section class="px-3 sm:px-6 lg:px-8 py-4 space-y-4 sm:space-y-6 max-w-7xl mx-auto w-full">
             
             <!-- Greeting & Producer Profile Banner -->
             <div class="bg-gradient-to-r from-indigo-500/10 via-surface-container-lowest to-surface-container-lowest border border-outline-variant p-4 sm:p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div class="flex items-start sm:items-center gap-3">
+              <div class="flex items-start sm:items-center gap-3 min-w-0 w-full md:w-auto">
                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-bold text-lg sm:text-xl shadow-md border border-primary-fixed shrink-0">
                   {{ userFullName().charAt(0) }}
                 </div>
-                <div class="flex flex-col">
+                <div class="flex flex-col min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-1.5">
-                    <h2 class="text-lg sm:text-xl font-extrabold text-on-surface">Hola, {{ userFullName() }}</h2>
-                    <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider">PAS SSN</span>
+                    <h2 class="text-base sm:text-xl font-extrabold text-on-surface truncate">Hola, {{ userFullName() }}</h2>
+                    <span class="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider shrink-0">PAS SSN</span>
                   </div>
                   <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-on-surface-variant mt-1 font-medium">
                     <span>Matrícula: <strong>#{{ userMatricula() }}</strong></span>
                     <span class="hidden sm:inline">•</span>
-                    <span>{{ userOrganizador() }}</span>
+                    <span class="truncate">{{ userOrganizador() }}</span>
                     <span class="hidden sm:inline">•</span>
                     <span class="text-primary font-bold">Mercantil Andina (Principal)</span>
                   </div>
                 </div>
               </div>
               
-              <button routerLink="/asistente" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-on-primary px-5 py-3 rounded-xl font-bold text-xs sm:text-sm hover:bg-primary-container transition-all shadow-sm cursor-pointer">
+              <button routerLink="/asistente" class="w-full md:w-auto flex items-center justify-center gap-2 bg-primary text-on-primary px-5 py-3 rounded-xl font-bold text-xs sm:text-sm hover:bg-primary-container transition-all shadow-sm cursor-pointer shrink-0">
                 <span class="material-symbols-outlined text-base">smart_toy</span>
                 <span>Abrir Multicotizador IA</span>
               </button>
@@ -605,8 +605,8 @@ const DEFAULT_TICKETS: Ticket[] = [
               <div class="space-y-3">
                 @for (t of pasTickets(); track t.id) {
                   <div (click)="openTicketDetail(t)" class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:bg-surface-container transition-all group">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-black text-xs shrink-0 shadow-xs"
+                    <div class="flex items-start sm:items-center gap-3 min-w-0 w-full sm:w-auto flex-1">
+                      <div class="w-10 h-10 rounded-xl flex flex-col items-center justify-center font-black text-xs shrink-0 shadow-xs mt-0.5 sm:mt-0"
                            [ngClass]="{
                              'bg-red-500/10 text-red-600 border border-red-500/20': t.estado === 'Falta Doc.',
                              'bg-amber-500/10 text-amber-600 border border-amber-500/20': t.estado === 'En Proceso',
@@ -615,10 +615,10 @@ const DEFAULT_TICKETS: Ticket[] = [
                            }">
                         <span>{{ t.id }}</span>
                       </div>
-                      <div class="min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <p class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary transition-colors truncate">{{ t.asunto }}</p>
-                          <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full"
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap mb-1 sm:mb-0">
+                          <p class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary transition-colors leading-snug">{{ t.asunto }}</p>
+                          <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0"
                                 [ngClass]="{
                                   'bg-red-600 text-white': t.estado === 'Falta Doc.',
                                   'bg-amber-500 text-white': t.estado === 'En Proceso',
@@ -626,15 +626,15 @@ const DEFAULT_TICKETS: Ticket[] = [
                                   'bg-emerald-600 text-white': t.estado === 'Cerrado'
                                 }">{{ t.estado }}</span>
                         </div>
-                        <p class="text-xs text-on-surface-variant mt-0.5 truncate">
+                        <p class="text-xs text-on-surface-variant mt-0.5">
                           Asignado: <strong>{{ t.asignado }}</strong> • Actualizado: {{ t.tiempo }}
                         </p>
-                        <p *ngIf="t.notasInternal && t.notasInternal.length > 0" class="text-[11px] text-amber-700 dark:text-amber-300 font-semibold mt-1 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 truncate">
+                        <p *ngIf="t.notasInternal && t.notasInternal.length > 0" class="text-[11px] text-amber-700 dark:text-amber-300 font-semibold mt-1 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 leading-relaxed">
                           📌 Última observación: {{ t.notasInternal[0] }}
                         </p>
                       </div>
                     </div>
-                    <button class="bg-primary hover:bg-primary-container text-white text-xs font-bold px-3.5 py-2 rounded-xl shrink-0 cursor-pointer shadow-xs">
+                    <button class="w-full sm:w-auto bg-primary hover:bg-primary-container text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 cursor-pointer shadow-xs text-center">
                       Ver Detalle
                     </button>
                   </div>

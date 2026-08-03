@@ -15,6 +15,27 @@ export const isPdfModalOpen = signal(false);
   template: `
     <div class="flex h-screen w-full bg-background overflow-hidden relative">
       
+      <!-- BANNER SOLICITUD DE PERMISO PUSH SI NO ESTÁ PERMITIDO -->
+      <div *ngIf="pushService.pushPermissionStatus() !== 'granted' && !dismissedPushPrompt()" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-slate-900 text-white border border-emerald-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl animate-in slide-in-from-top-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold shrink-0">
+            <span class="material-symbols-outlined text-xl">notifications_active</span>
+          </div>
+          <div>
+            <h4 class="font-extrabold text-xs text-white">¿Activar Notificaciones en Celular?</h4>
+            <p class="text-[11px] text-white/70">Recibí avisos emergentes con sonido al actualizar trámites.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button (click)="solicitarPush()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl cursor-pointer shadow-sm active:scale-95">
+            Activar
+          </button>
+          <button (click)="dismissedPushPrompt.set(true)" class="text-white/40 hover:text-white p-1 rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      </div>
+
       <!-- BANNER EMERGENTE PUSH-POP ESTILO WHATSAPP (TOP MOBILE & DESKTOP) -->
       <div *ngIf="pushService.activeToast()" class="fixed top-2 left-2 right-2 sm:left-auto sm:right-6 sm:max-w-md z-[999999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10">
         
@@ -238,6 +259,7 @@ export class LayoutComponent {
   isPdfModalOpen = isPdfModalOpen;
   pushService = inject(PushNotificationService);
   isExpanded = signal(false);
+  dismissedPushPrompt = signal(false);
   authService = inject(AuthService);
   router = inject(Router);
 
@@ -252,6 +274,12 @@ export class LayoutComponent {
 
   toggleSidebar() {
     this.isExpanded.set(!this.isExpanded());
+  }
+
+  solicitarPush() {
+    this.pushService.solicitarPermisoYSuscribir().then(() => {
+      this.dismissedPushPrompt.set(true);
+    });
   }
 
   logout() {
