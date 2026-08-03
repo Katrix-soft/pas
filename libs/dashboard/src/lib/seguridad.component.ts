@@ -88,26 +88,26 @@ export interface RegistroAuditoria {
           </div>
         </section>
 
-        <!-- Section 2: Autenticación & 2FA -->
+        <!-- Section 2: Autenticación Avanzada (2FA & Biometría) -->
         <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-xs">
-          <div class="px-4 py-3 bg-surface-container-low border-b border-outline-variant flex items-center gap-2">
+          <div class="px-4 py-3 bg-blue-50/70 dark:bg-blue-950/40 border-b border-outline-variant/60 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-base">shield</span>
-            <h3 class="text-xs font-bold text-primary uppercase">Autenticación Avanzada (2FA & Biometría)</h3>
+            <h3 class="text-xs font-bold text-primary uppercase tracking-wide">AUTENTICACIÓN AVANZADA (2FA & BIOMETRÍA)</h3>
           </div>
-          <div class="divide-y divide-outline-variant text-xs sm:text-sm">
-            <div class="p-4 flex items-center justify-between">
+          <div class="divide-y divide-outline-variant/60 text-xs sm:text-sm">
+            <div class="p-4 sm:p-5 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
               <div>
-                <p class="font-bold text-on-surface">Verificación en Dos Pasos (2FA)</p>
-                <p class="text-xs text-on-surface-variant">Código OTP por aplicación autenticadora o SMS.</p>
+                <p class="font-extrabold text-on-surface text-sm sm:text-base">Verificación en Dos Pasos (2FA)</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">Código OTP por aplicación autenticadora o SMS.</p>
               </div>
-              <input type="checkbox" [(ngModel)]="is2faEnabled" class="w-5 h-5 accent-primary cursor-pointer">
+              <input type="checkbox" [ngModel]="is2faEnabled()" (change)="toggle2FA($event)" class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
-            <div class="p-4 flex items-center justify-between">
+            <div class="p-4 sm:p-5 flex items-center justify-between hover:bg-surface-container-low/50 transition-colors">
               <div>
-                <p class="font-bold text-on-surface">Autenticación Biométrica (Face ID / Huella)</p>
-                <p class="text-xs text-on-surface-variant">Permite acceso directo en dispositivos móviles registrados.</p>
+                <p class="font-extrabold text-on-surface text-sm sm:text-base">Autenticación Biométrica (Face ID / Huella)</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">Permite acceso directo en dispositivos móviles registrados.</p>
               </div>
-              <input type="checkbox" [(ngModel)]="isBiometricEnabled" class="w-5 h-5 accent-primary cursor-pointer">
+              <input type="checkbox" [ngModel]="isBiometricEnabled()" (change)="toggleBiometric($event)" class="w-5 h-5 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
           </div>
         </section>
@@ -253,6 +253,76 @@ export interface RegistroAuditoria {
         </div>
       </div>
 
+      <!-- MODAL CONFIGURACIÓN 2FA OTP -->
+      <div *ngIf="show2faModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 z-[80] animate-in fade-in">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+          <div class="flex justify-between items-start pb-3 border-b border-outline-variant">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-xl">phonelink_lock</span>
+              <h3 class="font-extrabold text-base text-on-surface">Configurar 2FA (Google Authenticator)</h3>
+            </div>
+            <button (click)="close2faModal()" class="text-outline hover:text-on-surface p-1 rounded-lg cursor-pointer">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <p class="text-on-surface-variant">1. Escaneá este código QR con Google Authenticator, Authy o Microsoft Authenticator:</p>
+            <div class="flex justify-center p-3 bg-white rounded-xl border border-outline-variant">
+              <div class="w-32 h-32 bg-slate-950 rounded-lg p-2 flex flex-wrap gap-1 items-center justify-around">
+                <div class="w-4 h-4 bg-white"></div>
+                <div class="w-4 h-4 bg-blue-500"></div>
+                <div class="w-4 h-4 bg-white"></div>
+                <div class="w-4 h-4 bg-emerald-400"></div>
+                <div class="w-4 h-4 bg-white"></div>
+                <div class="w-4 h-4 bg-white"></div>
+              </div>
+            </div>
+            <p class="text-[11px] text-center text-outline">Clave de recuperación: <strong class="text-primary font-mono select-all">JCORG-PAS-86992-SEC</strong></p>
+
+            <div class="space-y-1.5 pt-2">
+              <label class="font-bold text-on-surface block">2. Ingresá el código OTP de 6 dígitos:</label>
+              <input type="text" maxlength="6" [(ngModel)]="otpCode" placeholder="Ej: 482910"
+                     class="w-full text-center tracking-[0.5em] font-mono text-lg p-3 bg-surface-container-low border border-outline-variant rounded-xl text-primary font-black">
+            </div>
+          </div>
+
+          <div class="pt-3 flex gap-2">
+            <button (click)="confirm2FA()" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl text-xs hover:bg-primary-container cursor-pointer shadow-xs">
+              Verificar & Activar 2FA
+            </button>
+            <button (click)="close2faModal()" class="px-4 bg-surface-container text-on-surface font-bold py-3 rounded-xl text-xs hover:bg-surface-container-high cursor-pointer">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL ESCÁNER BIOMÉTRICO (FACE ID / HUELLA) -->
+      <div *ngIf="showBiometricModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 z-[80] animate-in fade-in">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+          <div class="w-20 h-20 rounded-full bg-blue-500/10 text-primary mx-auto flex items-center justify-center animate-pulse border border-primary/20">
+            <span class="material-symbols-outlined text-4xl" [ngClass]="biometricSuccess() ? 'text-emerald-500' : 'text-primary'">
+              {{ biometricSuccess() ? 'verified' : 'fingerprint' }}
+            </span>
+          </div>
+
+          <div>
+            <h3 class="font-extrabold text-base text-on-surface">Biometría (Face ID / Huella)</h3>
+            <p class="text-xs text-on-surface-variant mt-1.5 font-medium">{{ biometricStatusText() }}</p>
+          </div>
+
+          <div class="pt-2">
+            <button *ngIf="biometricSuccess()" (click)="closeBiometricModal()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs hover:bg-emerald-700 cursor-pointer shadow-xs">
+              ¡Excelente! Continuar
+            </button>
+            <button *ngIf="!biometricSuccess()" (click)="closeBiometricModal()" class="w-full bg-surface-container text-on-surface font-bold py-3 rounded-xl text-xs hover:bg-surface-container-high cursor-pointer">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   `,
   styles: [`
@@ -265,11 +335,16 @@ export class SeguridadComponent {
   passStrength = signal<number>(0);
   passStrengthLabel = signal<string>('Sin definir');
 
-  is2faEnabled = true;
-  isBiometricEnabled = true;
+  is2faEnabled = signal<boolean>(true);
+  isBiometricEnabled = signal<boolean>(true);
 
-  // Modal State
+  // Modales
   showDevicesModal = signal<boolean>(false);
+  show2faModal = signal<boolean>(false);
+  showBiometricModal = signal<boolean>(false);
+  otpCode = '';
+  biometricStatusText = signal<string>('Escaneando rostro / huella digital en este dispositivo...');
+  biometricSuccess = signal<boolean>(false);
 
   dispositivos = signal<DispositivoSesion[]>([
     {
@@ -307,6 +382,53 @@ export class SeguridadComponent {
     { fecha: 'Ayer 22:15 hs', dispositivo: 'IP desconocida (EEUU)', ip: '45.33.21.110', resultado: 'Bloqueado anti-fuerza bruta' },
     { fecha: 'Ayer 18:30 hs', dispositivo: 'iPad Air Safari', ip: '190.224.89.12', resultado: 'Exitoso' }
   ];
+
+  toggle2FA(event: any) {
+    const checked = event.target.checked;
+    if (checked) {
+      this.otpCode = '';
+      this.show2faModal.set(true);
+    } else {
+      this.is2faEnabled.set(false);
+      alert('La Verificación en Dos Pasos (2FA) fue desactivada.');
+    }
+  }
+
+  confirm2FA() {
+    if (!this.otpCode || this.otpCode.length < 6) {
+      alert('Ingrese el código OTP de 6 dígitos brindado por su aplicación autenticadora.');
+      return;
+    }
+    this.is2faEnabled.set(true);
+    this.show2faModal.set(false);
+    alert('✅ Verificación en Dos Pasos (2FA) configurada y activada exitosamente.');
+  }
+
+  close2faModal() {
+    this.show2faModal.set(false);
+  }
+
+  toggleBiometric(event: any) {
+    const checked = event.target.checked;
+    if (checked) {
+      this.biometricSuccess.set(false);
+      this.biometricStatusText.set('Escaneando rostro / huella digital en este dispositivo...');
+      this.showBiometricModal.set(true);
+
+      setTimeout(() => {
+        this.biometricStatusText.set('¡Identidad Biométrica Confirmada! Dispositivo registrado.');
+        this.biometricSuccess.set(true);
+        this.isBiometricEnabled.set(true);
+      }, 1500);
+    } else {
+      this.isBiometricEnabled.set(false);
+      alert('La autenticación biométrica fue desactivada para este dispositivo.');
+    }
+  }
+
+  closeBiometricModal() {
+    this.showBiometricModal.set(false);
+  }
 
   checkStrength() {
     const p = this.newPass;
