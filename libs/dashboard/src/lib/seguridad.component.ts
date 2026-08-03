@@ -226,19 +226,58 @@ export interface RegistroAuditoria {
             </div>
           </div>
 
-          <!-- Section C: Audit Logs History -->
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-outline uppercase tracking-wider">Historial de Accesos Recientes (Auditoría)</h4>
-            <div class="space-y-1.5 bg-surface-container-low p-3 rounded-xl border border-outline-variant text-xs max-h-40 overflow-y-auto">
-              <div *ngFor="let log of auditoriaLogs" class="flex items-center justify-between py-1.5 border-b border-outline-variant/40 last:border-0">
-                <div>
-                  <p class="font-semibold text-on-surface">{{ log.dispositivo }} <span class="text-outline font-normal">({{ log.ip }})</span></p>
-                  <p class="text-[10px] text-outline">{{ log.fecha }}</p>
+          <!-- Section C: Audit Logs History & Threat Defense -->
+          <div class="space-y-3">
+            <div class="flex justify-between items-center flex-wrap gap-1">
+              <h4 class="text-xs font-bold text-outline uppercase tracking-wider">Historial de Accesos Recientes & Amenazas</h4>
+              <button (click)="activarGeobloqueoTotal()" class="text-[11px] font-extrabold text-error hover:underline flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">public_off</span>
+                <span>Activar Geobloqueo (Solo IP Argentina)</span>
+              </button>
+            </div>
+
+            <!-- Threat Defense Actions Banner -->
+            <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-red-600/20 text-red-600 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-lg">gavel</span>
                 </div>
-                <span class="px-2 py-0.5 text-[10px] font-bold rounded"
-                      [ngClass]="log.resultado === 'Exitoso' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-error/10 text-error border border-error/20'">
-                  {{ log.resultado }}
-                </span>
+                <div>
+                  <span class="font-extrabold text-red-900 dark:text-red-300 block">¿Detectaste un intento sosprechoso desde EEUU (45.33.21.110)?</span>
+                  <span class="text-on-surface-variant text-[11px]">El sistema anti-fuerza bruta contuvo los 3 intentos. Podés aplicar sanción inmediata:</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0 w-full sm:w-auto">
+                <button (click)="banearIpSospechosa('45.33.21.110')" class="flex-1 sm:flex-none px-2.5 py-1.5 bg-red-600 text-white font-bold rounded-lg text-[11px] hover:bg-red-700 transition-all cursor-pointer shadow-xs active:scale-95">
+                  🚫 Banear IP EEUU
+                </button>
+                <button (click)="notificarIntentoSospechoso()" class="flex-1 sm:flex-none px-2.5 py-1.5 bg-slate-800 text-white font-bold rounded-lg text-[11px] hover:bg-slate-900 transition-all cursor-pointer active:scale-95">
+                  📲 Notificar WhatsApp
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5 bg-surface-container-low p-3 rounded-xl border border-outline-variant text-xs max-h-48 overflow-y-auto custom-scrollbar">
+              <div *ngFor="let log of auditoriaLogs" class="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-outline-variant/40 last:border-0 gap-2">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <p class="font-bold text-on-surface">{{ log.dispositivo }}</p>
+                    <span class="text-outline text-[11px]">({{ log.ip }})</span>
+                  </div>
+                  <p class="text-[10px] text-outline mt-0.5">{{ log.fecha }}</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 text-[10px] font-bold rounded"
+                        [ngClass]="log.resultado === 'Exitoso' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-error/10 text-error border border-error/20'">
+                    {{ log.resultado }}
+                  </span>
+                  
+                  <button *ngIf="log.resultado !== 'Exitoso'" (click)="banearIpSospechosa(log.ip)" 
+                          class="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded hover:bg-red-700 transition-colors cursor-pointer shadow-xs">
+                    Banear IP
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -338,13 +377,34 @@ export class SeguridadComponent {
   is2faEnabled = signal<boolean>(true);
   isBiometricEnabled = signal<boolean>(true);
 
-  // Modales
+  // Modales & Amenazas
   showDevicesModal = signal<boolean>(false);
   show2faModal = signal<boolean>(false);
   showBiometricModal = signal<boolean>(false);
   otpCode = '';
   biometricStatusText = signal<string>('Escaneando rostro / huella digital en este dispositivo...');
   biometricSuccess = signal<boolean>(false);
+
+  ipBaneadas = signal<string[]>([]);
+  geobloqueoActivo = signal<boolean>(true);
+
+  banearIpSospechosa(ip: string) {
+    if (!this.ipBaneadas().includes(ip)) {
+      this.ipBaneadas.update(list => [...list, ip]);
+    }
+    alert(`🚨 IP ${ip} BLOQUEADA permanentemente en Firewall. Ninguna petición ni intento de acceso proveniente de esta IP podrá llegar al servidor.`);
+  }
+
+  activarGeobloqueoTotal() {
+    this.geobloqueoActivo.set(true);
+    alert('🛡️ Geobloqueo Internacional Activado: Se denegará el acceso a cualquier dirección IP proveniente fuera de Argentina (EEUU, Europa, Asia).');
+  }
+
+  notificarIntentoSospechoso() {
+    const msg = `⚠️ *ALERTA DE SEGURIDAD JC BROKER*\nSe detectó e impidió un intento de acceso no autorizado a tu cuenta desde EEUU (IP: 45.33.21.110).\nLa IP fue bloqueada por el sistema anti-fuerza bruta.`;
+    const phone = '02614238800';
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
 
   dispositivos = signal<DispositivoSesion[]>([
     {
