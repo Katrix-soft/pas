@@ -460,10 +460,11 @@ const DEFAULT_TICKETS: Ticket[] = [
 
                 <!-- Status Filter Pills -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
-                  <button (click)="setStatusFilter('all')" 
-                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
-                          [ngClass]="activeStatusFilter() === 'all' ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
-                    Todos ({{ tickets().length }})
+                  <button (click)="setStatusFilter('pendientes')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1"
+                          [ngClass]="activeStatusFilter() === 'pendientes' ? 'bg-primary text-white shadow-xs' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    <span>⚡ Pendientes</span>
+                    <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full font-black">{{ countPendingTickets() }}</span>
                   </button>
                   <button (click)="setStatusFilter('Abierto')" 
                           class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
@@ -483,7 +484,12 @@ const DEFAULT_TICKETS: Ticket[] = [
                   <button (click)="setStatusFilter('Cerrado')" 
                           class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
                           [ngClass]="activeStatusFilter() === 'Cerrado' ? 'bg-emerald-600 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
-                    Cerrados ({{ countByStatus('Cerrado') }})
+                    ✅ Cerrados / Archivados ({{ countByStatus('Cerrado') }})
+                  </button>
+                  <button (click)="setStatusFilter('all')" 
+                          class="px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
+                          [ngClass]="activeStatusFilter() === 'all' ? 'bg-slate-700 text-white' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'">
+                    📋 Todos ({{ tickets().length }})
                   </button>
                 </div>
 
@@ -491,7 +497,7 @@ const DEFAULT_TICKETS: Ticket[] = [
                 <div class="space-y-sm">
                   @for (t of filteredTickets(); track t.id) {
                     <div (click)="openTicketDetail(t)" 
-                         class="premium-card rounded-xl p-md flex flex-col gap-sm cursor-pointer hover:shadow-md transition-all border-l-4 group"
+                         class="premium-card rounded-xl p-md flex flex-col gap-sm cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 group"
                          [ngClass]="{
                            'border-l-blue-600': t.estado === 'Abierto',
                            'border-l-amber-500': t.estado === 'En Proceso',
@@ -529,12 +535,35 @@ const DEFAULT_TICKETS: Ticket[] = [
 
                       <p class="text-xs sm:text-sm text-on-surface font-semibold leading-snug">{{ t.asunto }}</p>
 
-                      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-outline-variant/40 text-xs">
-                        <div class="flex items-center gap-2">
-                          <div class="w-6 h-6 rounded-full bg-primary-container text-[10px] font-black flex items-center justify-center text-primary shrink-0">
+                      <div class="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-outline-variant/40 text-xs">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <div class="w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center shrink-0 shadow-xs"
+                               [ngClass]="{
+                                 'bg-indigo-600 text-white': t.asignado === 'Gonzalo',
+                                 'bg-emerald-600 text-white': t.asignado === 'Candela',
+                                 'bg-amber-600 text-white': t.asignado === 'Marina',
+                                 'bg-slate-400 text-white': t.asignado !== 'Gonzalo' && t.asignado !== 'Candela' && t.asignado !== 'Marina'
+                               }">
                             {{ t.asignadoInitials }}
                           </div>
                           <span class="text-on-surface-variant font-medium">Asignado: <strong>{{ t.asignado }}</strong></span>
+                          
+                          <!-- Botones de Acción Directa de 1 Clic -->
+                          <button *ngIf="t.asignado !== activeAdminAgent() && t.estado !== 'Cerrado'" (click)="tomarTramiteDirecto(t, $event)" 
+                                  class="px-2 py-0.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 text-[10px] font-extrabold rounded-lg border border-indigo-500/20 transition-all cursor-pointer shadow-xs active:scale-95">
+                            ⚡ Tomar
+                          </button>
+
+                          <button *ngIf="t.estado !== 'Cerrado'" (click)="aprobarYArchivarTramiteDirecto(t, $event)" 
+                                  class="px-2 py-0.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 text-[10px] font-extrabold rounded-lg border border-emerald-500/20 transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-0.5" title="Aprobar este trámite y quitarlo de la lista de pendientes al instante">
+                            <span class="material-symbols-outlined text-xs">check_circle</span>
+                            <span>Aprobar & Archivar</span>
+                          </button>
+
+                          <button *ngIf="t.estado !== 'Falta Doc.' && t.estado !== 'Cerrado'" (click)="requerirDocDirecto(t, $event)" 
+                                  class="px-2 py-0.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 text-[10px] font-extrabold rounded-lg border border-red-500/20 transition-all cursor-pointer shadow-xs active:scale-95">
+                            Pedir Doc
+                          </button>
                         </div>
 
                         <span class="text-outline text-[11px]">PAS: <strong>{{ t.pas }}</strong> (#{{ t.pasMatricula }})</span>
@@ -1352,7 +1381,7 @@ export class DashboardComponent implements OnInit {
 
   // States
   selectedPeriod = signal('Junio 2026');
-  activeStatusFilter = signal<'all' | 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado'>('all');
+  activeStatusFilter = signal<'pendientes' | 'all' | 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado'>('pendientes');
   ticketSearchQuery = signal('');
   toastMessage = signal<string | null>(null);
 
@@ -1506,13 +1535,69 @@ export class DashboardComponent implements OnInit {
     }
   ]);
 
+  countPendingTickets(): number {
+    return this.tickets().filter(t => t.estado !== 'Cerrado').length;
+  }
+
+  aprobarYArchivarTramiteDirecto(ticket: Ticket, event: Event) {
+    event.stopPropagation();
+    ticket.estado = 'Cerrado';
+    ticket.tiempo = 'Justo ahora';
+
+    if (!ticket.notasInternal) ticket.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    ticket.notasInternal.unshift(`[${timestamp}] Mesa Operativa (${this.activeAdminAgent()}): Trámite aprobado y archivado.`);
+
+    const alertData = {
+      id: 'auto-close-' + Date.now(),
+      titulo: `✅ Trámite Aprobado & Archivado (${ticket.id})`,
+      mensaje: `El trámite "${ticket.asunto}" fue finalizado exitosamente por ${this.activeAdminAgent()}.`,
+      tipo: 'siniestro',
+      icon: 'check_circle',
+      remitente: 'MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(ticket, alertData);
+    this.showToast(`Trámite ${ticket.id} Aprobado y Archivado (Salió de pendientes)`);
+  }
+
+  requerirDocDirecto(ticket: Ticket, event: Event) {
+    event.stopPropagation();
+    ticket.estado = 'Falta Doc.';
+    ticket.tiempo = 'Justo ahora';
+
+    if (!ticket.notasInternal) ticket.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    ticket.notasInternal.unshift(`[${timestamp}] Mesa Operativa (${this.activeAdminAgent()}): Se solicitó documentación urgente al PAS.`);
+
+    const alertData = {
+      id: 'auto-docreq-' + Date.now(),
+      titulo: `⚠️ Documentación Requerida (${ticket.id})`,
+      mensaje: `Se requirió documentación para el trámite "${ticket.asunto}".`,
+      tipo: 'siniestro',
+      icon: 'warning',
+      remitente: 'MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(ticket, alertData);
+    this.showToast(`Trámite ${ticket.id} marcado como Falta Documentación`);
+  }
+
   // Computed Filtered Tickets for Admin
   filteredTickets = computed(() => {
     let list = this.tickets();
     const filter = this.activeStatusFilter();
     const query = this.ticketSearchQuery().toLowerCase().trim();
 
-    if (filter !== 'all') {
+    if (filter === 'pendientes') {
+      list = list.filter(t => t.estado !== 'Cerrado');
+    } else if (filter !== 'all') {
       list = list.filter(t => t.estado === filter);
     }
 
@@ -1521,7 +1606,8 @@ export class DashboardComponent implements OnInit {
         t.id.toLowerCase().includes(query) ||
         t.asunto.toLowerCase().includes(query) ||
         t.pas.toLowerCase().includes(query) ||
-        t.tipo.toLowerCase().includes(query)
+        t.tipo.toLowerCase().includes(query) ||
+        t.asignado.toLowerCase().includes(query)
       );
     }
 
