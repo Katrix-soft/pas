@@ -15,24 +15,31 @@ export const isPdfModalOpen = signal(false);
   template: `
     <div class="flex h-screen w-full bg-background overflow-hidden relative">
       
-      <!-- BANNER SOLICITUD DE PERMISO PUSH SI NO ESTÁ PERMITIDO -->
-      <div *ngIf="showPushPrompt()" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-slate-900 text-white border border-emerald-500/40 rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl animate-in slide-in-from-top-4 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold shrink-0">
-            <span class="material-symbols-outlined text-xl">notifications_active</span>
+      <!-- BANNER SOLICITUD DE PERMISO PUSH (auto-cierre en 8s) -->
+      <div *ngIf="showPushPrompt()" 
+           class="fixed top-3 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-slate-900 text-white border border-emerald-500/40 rounded-2xl shadow-2xl backdrop-blur-xl animate-in slide-in-from-top-4 overflow-hidden">
+        <div class="p-3.5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold shrink-0">
+              <span class="material-symbols-outlined text-xl">notifications_active</span>
+            </div>
+            <div>
+              <h4 class="font-extrabold text-xs text-white">¿Activar Notificaciones en Celular?</h4>
+              <p class="text-[11px] text-white/70">Recibí avisos emergentes con sonido al actualizar trámites.</p>
+            </div>
           </div>
-          <div>
-            <h4 class="font-extrabold text-xs text-white">¿Activar Notificaciones en Celular?</h4>
-            <p class="text-[11px] text-white/70">Recibí avisos emergentes con sonido al actualizar trámites.</p>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button (click)="solicitarPush()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl cursor-pointer shadow-sm active:scale-95">
+              Activar
+            </button>
+            <button (click)="dismissPushPrompt()" class="text-white/40 hover:text-white p-1 rounded-lg cursor-pointer">
+              <span class="material-symbols-outlined text-sm">close</span>
+            </button>
           </div>
         </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button (click)="solicitarPush()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl cursor-pointer shadow-sm active:scale-95">
-            Activar
-          </button>
-          <button (click)="dismissPushPrompt()" class="text-white/40 hover:text-white p-1 rounded-lg cursor-pointer">
-            <span class="material-symbols-outlined text-sm">close</span>
-          </button>
+        <!-- Barra de progreso de auto-cierre -->
+        <div class="h-0.5 bg-white/10">
+          <div class="h-full bg-emerald-500/60 push-countdown-bar"></div>
         </div>
       </div>
 
@@ -253,6 +260,14 @@ export const isPdfModalOpen = signal(false);
   styles: [`
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Barra de cuenta regresiva del banner push */
+    @keyframes shrink-bar {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+    .push-countdown-bar {
+      animation: shrink-bar 8s linear forwards;
+    }
   `]
 })
 export class LayoutComponent {
@@ -263,8 +278,9 @@ export class LayoutComponent {
   router = inject(Router);
 
   private readonly DISMISS_KEY = 'jc_push_prompt_dismissed';
+  private autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // El banner se muestra solo si: push NO está concedido Y el usuario no lo cerró antes
+  // El banner se muestra solo si: push NO está concedido Y no lo cerró antes
   showPushPrompt = computed(() => {
     if (this.pushService.isSubscribedBackend()) return false;
     if (this.pushService.pushPermissionStatus() === 'granted') return false;
@@ -272,10 +288,13 @@ export class LayoutComponent {
     return true;
   });
 
-  dismissPushPrompt() {
-    try { localStorage.setItem(this.DISMISS_KEY, '1'); } catch { }
-    // Forzar re-evaluación del computed
-    this.pushService.pushPermissionStatus.set(this.pushService.pushPermissionStatus());
+  constructor() {
+    // Auto-cierre del banner a los 8 segundos
+    if (typeof window !== 'undefined') {
+      this.autoDismissTimer = setTimeout(() => {
+        this.dismissPushPrompt();
+      }, 8000);
+    }
   }
 
   role = computed<Role>(() => this.authService.currentUser()?.role || 'admin');
@@ -286,6 +305,12 @@ export class LayoutComponent {
   userMatricula = computed(() => this.authService.currentUser()?.matricula || '86992');
   userOrganizador = computed(() => this.authService.currentUser()?.organizador || 'JCORG Broker de Seguros');
   userName = computed<string>(() => this.userFullName().split(' ')[0]);
+
+  dismissPushPrompt() {
+    if (this.autoDismissTimer) clearTimeout(this.autoDismissTimer);
+    try { localStorage.setItem(this.DISMISS_KEY, '1'); } catch { }
+    this.pushService.pushPermissionStatus.set(this.pushService.pushPermissionStatus());
+  }
 
   toggleSidebar() {
     this.isExpanded.set(!this.isExpanded());
