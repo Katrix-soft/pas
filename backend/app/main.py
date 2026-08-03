@@ -1252,7 +1252,7 @@ async def send_web_push_notification(data: SendPushNotificationSchema, db: Async
 # ------------------------------------------------------------
 SHARED_TICKETS_STORE = [
     {
-        "id": "#TK-8842",
+        "id": "#SIN-8842",
         "tipo": "Siniestro",
         "asunto": "Falta reporte policial para siniestro de flota camionera.",
         "prioridad": "Alta",
@@ -1266,7 +1266,7 @@ SHARED_TICKETS_STORE = [
         "notasInternal": ["Mesa Operativa Gonzalo: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura."]
     },
     {
-        "id": "#TK-8839",
+        "id": "#END-8839",
         "tipo": "Endoso",
         "asunto": "Cambio de titularidad y modificación de CBU para cobro automático.",
         "prioridad": "Media",
@@ -1280,7 +1280,7 @@ SHARED_TICKETS_STORE = [
         "notasInternal": ["Verificado CBU en AFIP por Candela."]
     },
     {
-        "id": "#TK-8835",
+        "id": "#ALT-8835",
         "tipo": "Alta",
         "asunto": "Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.",
         "prioridad": "Alta",
@@ -1294,7 +1294,7 @@ SHARED_TICKETS_STORE = [
         "notasInternal": []
     },
     {
-        "id": "#TK-8820",
+        "id": "#FAC-8820",
         "tipo": "Facturación",
         "asunto": "Consulta sobre desglose de liquidación de comisiones quincena Mayo.",
         "prioridad": "Baja",
@@ -1307,7 +1307,7 @@ SHARED_TICKETS_STORE = [
         "notasInternal": ["Liquidación enviada en formato PDF firmado por Marina."]
     },
     {
-        "id": "#TK-8812",
+        "id": "#END-8812",
         "tipo": "Endoso",
         "asunto": "Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.",
         "prioridad": "Crítica",

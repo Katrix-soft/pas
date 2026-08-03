@@ -38,7 +38,7 @@ export interface ProducerStats {
 
 const DEFAULT_TICKETS: Ticket[] = [
   {
-    id: '#TK-8842',
+    id: '#SIN-8842',
     tipo: 'Siniestro',
     asunto: 'Falta reporte policial para siniestro de flota camionera.',
     prioridad: 'Alta',
@@ -52,7 +52,7 @@ const DEFAULT_TICKETS: Ticket[] = [
     notasInternal: ['Mesa Operativa Gonzalo: Se requiere informe policial de la Comisaría 2da para proceder con la cobertura.']
   },
   {
-    id: '#TK-8839',
+    id: '#END-8839',
     tipo: 'Endoso',
     asunto: 'Cambio de titularidad y modificación de CBU para cobro automático.',
     prioridad: 'Media',
@@ -66,7 +66,7 @@ const DEFAULT_TICKETS: Ticket[] = [
     notasInternal: ['Verificado CBU en AFIP por Candela.']
   },
   {
-    id: '#TK-8835',
+    id: '#ALT-8835',
     tipo: 'Alta',
     asunto: 'Validación técnica DNI & scoring nuevo asegurado Toyota Corolla.',
     prioridad: 'Alta',
@@ -80,7 +80,7 @@ const DEFAULT_TICKETS: Ticket[] = [
     notasInternal: []
   },
   {
-    id: '#TK-8820',
+    id: '#FAC-8820',
     tipo: 'Facturación',
     asunto: 'Consulta sobre desglose de liquidación de comisiones quincena Mayo.',
     prioridad: 'Baja',
@@ -93,7 +93,7 @@ const DEFAULT_TICKETS: Ticket[] = [
     notasInternal: ['Liquidación enviada en formato PDF firmado por Marina.']
   },
   {
-    id: '#TK-8812',
+    id: '#END-8812',
     tipo: 'Endoso',
     asunto: 'Solicitud de inclusión de cláusula de no repetición a favor de YPF S.A.',
     prioridad: 'Crítica',
@@ -937,31 +937,82 @@ const DEFAULT_TICKETS: Ticket[] = [
         <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
           
           <div class="flex justify-between items-start border-b border-outline-variant/40 pb-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-black bg-primary text-white px-2 py-0.5 rounded">{{ selectedTicket().id }}</span>
-                <span class="text-xs font-bold text-tertiary uppercase">{{ selectedTicket().tipo }}</span>
+            <div class="flex-1 mr-3 space-y-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-black bg-primary text-white px-2.5 py-0.5 rounded-lg shadow-xs">{{ selectedTicket().id }}</span>
+                
+                <!-- Tipo Selector (Editable) -->
+                <div class="flex items-center gap-1 bg-surface-container p-1 rounded-xl border border-outline-variant/50">
+                  <button (click)="changeSelectedTicketType('Siniestro')" 
+                          class="px-2 py-0.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer"
+                          [ngClass]="selectedTicket().tipo === 'Siniestro' ? 'bg-red-600 text-white shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-high'">
+                    Siniestro
+                  </button>
+                  <button (click)="changeSelectedTicketType('Endoso')" 
+                          class="px-2 py-0.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer"
+                          [ngClass]="selectedTicket().tipo === 'Endoso' ? 'bg-indigo-600 text-white shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-high'">
+                    Endoso
+                  </button>
+                  <button (click)="changeSelectedTicketType('Alta')" 
+                          class="px-2 py-0.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer"
+                          [ngClass]="selectedTicket().tipo === 'Alta' ? 'bg-emerald-600 text-white shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-high'">
+                    Alta
+                  </button>
+                  <button (click)="changeSelectedTicketType('Facturación')" 
+                          class="px-2 py-0.5 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer"
+                          [ngClass]="selectedTicket().tipo === 'Facturación' ? 'bg-amber-600 text-white shadow-xs' : 'text-on-surface-variant hover:bg-surface-container-high'">
+                    Facturación
+                  </button>
+                </div>
               </div>
-              <h3 class="font-extrabold text-base sm:text-lg text-on-surface mt-1">{{ selectedTicket().asunto }}</h3>
+
+              <!-- Asunto Input Editable -->
+              <input type="text" [(ngModel)]="selectedTicket().asunto" (change)="updateSelectedTicketSubject()"
+                     class="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-1.5 text-xs sm:text-sm font-extrabold text-on-surface focus:outline-none focus:border-primary">
             </div>
-            <button (click)="closeTicketDetail()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container">
+            <button (click)="closeTicketDetail()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container shrink-0">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          <!-- Quick Stats Row -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-surface-container-low p-3 rounded-xl text-xs">
-            <div>
-              <span class="text-on-surface-variant block font-medium">PAS Solicitante:</span>
-              <strong class="text-on-surface">{{ selectedTicket().pas }}</strong>
+          <!-- Quick Stats & Priority Control Row -->
+          <div class="space-y-2 bg-surface-container-low p-3 rounded-xl text-xs">
+            <div class="grid grid-cols-2 gap-2 pb-2 border-b border-outline-variant/30">
+              <div>
+                <span class="text-on-surface-variant block font-medium">PAS Solicitante:</span>
+                <strong class="text-on-surface">{{ selectedTicket().pas }}</strong>
+              </div>
+              <div>
+                <span class="text-on-surface-variant block font-medium">Matrícula PAS:</span>
+                <strong class="text-on-surface">#{{ selectedTicket().pasMatricula }}</strong>
+              </div>
             </div>
+
+            <!-- Priority Selector (Editable) -->
             <div>
-              <span class="text-on-surface-variant block font-medium">Matrícula:</span>
-              <strong class="text-on-surface">#{{ selectedTicket().pasMatricula }}</strong>
-            </div>
-            <div>
-              <span class="text-on-surface-variant block font-medium">Prioridad:</span>
-              <strong class="text-error uppercase">{{ selectedTicket().prioridad }}</strong>
+              <span class="text-on-surface-variant block font-bold mb-1 uppercase text-[10px]">Nivel de Prioridad:</span>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button (click)="changeSelectedTicketPriority('Baja')" 
+                        class="py-1 px-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer active:scale-95"
+                        [ngClass]="selectedTicket().prioridad === 'Baja' ? 'bg-slate-700 text-white border-slate-700 shadow-xs' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  Baja
+                </button>
+                <button (click)="changeSelectedTicketPriority('Media')" 
+                        class="py-1 px-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer active:scale-95"
+                        [ngClass]="selectedTicket().prioridad === 'Media' ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  Media
+                </button>
+                <button (click)="changeSelectedTicketPriority('Alta')" 
+                        class="py-1 px-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer active:scale-95"
+                        [ngClass]="selectedTicket().prioridad === 'Alta' ? 'bg-amber-600 text-white border-amber-600 shadow-xs' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  Alta
+                </button>
+                <button (click)="changeSelectedTicketPriority('Crítica')" 
+                        class="py-1 px-2 rounded-lg text-xs font-bold transition-all border text-center cursor-pointer active:scale-95"
+                        [ngClass]="selectedTicket().prioridad === 'Crítica' ? 'bg-red-600 text-white border-red-600 shadow-xs' : 'bg-surface-container text-on-surface border-outline-variant'">
+                  🔥 Crítica
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1650,6 +1701,80 @@ export class DashboardComponent implements OnInit {
 
     this.updateTicketInList(t, alertData);
     this.showToast(`Estado del ticket ${t.id} actualizado a "${status}"`);
+  }
+
+  changeSelectedTicketPriority(priority: 'Baja' | 'Media' | 'Alta' | 'Crítica') {
+    const t = this.selectedTicket();
+    if (!t) return;
+    t.prioridad = priority;
+    t.tiempo = 'Justo ahora';
+
+    if (!t.notasInternal) t.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    t.notasInternal.unshift(`[${timestamp}] Prioridad de trámite actualizada a "${priority}".`);
+
+    this.selectedTicket.set({ ...t });
+
+    const alertData = {
+      id: 'auto-prio-' + Date.now(),
+      titulo: `⚡ Prioridad Actualizada (${t.id})`,
+      mensaje: `Prioridad del trámite cambiada a "${priority}".`,
+      tipo: 'siniestro',
+      icon: 'priority_high',
+      remitente: 'MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.showToast(`Prioridad del ticket ${t.id} cambiada a "${priority}"`);
+  }
+
+  changeSelectedTicketType(tipo: 'Endoso' | 'Siniestro' | 'Alta' | 'Facturación') {
+    const t = this.selectedTicket();
+    if (!t) return;
+    t.tipo = tipo;
+
+    const numPart = t.id.replace(/[^0-9]/g, '');
+    const prefixMap = {
+      'Siniestro': 'SIN',
+      'Endoso': 'END',
+      'Alta': 'ALT',
+      'Facturación': 'FAC'
+    };
+    t.id = `#${prefixMap[tipo]}-${numPart}`;
+    t.tiempo = 'Justo ahora';
+
+    if (!t.notasInternal) t.notasInternal = [];
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    t.notasInternal.unshift(`[${timestamp}] Categoría de trámite modificada a "${tipo}" (Nuevo ID: ${t.id}).`);
+
+    this.selectedTicket.set({ ...t });
+
+    const alertData = {
+      id: 'auto-type-' + Date.now(),
+      titulo: `🏷️ Categoría de Trámite (${t.id})`,
+      mensaje: `Categoría del trámite actualizada a "${tipo}".`,
+      tipo: 'cartera',
+      icon: 'category',
+      remitente: 'MESA OPERATIVA',
+      hora: 'Ahora',
+      link: '/dashboard',
+      recipientRole: 'pas'
+    };
+
+    this.updateTicketInList(t, alertData);
+    this.showToast(`Tipo de trámite cambiado a "${tipo}" (${t.id})`);
+  }
+
+  updateSelectedTicketSubject() {
+    const t = this.selectedTicket();
+    if (!t) return;
+    t.tiempo = 'Justo ahora';
+    this.selectedTicket.set({ ...t });
+    this.updateTicketInList(t);
+    this.showToast(`Asunto del ticket ${t.id} actualizado`);
   }
 
   // REASIGNACIÓN EN TIEMPO REAL
