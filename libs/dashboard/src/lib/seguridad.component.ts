@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import * as QRCode from 'qrcode';
 
 export interface DispositivoSesion {
   id: string;
@@ -333,18 +334,30 @@ export interface RegistroAuditoria {
           </div>
 
           <div class="space-y-3 text-xs">
-            <p class="text-on-surface-variant">1. Escaneá este código QR con Google Authenticator, Authy o Microsoft Authenticator:</p>
-            <div class="flex justify-center p-3 bg-white rounded-xl border border-outline-variant">
-              <div class="w-32 h-32 bg-slate-950 rounded-lg p-2 flex flex-wrap gap-1 items-center justify-around">
-                <div class="w-4 h-4 bg-white"></div>
-                <div class="w-4 h-4 bg-blue-500"></div>
-                <div class="w-4 h-4 bg-white"></div>
-                <div class="w-4 h-4 bg-emerald-400"></div>
-                <div class="w-4 h-4 bg-white"></div>
-                <div class="w-4 h-4 bg-white"></div>
+            <p class="text-on-surface-variant">1. Escaneá este código QR con <strong>Google Authenticator</strong>, <strong>Authy</strong> o <strong>Microsoft Authenticator</strong>:</p>
+
+            <!-- QR Real generado por qrcode lib -->
+            <div class="flex flex-col items-center gap-2">
+              <div class="p-3 bg-white rounded-2xl border-2 border-outline-variant shadow-xs">
+                <img *ngIf="qrDataUrl()" [src]="qrDataUrl()" alt="Código QR TOTP" width="192" height="192" class="block rounded-lg">
+                <div *ngIf="!qrDataUrl()" class="w-48 h-48 flex items-center justify-center text-outline">
+                  <span class="material-symbols-outlined text-4xl animate-spin">progress_activity</span>
+                </div>
               </div>
+              <button (click)="generarNuevoQr()" class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-xs">refresh</span> Regenerar código
+              </button>
             </div>
-            <p class="text-[11px] text-center text-outline">Clave de recuperación: <strong class="text-primary font-mono select-all">JCORG-PAS-86992-SEC</strong></p>
+
+            <!-- Secret manual -->
+            <div class="bg-surface-container-low border border-outline-variant rounded-xl p-3 space-y-1">
+              <p class="text-[10px] font-bold text-outline uppercase tracking-wider">O ingresá la clave manualmente en tu app:</p>
+              <button (click)="copiarSecret()" class="w-full flex items-center justify-between gap-2 group cursor-pointer">
+                <code class="font-mono text-xs text-primary font-black tracking-wider break-all text-left">{{ totpSecret() }}</code>
+                <span class="material-symbols-outlined text-outline group-hover:text-primary shrink-0 text-base transition-colors">content_copy</span>
+              </button>
+              <p *ngIf="secretCopiado()" class="text-[10px] text-emerald-600 font-bold">✓ Clave copiada al portapapeles</p>
+            </div>
 
             <div class="space-y-1.5 pt-2">
               <label class="font-bold text-on-surface block">2. Ingresá el código OTP de 6 dígitos:</label>
@@ -441,8 +454,51 @@ export class SeguridadComponent {
   biometricStatusText = signal<string>('Escaneando rostro / huella digital en este dispositivo...');
   biometricSuccess = signal<boolean>(false);
 
+  // QR & TOTP
+  qrDataUrl = signal<string>('');
+  totpSecret = signal<string>('');
+  secretCopiado = signal<boolean>(false);
+
   ipBaneadas = signal<string[]>([]);
   geobloqueoActivo = signal<boolean>(true);
+
+  private generarSecretBase32(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let secret = '';
+    const arr = new Uint8Array(20);
+    crypto.getRandomValues(arr);
+    arr.forEach(b => { secret += chars[b % 32]; });
+    // Formato legible: grupos de 4 letras
+    return secret.match(/.{1,4}/g)!.join(' ');
+  }
+
+  async generarQrReal() {
+    const secretClean = this.totpSecret().replace(/\s/g, '');
+    const issuer = 'JC%20Broker%20PAS';
+    const account = 'gpaso%40jcorg.com.ar';
+    const uri = `otpauth://totp/${issuer}:${account}?secret=${secretClean}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
+    try {
+      const dataUrl = await QRCode.toDataURL(uri, {
+        errorCorrectionLevel: 'M',
+        width: 256,
+        margin: 1,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+      this.qrDataUrl.set(dataUrl);
+    } catch (e) {
+      console.error('QR generation error:', e);
+    }
+  }
+
+  async copiarSecret() {
+    try {
+      await navigator.clipboard.writeText(this.totpSecret().replace(/\s/g, ''));
+      this.secretCopiado.set(true);
+      setTimeout(() => this.secretCopiado.set(false), 2000);
+    } catch {
+      // fallback
+    }
+  }
 
   banearIpSospechosa(ip: string) {
     if (!this.ipBaneadas().includes(ip)) {
@@ -501,9 +557,14 @@ export class SeguridadComponent {
 
   toggle2FA() {
     if (!this.is2faEnabled()) {
-      // Activar: abrir modal de configuración OTP
+      // Activar: generar nuevo secret y QR real, abrir modal
       this.otpCode = '';
+      this.qrDataUrl.set('');
+      this.secretCopiado.set(false);
+      const newSecret = this.generarSecretBase32();
+      this.totpSecret.set(newSecret);
       this.show2faModal.set(true);
+      this.generarQrReal();
     } else {
       // Desactivar directamente
       this.is2faEnabled.set(false);
@@ -586,7 +647,10 @@ export class SeguridadComponent {
   }
 
   generarNuevoQr() {
-    alert('Se generó un nuevo código QR de vinculación válido por 5 minutos.');
+    this.qrDataUrl.set('');
+    const newSecret = this.generarSecretBase32();
+    this.totpSecret.set(newSecret);
+    this.generarQrReal();
   }
 
   cerrarOtrasSesiones() {
