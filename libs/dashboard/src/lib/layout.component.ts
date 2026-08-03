@@ -1,4 +1,4 @@
-import { Component, signal, effect, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
@@ -279,12 +279,15 @@ export class LayoutComponent {
 
   private readonly DISMISS_KEY = 'jc_push_prompt_dismissed';
   private autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
+  private _dismissed = signal(
+    typeof localStorage !== 'undefined' && localStorage.getItem('jc_push_prompt_dismissed') === '1'
+  );
 
   // El banner se muestra solo si: push NO está concedido Y no lo cerró antes
   showPushPrompt = computed(() => {
+    if (this._dismissed()) return false;
     if (this.pushService.isSubscribedBackend()) return false;
     if (this.pushService.pushPermissionStatus() === 'granted') return false;
-    if (typeof localStorage !== 'undefined' && localStorage.getItem(this.DISMISS_KEY) === '1') return false;
     return true;
   });
 
@@ -309,7 +312,7 @@ export class LayoutComponent {
   dismissPushPrompt() {
     if (this.autoDismissTimer) clearTimeout(this.autoDismissTimer);
     try { localStorage.setItem(this.DISMISS_KEY, '1'); } catch { }
-    this.pushService.pushPermissionStatus.set(this.pushService.pushPermissionStatus());
+    this._dismissed.set(true);
   }
 
   toggleSidebar() {
@@ -321,7 +324,7 @@ export class LayoutComponent {
       await this.pushService.solicitarPermisoYSuscribir();
     } finally {
       try { localStorage.setItem(this.DISMISS_KEY, '1'); } catch { }
-      this.pushService.pushPermissionStatus.set(this.pushService.pushPermissionStatus());
+      this._dismissed.set(true);
     }
   }
 

@@ -2,10 +2,9 @@ import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Toma la variable de Easypanel o usa el fallback local
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
-    "postgresql+asyncpg://postgres:Nachax5$@localhost:5432/pas"
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/pas"
 )
 
 # SQLAlchemy requiere el driver 'postgresql+asyncpg://'

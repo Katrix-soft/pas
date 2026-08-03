@@ -144,13 +144,8 @@ import { AuthService } from './services/auth.service';
           </div>
         </section>
 
-        <!-- Logout & Footer -->
-        <section class="pt-4 pb-20 md:pb-6 space-y-6">
-          <button routerLink="/login" class="w-full py-3 px-6 bg-surface-container-lowest border-2 border-error text-error font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-error-container/20 active:scale-[0.98] transition-all cursor-pointer text-sm">
-            <span class="material-symbols-outlined text-base">logout</span>
-            <span>Cerrar Sesión</span>
-          </button>
-          
+        <!-- Footer -->
+        <section class="pt-4 pb-20 md:pb-6">
           <footer class="py-4 text-center border-t border-outline-variant/40 space-y-1">
             <p class="text-xs text-on-surface-variant font-bold">JC Broker Platform — <span class="text-primary font-extrabold">v1.0.0</span></p>
             <p class="text-[11px] text-outline font-medium">© 2026 JC Organizadores • Powered by <strong class="text-primary">Katrix</strong></p>

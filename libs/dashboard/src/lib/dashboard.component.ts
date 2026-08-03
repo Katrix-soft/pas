@@ -231,10 +231,6 @@ const DEFAULT_TICKETS: Ticket[] = [
             <div routerLink="/perfil" class="w-8 h-8 rounded-full border-2 border-primary-fixed overflow-hidden cursor-pointer shrink-0 shadow-xs" title="Mi Perfil">
               <img class="w-full h-full object-cover" alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTIabKB45fJfFZT8sg1aLxduEgN7AhCOFzIsvmDSkF1oQKBmdkCcCBoTSyCSChn6hodGbZI9ruZjissrJ5QsF3IDVRtjA6J_W2g7JLX0xFKsM1ikBVlcQ9r38sAYjxHsXHIZPTgie5K_XSZduWWYNgACxqSIw2gLDCzotWC2Dnob-KctR1SKP16Bl51hNH5aWcclyiekEm3v5yGCDSQ9gi7Dg_7O1eT0OBqbZcPDCORCLDN0MRj7JEYCCNBeurMU-BOkLdAi8BUPh0">
             </div>
-            
-            <button routerLink="/login" class="hidden md:flex items-center justify-center w-8 h-8 text-error hover:bg-error-container/20 rounded-full transition-all cursor-pointer" title="Cerrar Sesión">
-              <span class="material-symbols-outlined text-lg">logout</span>
-            </button>
           </div>
         </header>
 
@@ -1660,19 +1656,27 @@ export class DashboardComponent implements OnInit {
     // Sincronizar inicialmente desde FastAPI backend
     this.syncTicketsFromBackend();
 
-    // Sincronización continua en vivo (cada 800ms) desde la API central de FastAPI
+    // Sincronización continua en vivo (cada 3s) desde la API central de FastAPI
     if (typeof window !== 'undefined') {
       setInterval(() => {
         this.syncTicketsFromBackend();
-      }, 800);
+      }, 3000);
     }
   }
 
   private processedAlertIds = new Set<string>();
+  // Bloqueo temporal de sync mientras hay un cambio local en vuelo (ms)
+  private _syncLockUntil = 0;
 
   private syncTicketsFromBackend() {
+    // Si hay un cambio local reciente en vuelo, no sobreescribir con datos viejos
+    if (Date.now() < this._syncLockUntil) return;
+
     this.http.get<any>('/api/v1/tickets').subscribe({
       next: (res) => {
+        // Verificar de nuevo al recibir la respuesta (el POST puede tardar)
+        if (Date.now() < this._syncLockUntil) return;
+
         if (res && res.tickets) {
           const remoteJson = JSON.stringify(res.tickets);
           const currentJson = JSON.stringify(this.tickets());
@@ -1708,12 +1712,21 @@ export class DashboardComponent implements OnInit {
 
   private persistTickets(list: Ticket[], pendingAlert?: any) {
     this.tickets.set([...list]);
+    // Bloquear sync por 8s para darle tiempo al backend de procesar el POST
+    this._syncLockUntil = Date.now() + 8000;
     const payload: any = { tickets: list };
     if (pendingAlert) {
       payload.alert = pendingAlert;
     }
     this.http.post('/api/v1/tickets', payload).subscribe({
-      error: () => {}
+      next: () => {
+        // POST confirmado: extender lock 3s más para que el próximo GET traiga datos frescos
+        this._syncLockUntil = Date.now() + 3000;
+      },
+      error: () => {
+        // Si el POST falla, mantener el estado local (no liberar el lock prematuramente)
+        this._syncLockUntil = Math.max(this._syncLockUntil, Date.now() + 5000);
+      }
     });
   }
 

@@ -152,6 +152,48 @@ async def startup():
             else:
                 existing_pas.password_hash = hash_password("pas1234")
 
+            # ── Agentes Mesa Operativa ──────────────────────────────────
+            AGENTES = [
+                {
+                    "email": "gonzalo@jcorg.com.ar",
+                    "password": "gonzalo123",
+                    "full_name": "Gonzalo",
+                    "role": "admin",
+                    "matricula": "86992",
+                },
+                {
+                    "email": "candela@jcorg.com.ar",
+                    "password": "candela123",
+                    "full_name": "Candela",
+                    "role": "admin",
+                    "matricula": "ADM-102",
+                },
+                {
+                    "email": "marina@jcorg.com.ar",
+                    "password": "marina123",
+                    "full_name": "Marina",
+                    "role": "admin",
+                    "matricula": "ADM-105",
+                },
+            ]
+
+            for agente in AGENTES:
+                result_ag = await session.execute(
+                    select(User).filter(User.email == agente["email"])
+                )
+                existing_ag = result_ag.scalars().first()
+                if not existing_ag:
+                    new_user = User(
+                        email=agente["email"],
+                        password_hash=hash_password(agente["password"]),
+                        full_name=agente["full_name"],
+                        role=agente["role"],
+                    )
+                    session.add(new_user)
+                    print(f"✅ Usuario creado: {agente['email']}")
+                else:
+                    existing_ag.password_hash = hash_password(agente["password"])
+
             await session.commit()
             print("✅ PostgreSQL inicializado: Tablas creadas y usuario PAS configurado con contraseña 'pas1234'.")
         except Exception as e:
@@ -286,8 +328,14 @@ class LoginRequest(BaseModel):
 @app.post("/api/v1/auth/login", tags=["Auth"])
 async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     email_clean = req.email.strip().lower()
-    # Mapear alias corto "pas" a la cuenta principal "pas@katrix.com.ar"
-    target_email = "pas@katrix.com.ar" if email_clean == "pas" else email_clean
+    # Mapear alias corto al email completo
+    ALIAS_MAP = {
+        "pas": "pas@katrix.com.ar",
+        "gonzalo": "gonzalo@jcorg.com.ar",
+        "candela": "candela@jcorg.com.ar",
+        "marina": "marina@jcorg.com.ar",
+    }
+    target_email = ALIAS_MAP.get(email_clean, email_clean)
 
     # Buscar usuario en PostgreSQL
     result = await db.execute(select(User).filter(User.email == target_email))
