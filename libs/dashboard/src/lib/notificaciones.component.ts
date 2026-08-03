@@ -644,7 +644,7 @@ export class NotificacionesComponent implements OnInit {
     this.loadPrefs();
     // Detectar si el permiso ya fue denegado previamente (sin disparar alert)
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      this.pushDenied.set(Notification.permission === 'denied');
+      this.pushDenied.set((Notification.permission as string) === 'denied');
     }
   }
 
@@ -686,7 +686,7 @@ export class NotificacionesComponent implements OnInit {
       this.pushError.set('Tu navegador no soporta notificaciones push.');
       return;
     }
-    if (Notification.permission === 'denied') {
+    if ((Notification.permission as string) === 'denied') {
       this.pushDenied.set(true);
       return;
     }
@@ -695,7 +695,7 @@ export class NotificacionesComponent implements OnInit {
     try {
       const ok = await this.pushService.solicitarPermisoYSuscribir();
       if (!ok) {
-        if (Notification.permission === 'denied') {
+        if ((Notification.permission as string) === 'denied') {
           this.pushDenied.set(true);
         } else {
           this.pushError.set('No se pudo completar la suscripción push. Intentá de nuevo.');
