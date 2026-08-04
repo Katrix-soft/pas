@@ -162,7 +162,9 @@ const DEFAULT_TICKETS: Ticket[] = [
     <div class="font-body-md text-on-background min-h-screen bg-background flex flex-col w-full relative">
       
       <!-- BANNER EMERGENTE PUSH-POP ESTILO WHATSAPP DE ALERTA PUSH (VISTA PAS Y ADMIN) -->
-      <div *ngIf="pushService.activeToast()" class="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10">
+      <div *ngIf="pushService.activeToast()" class="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-[99999] bg-[#111b21] text-white border-l-4 border-l-[#25d366] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.8)] p-3.5 sm:p-4 backdrop-blur-xl animate-in slide-in-from-top-6 duration-300 flex items-start gap-3 border border-white/10"
+           [class.cursor-pointer]="!!pushService.activeToast()?.link"
+           (click)="openTicketFromToast(pushService.activeToast()!)">
         <div class="w-11 h-11 rounded-2xl bg-[#25d366]/20 text-[#25d366] border border-[#25d366]/40 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
           <span class="material-symbols-outlined text-2xl">{{ pushService.activeToast()?.icon || 'notifications_active' }}</span>
         </div>
@@ -179,13 +181,26 @@ const DEFAULT_TICKETS: Ticket[] = [
           <p class="text-xs text-white/80 mt-0.5 leading-relaxed">{{ pushService.activeToast()?.mensaje }}</p>
           
           <div class="mt-2.5 flex items-center gap-2">
-            <button (click)="pushService.descartarToast()" class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer">
+            <!-- Si tiene link → botón Ver Ticket; si no → solo Entendido -->
+            <button *ngIf="pushService.activeToast()?.link"
+                    (click)="$event.stopPropagation(); openTicketFromToast(pushService.activeToast()!)"
+                    class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">open_in_new</span>
+              Ver Ticket
+            </button>
+            <button *ngIf="!pushService.activeToast()?.link"
+                    (click)="$event.stopPropagation(); pushService.descartarToast()"
+                    class="bg-[#25d366] hover:bg-[#20bd5a] text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer">
               Entendido
+            </button>
+            <button (click)="$event.stopPropagation(); pushService.descartarToast()"
+                    class="text-white/60 hover:text-white text-xs font-semibold px-2 py-1.5 rounded-xl transition-colors cursor-pointer">
+              Descartar
             </button>
           </div>
         </div>
 
-        <button (click)="pushService.descartarToast()" class="text-white/40 hover:text-white p-1 rounded-lg shrink-0 cursor-pointer">
+        <button (click)="$event.stopPropagation(); pushService.descartarToast()" class="text-white/40 hover:text-white p-1 rounded-lg shrink-0 cursor-pointer">
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
       </div>
@@ -1478,7 +1493,7 @@ export class DashboardComponent implements OnInit {
       icon: 'person',
       remitente: active.toUpperCase(),
       hora: 'Ahora',
-      link: '/dashboard',
+      link: ticket.id,
       recipientRole: 'pas'
     };
 
@@ -1552,7 +1567,7 @@ export class DashboardComponent implements OnInit {
       icon: 'check_circle',
       remitente: 'MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: ticket.id,
       recipientRole: 'pas'
     };
 
@@ -1577,7 +1592,7 @@ export class DashboardComponent implements OnInit {
       icon: 'warning',
       remitente: 'MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: ticket.id,
       recipientRole: 'pas'
     };
 
@@ -1611,16 +1626,22 @@ export class DashboardComponent implements OnInit {
   });
 
   // Computed Tickets for PAS view (Gonzalo Paso / Carlos Benítez)
+  // Los tickets Cerrados siempre van al fondo de la lista
   pasTickets = computed(() => {
     const all = this.tickets();
     const pasName = this.userFullName();
     const mat = this.userMatricula();
-    return all.filter(t => 
-      t.pasMatricula === mat || 
+    const filtered = all.filter(t =>
+      t.pasMatricula === mat ||
       t.pas.toLowerCase().includes('gonzalo') ||
       t.pas.toLowerCase().includes('carlos') ||
       t.pas.toLowerCase().includes(pasName.toLowerCase())
     );
+    return filtered.sort((a, b) => {
+      const aClosed = a.estado === 'Cerrado' ? 1 : 0;
+      const bClosed = b.estado === 'Cerrado' ? 1 : 0;
+      return aClosed - bClosed;
+    });
   });
 
   // Computed Alert Items
@@ -1771,6 +1792,24 @@ export class DashboardComponent implements OnInit {
     this.selectedTicket.set({ ...ticket, notasInternal: [...(ticket.notasInternal || [])] });
   }
 
+  /** Abre el detalle del ticket referenciado en el toast (link = ticket ID, ej: '#END-8839') */
+  openTicketFromToast(toast: any) {
+    if (!toast?.link) {
+      this.pushService.descartarToast();
+      return;
+    }
+    // Buscar el ticket por ID en la lista actual
+    const ticketId = toast.link.startsWith('#') ? toast.link : '#' + toast.link;
+    const found = this.tickets().find(t => t.id === ticketId);
+    if (found) {
+      this.pushService.descartarToast();
+      this.openTicketDetail(found);
+    } else {
+      // Si no encuentra por ID exacto, cerrar el toast igualmente
+      this.pushService.descartarToast();
+    }
+  }
+
   closeTicketDetail() {
     this.selectedTicket.set(null);
     this.newTicketNote = '';
@@ -1794,7 +1833,7 @@ export class DashboardComponent implements OnInit {
       icon: 'notifications_active',
       remitente: 'JC PAS MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: 'pas'
     };
 
@@ -1822,7 +1861,7 @@ export class DashboardComponent implements OnInit {
       icon: 'priority_high',
       remitente: 'MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: 'pas'
     };
 
@@ -1859,7 +1898,7 @@ export class DashboardComponent implements OnInit {
       icon: 'category',
       remitente: 'MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: 'pas'
     };
 
@@ -1894,7 +1933,7 @@ export class DashboardComponent implements OnInit {
       icon: 'person',
       remitente: 'JC PAS MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: 'pas'
     };
 
@@ -1926,7 +1965,7 @@ export class DashboardComponent implements OnInit {
       icon: 'edit_note',
       remitente: sender.toUpperCase(),
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: recipientRole
     };
 
@@ -1958,7 +1997,7 @@ export class DashboardComponent implements OnInit {
       icon: 'attach_file',
       remitente: sender.toUpperCase(),
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: this.role() === 'admin' ? 'pas' : 'admin'
     };
 
@@ -1996,7 +2035,7 @@ export class DashboardComponent implements OnInit {
       icon: 'sync',
       remitente: 'MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: t.id,
       recipientRole: 'pas'
     };
 
@@ -2062,7 +2101,7 @@ export class DashboardComponent implements OnInit {
       icon: 'add_task',
       remitente: 'JC PAS MESA OPERATIVA',
       hora: 'Ahora',
-      link: '/dashboard',
+      link: newId,
       recipientRole: 'pas'
     };
 
