@@ -253,45 +253,6 @@ const DEFAULT_TICKETS: Ticket[] = [
           <!-- VISTA ADMINISTRADOR -->
           <section class="p-container-margin md:p-lg space-y-lg pb-24 max-w-7xl mx-auto w-full">
             
-            <!-- Administrative Team Workload Selector (3 Perfiles Reales) -->
-            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-md border border-indigo-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-black text-xl shrink-0">
-                  🛡️
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <h3 class="font-extrabold text-base sm:text-lg text-white truncate">Mesa Operativa Central (3 Administrativos)</h3>
-                    <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded border border-emerald-500/30 uppercase shrink-0">Protección Anti-Solapamiento</span>
-                  </div>
-                  <p class="text-xs text-slate-300 mt-0.5 leading-snug">Distribución de carga por especialidad para no pisar el trabajo entre operadores.</p>
-                </div>
-              </div>
-
-              <!-- Switcher de Operador Activo -->
-              <div class="flex items-center gap-1.5 w-full md:w-auto bg-slate-800/90 p-1.5 rounded-xl border border-slate-700/60 overflow-x-auto no-scrollbar shrink-0">
-                <span class="text-[10px] text-slate-400 font-bold uppercase px-1.5 shrink-0">Operador:</span>
-                <button (click)="setActiveAdminAgent('Gonzalo')" 
-                        [class]="activeAdminAgent() === 'Gonzalo' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
-                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
-                  <span>👑 Gonzalo</span>
-                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Gonzalo') }}</span>
-                </button>
-                <button (click)="setActiveAdminAgent('Candela')" 
-                        [class]="activeAdminAgent() === 'Candela' ? 'bg-emerald-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
-                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
-                  <span>👩‍💼 Candela</span>
-                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Candela') }}</span>
-                </button>
-                <button (click)="setActiveAdminAgent('Marina')" 
-                        [class]="activeAdminAgent() === 'Marina' ? 'bg-amber-600 text-white font-bold shadow-xs' : 'text-slate-300 hover:bg-slate-700/50'"
-                        class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
-                  <span>👩‍💼 Marina</span>
-                  <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full">{{ countByAgent('Marina') }}</span>
-                </button>
-              </div>
-            </div>
-
             <!-- Welcome Header & Quick Action Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-outline-variant/40 pb-4">
               <div>
