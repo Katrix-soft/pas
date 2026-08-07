@@ -37,6 +37,16 @@ function deleteCookie(name: string) {
   document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
 }
 
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 function urlBase64ToUint8Array(base64String: string) {
   if (!base64String) return new Uint8Array(0);
   const cleanBase64 = base64String.trim();
@@ -132,7 +142,9 @@ export class PushNotificationService {
               auth: subJson.keys?.['auth'] || ''
             }
           };
-          this.http.post('/api/v1/push/subscribe', payload).subscribe({
+          this.http.post('/api/v1/push/subscribe', payload, {
+            headers: { 'Idempotency-Key': generateIdempotencyKey() }
+          }).subscribe({
             next: () => {
               this.isSubscribedBackend.set(true);
             },
@@ -150,6 +162,8 @@ export class PushNotificationService {
   }
 
   async solicitarPermisoYSuscribir(): Promise<boolean> {
+    if (this.isSubscribing()) return false;
+
     if (typeof window === 'undefined' || !('Notification' in window)) {
       alert('Tu navegador o dispositivo no soporta Notificaciones Push.');
       return false;
@@ -222,7 +236,9 @@ export class PushNotificationService {
         }
       };
 
-      await firstValueFrom(this.http.post<any>('/api/v1/push/subscribe', payload));
+      await firstValueFrom(this.http.post<any>('/api/v1/push/subscribe', payload, {
+        headers: { 'Idempotency-Key': generateIdempotencyKey() }
+      }));
 
       this.isSubscribedBackend.set(true);
       this.isSubscribing.set(false);

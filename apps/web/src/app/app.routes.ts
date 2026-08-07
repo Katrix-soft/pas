@@ -96,7 +96,9 @@ export const routes: Routes = [
       {
         path: 'sancor-demo',
         loadComponent: () => import('../../../../libs/quotations/src/index').then(m => m.VehicleQuotationDemoComponent)
-      }
+      },
+
+
     ]
   }
 ];

@@ -107,6 +107,17 @@ const DEFAULT_TICKETS: Ticket[] = [
   }
 ];
 
+function generatePeriods() {
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const current = new Date();
+  const result = [];
+  for (let i = 0; i < 3; i++) {
+    let d = new Date(current.getFullYear(), current.getMonth() - i, 1);
+    result.push(`${months[d.getMonth()]} ${d.getFullYear()}`);
+  }
+  return result;
+}
+
 @Component({
   selector: 'lib-dashboard',
   standalone: true,
@@ -236,9 +247,7 @@ const DEFAULT_TICKETS: Ticket[] = [
             <div class="relative">
               <select [(ngModel)]="selectedPeriod" (change)="showToast('Período actualizado: ' + selectedPeriod())"
                       class="bg-surface-container-low border border-outline-variant text-on-surface text-[11px] sm:text-xs font-bold px-2.5 py-1.5 rounded-xl cursor-pointer focus:outline-none focus:border-primary">
-                <option value="Junio 2026">Junio 2026</option>
-                <option value="Mayo 2026">Mayo 2026</option>
-                <option value="Abril 2026">Abril 2026</option>
+                <option *ngFor="let p of periods()" [value]="p">{{ p }}</option>
               </select>
             </div>
 
@@ -689,7 +698,7 @@ const DEFAULT_TICKETS: Ticket[] = [
             <!-- Metrics Grid PAS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <!-- Premio Administrado -->
-              <div (click)="showToast('Abriendo detalle de premio administrado...')" 
+              <div routerLink="/premio" 
                    class="bg-surface-container-lowest p-4 sm:p-5 rounded-xl border border-outline-variant metric-card-accent-blue shadow-sm col-span-1 sm:col-span-2 flex flex-col justify-between hover:scale-[0.99] transition-transform cursor-pointer">
                 <div class="flex justify-between items-start">
                   <div>
@@ -814,7 +823,7 @@ const DEFAULT_TICKETS: Ticket[] = [
                 </h3>
                 <div class="grid grid-cols-1 gap-2.5">
                   <!-- Mercantil Andina -->
-                  <div (click)="showToast('Filtrando cartera Mercantil Andina...')" 
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'mercantil' }" 
                        class="flex items-center justify-between p-3 sm:p-3.5 bg-indigo-500/10 rounded-xl border border-indigo-500/30 cursor-pointer hover:bg-indigo-500/20 transition-all">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md shrink-0">
@@ -832,7 +841,7 @@ const DEFAULT_TICKETS: Ticket[] = [
                   </div>
 
                   <!-- San Cristóbal -->
-                  <div (click)="showToast('Filtrando cartera San Cristóbal...')" 
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancristobal' }" 
                        class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
@@ -847,7 +856,7 @@ const DEFAULT_TICKETS: Ticket[] = [
                   </div>
 
                   <!-- Sancor Seguros -->
-                  <div (click)="showToast('Filtrando cartera Sancor Seguros...')" 
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'sancor' }" 
                        class="flex items-center justify-between p-3 sm:p-3.5 bg-surface-container-low rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container transition-colors">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-sm shrink-0">
@@ -862,7 +871,7 @@ const DEFAULT_TICKETS: Ticket[] = [
                   </div>
 
                   <!-- Cooperación Seguros -->
-                  <div (click)="showToast('Ariendo integrador Cooperación Seguros...')" 
+                  <div [routerLink]="['/compania']" [queryParams]="{ id: 'cooperacion' }" 
                        class="flex items-center justify-between p-3 sm:p-3.5 bg-amber-500/10 rounded-xl border border-amber-500/30 cursor-pointer hover:bg-amber-500/20 transition-all">
                     <div class="flex items-center gap-3 min-w-0">
                       <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-bold text-sm shadow-md shrink-0">
@@ -1352,7 +1361,8 @@ export class DashboardComponent implements OnInit {
   private http = inject(HttpClient);
 
   // States
-  selectedPeriod = signal('Junio 2026');
+  periods = signal<string[]>(generatePeriods());
+  selectedPeriod = signal(generatePeriods()[0]);
   activeStatusFilter = signal<'pendientes' | 'all' | 'Abierto' | 'En Proceso' | 'Falta Doc.' | 'Cerrado'>('pendientes');
   ticketSearchQuery = signal('');
   toastMessage = signal<string | null>(null);

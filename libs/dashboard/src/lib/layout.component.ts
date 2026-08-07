@@ -210,6 +210,9 @@ export const isPdfModalOpen = signal(false);
             <!-- Badge when collapsed -->
             <span *ngIf="!isExpanded()" class="absolute top-2 right-2 w-3 h-3 bg-[#2563eb] rounded-full border-2 border-[#1c2e43]"></span>
           </a>
+
+
+
           
           <a routerLink="/perfil" routerLinkActive="bg-[#2563eb] text-white" 
              class="flex items-center gap-3 p-3 rounded-xl text-white/80 hover:bg-white/5 transition-all cursor-pointer group relative font-medium"

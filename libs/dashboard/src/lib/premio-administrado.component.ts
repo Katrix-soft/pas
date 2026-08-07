@@ -1,11 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+
+interface IndiceInflacion {
+  fecha: string;
+  valor: number;
+}
+
+interface ArglyIPCResponse {
+  data: {
+    indice_ipc: number;
+    mes: number;
+    nombre_mes: string;
+    anio: number;
+    fecha_publicacion: string;
+    fecha_proximo_informe: string;
+  };
+}
+
+interface ChartData {
+  mes: string;
+  nominalLabel: string;
+  realLabel: string;
+  nominalValue: number;
+  realValue: number;
+}
 
 @Component({
   selector: 'lib-premio-administrado',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, HttpClientModule],
   template: `
     <div class="bg-background text-on-surface font-body-md overflow-x-hidden min-h-screen">
       <!-- Top AppBar -->
@@ -25,18 +50,64 @@ import { RouterLink } from '@angular/router';
       </header>
 
       <main class="pt-20 pb-32 px-container-margin max-w-5xl mx-auto space-y-lg">
-        <!-- Hero Section: Managed Premium -->
-        <section class="relative overflow-hidden bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm">
-          <div class="absolute top-0 right-0 p-4 opacity-10">
-            <span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'wght' 200;">account_balance_wallet</span>
-          </div>
-          <div class="relative z-10 flex flex-col items-center text-center py-4">
-            <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Cartera Total Vigente (312 Pólizas)</p>
-            <h2 class="font-metric-xl text-metric-xl text-primary mb-xs">$18.5M</h2>
-            <div class="flex items-center gap-1 px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full">
-              <span class="material-symbols-outlined text-[18px]">trending_up</span>
-              <span class="font-label-md text-label-md">+14.8% este mes</span>
+        <!-- Hero Section: Managed Premium & Collected -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Cartera Total -->
+          <div class="relative overflow-hidden bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+              <span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'wght' 200;">account_balance_wallet</span>
             </div>
+            <div class="relative z-10 flex flex-col items-start py-2">
+              <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Cartera Total Vigente</p>
+              <h2 class="font-metric-xl text-metric-xl text-primary mb-xs">$18.5M</h2>
+              <div class="flex items-center gap-1 px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full">
+                <span class="material-symbols-outlined text-[18px]">trending_up</span>
+                <span class="font-label-md text-label-md">+14.8% crecimiento</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Cobrado Este Mes -->
+          <div class="relative overflow-hidden bg-surface-container-lowest rounded-xl border-l-4 border-emerald-500 border-t border-r border-b border-outline-variant p-lg shadow-sm hover:shadow-md transition-shadow">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-emerald-500">
+              <span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'wght' 200;">payments</span>
+            </div>
+            <div class="relative z-10 flex flex-col items-start py-2">
+              <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Cobrados Este Mes</p>
+              <h2 class="font-metric-xl text-metric-xl text-emerald-600 mb-xs">$2.450.000</h2>
+              <div class="flex items-center gap-1 px-3 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                <span class="font-label-md text-label-md">98.5% tasa de cobro</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Seccion: Indicadores Económicos -->
+        <section>
+          <!-- Tarjeta IPC Argly -->
+          <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px]">price_change</span>
+              </div>
+              <div>
+                <p class="font-label-md text-on-surface-variant uppercase tracking-widest text-xs font-bold">Índice de Precios al Consumidor (IPC)</p>
+                <h3 class="font-headline-md text-on-surface font-extrabold mt-1">
+                  @if (ipcActual(); as ipc) {
+                    {{ ipc.data.indice_ipc }}%
+                  } @else {
+                    <span class="text-sm text-on-surface-variant font-normal">Obteniendo de Argly...</span>
+                  }
+                </h3>
+              </div>
+            </div>
+            @if (ipcActual(); as ipc) {
+              <div class="text-left md:text-right text-sm text-on-surface-variant bg-surface-container px-4 py-2 rounded-lg">
+                <p><strong>Mes:</strong> <span class="capitalize">{{ ipc.data.nombre_mes }}</span> {{ ipc.data.anio }}</p>
+                <p class="text-xs mt-1">Próximo informe: {{ ipc.data.fecha_proximo_informe }}</p>
+              </div>
+            }
           </div>
         </section>
 
@@ -92,6 +163,57 @@ import { RouterLink } from '@angular/router';
               <span class="font-label-md text-xs font-black text-primary">Jun</span>
             </div>
           </div>
+        </section>
+
+        <!-- Chart Section: Inflation Impact -->
+        <section class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-lg gap-4">
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Impacto de la Inflación vs Cobranza Real</h3>
+              <p class="text-xs text-on-surface-variant mt-0.5">Comparativa de recaudación nominal contra crecimiento ajustado por inflación</p>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex items-center gap-1 text-xs font-bold text-on-surface-variant">
+                <div class="w-3 h-3 rounded bg-blue-500"></div> Nominal
+              </div>
+              <div class="flex items-center gap-1 text-xs font-bold text-on-surface-variant">
+                <div class="w-3 h-3 rounded bg-red-400"></div> Real (Ajustado)
+              </div>
+            </div>
+          </div>
+          
+          <div class="h-56 flex items-end justify-between gap-4 pt-8 pb-2 relative px-2 sm:px-6">
+            <!-- Grid Lines -->
+            <div class="absolute inset-x-0 top-12 border-t border-dashed border-outline-variant/50"></div>
+            <div class="absolute inset-x-0 top-28 border-t border-dashed border-outline-variant/50"></div>
+            <div class="absolute inset-x-0 top-44 border-t border-dashed border-outline-variant/50"></div>
+
+            @if (isLoading()) {
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-on-surface-variant text-sm font-bold flex items-center gap-2">
+                  <span class="material-symbols-outlined animate-spin text-primary">progress_activity</span>
+                  Cargando datos de ArgentinaDatos API...
+                </span>
+              </div>
+            } @else {
+              @for (item of chartData(); track item.mes; let last = $last) {
+                <div class="flex-1 flex flex-col items-center gap-2 group relative h-full justify-end">
+                  <div class="flex items-end justify-center w-full gap-1 h-[85%]">
+                    <div class="w-full max-w-[20px] bg-blue-500 rounded-t-md transition-all group-hover:opacity-80 chart-bar" [style.--target-height]="item.nominalValue + '%'" [title]="'Nominal: ' + item.nominalLabel"></div>
+                    <div class="w-full max-w-[20px] bg-red-400 rounded-t-md transition-all group-hover:opacity-80 chart-bar" [style.--target-height]="item.realValue + '%'" [title]="'Real: ' + item.realLabel"></div>
+                  </div>
+                  <span class="font-label-md text-xs font-semibold" [ngClass]="last ? 'text-primary font-black' : 'text-on-surface-variant'">{{item.mes}}</span>
+                </div>
+              }
+            }
+          </div>
+          
+          @if (alertaImpacto(); as alerta) {
+            <div class="mt-4 p-3 rounded-xl flex items-start gap-2" [ngClass]="alerta.positivo ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400'">
+              <span class="material-symbols-outlined text-sm mt-0.5 shrink-0">{{ alerta.positivo ? 'check_circle' : 'warning' }}</span>
+              <p class="text-xs"><strong>Alerta:</strong> {{ alerta.mensaje }}</p>
+            </div>
+          }
         </section>
 
         <!-- Breakdown Section: Distribution by Branch -->
@@ -226,4 +348,95 @@ import { RouterLink } from '@angular/router';
     }
 `]
 })
-export class PremioAdministradoComponent {}
+export class PremioAdministradoComponent implements OnInit {
+  meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
+  nominalData = [1.2, 1.44, 1.8, 2.1, 2.25, 2.7]; // Mock de montos nominales en Millones
+  
+  chartData = signal<ChartData[]>([]);
+  isLoading = signal(true);
+  alertaImpacto = signal<{positivo: boolean, mensaje: string} | null>(null);
+
+  ipcActual = signal<ArglyIPCResponse | null>(null);
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit() {
+    // Consultar IPC a Argly
+    this.http.get<ArglyIPCResponse>('https://api.argly.com.ar/v1/ipc').subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          this.ipcActual.set(res);
+        }
+      },
+      error: (err) => console.error("Error fetching IPC from Argly", err)
+    });
+
+    // Consultar API de ArgentinaDatos para índices de inflación
+    this.http.get<IndiceInflacion[]>('https://api.argentinadatos.com/v1/finanzas/indices/inflacion')
+      .subscribe({
+        next: (data) => {
+          // Tomar los últimos 6 meses de inflación disponibles
+          const ultimos6 = data.slice(-6); 
+          
+          let acumulada = 1;
+          const chartItems: ChartData[] = [];
+          
+          for (let i = 0; i < 6; i++) {
+            const nominal = this.nominalData[i];
+            const inflacionMes = ultimos6[i]?.valor || 0; // fallback a 0 si no hay
+            
+            // Inflación acumulada (1 + inf/100)
+            acumulada *= (1 + (inflacionMes / 100));
+            const real = nominal / acumulada;
+            
+            // Para la altura visual en %, tomamos 3.0M como tope
+            const maxVal = 3.0;
+            const nominalHeight = (nominal / maxVal) * 100;
+            const realHeight = (real / maxVal) * 100;
+            
+            chartItems.push({
+              mes: this.meses[i],
+              nominalLabel: `$${nominal.toFixed(2)}M`,
+              realLabel: `$${real.toFixed(2)}M`,
+              nominalValue: nominalHeight,
+              realValue: realHeight
+            });
+          }
+          
+          this.chartData.set(chartItems);
+          
+          // Calcular alertas de inflación basadas en los datos reales procesados
+          const primerReal = chartItems[0].realValue;
+          const ultimoReal = chartItems[5].realValue;
+          const difReal = ((ultimoReal - primerReal) / primerReal) * 100;
+          
+          const primerNominal = chartItems[0].nominalValue;
+          const ultimoNominal = chartItems[5].nominalValue;
+          const difNominal = ((ultimoNominal - primerNominal) / primerNominal) * 100;
+
+          if (difReal < 0) {
+            this.alertaImpacto.set({
+              positivo: false,
+              mensaje: `Aunque la cobranza nominal aumentó un ${difNominal.toFixed(1)}% semestral, descontando la inflación real de ArgentinaDatos, la cartera se contrajo un ${Math.abs(difReal).toFixed(1)}%.`
+            });
+          } else {
+            this.alertaImpacto.set({
+              positivo: true,
+              mensaje: `La cobranza nominal aumentó un ${difNominal.toFixed(1)}% semestral, superando la inflación real de ArgentinaDatos, logrando un crecimiento real del ${difReal.toFixed(1)}%.`
+            });
+          }
+          
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error("Error al obtener la inflación de ArgentinaDatos", err);
+          this.isLoading.set(false);
+          // Fallback en caso de error de red
+          this.alertaImpacto.set({
+            positivo: false,
+            mensaje: 'No se pudo conectar a la API de ArgentinaDatos para obtener la inflación.'
+          });
+        }
+      });
+  }
+}
